@@ -7,7 +7,7 @@ namespace PingPongClient.NetworkLayer
 {
     class LogWriter
     {
-        public void Log(string text)
+        public virtual void Log(string text)
         {
             Console.Out.WriteLine(text);
         }

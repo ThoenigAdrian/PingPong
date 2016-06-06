@@ -252,3 +252,5 @@ PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/PingPongClient.csproj
 PingPongClient/PingPongClient/PingPongClientContent/obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
 PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/PingPongClient.csprojResolveAssemblyReference.cache
 PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/PingPongClient.csprojResolveAssemblyReference.cache
+*.suo
+PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
