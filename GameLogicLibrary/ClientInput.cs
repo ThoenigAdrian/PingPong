@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameLogicLibrary
+﻿namespace GameLogicLibrary
 {
-    enum ClientInput
+    public enum ClientInput
     {
         StopMoving,
         Up,
         Down,
         Pause,
         Quit,
-        Restart
+        Restart,
+        NoInput
     }
 }

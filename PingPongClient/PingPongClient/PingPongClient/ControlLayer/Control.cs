@@ -12,6 +12,8 @@ using InputFunctionality.KeyboardAdapter;
 using PingPongClient.NetworkLayer;
 using System.Net;
 using NetworkLibrary.DataStructs;
+using PingPongClient.InputLayer;
+using GameLogicLibrary;
 
 namespace PingPongClient
 {
@@ -19,7 +21,7 @@ namespace PingPongClient
     {
         LogWriter Logger = new LogWriter();
         NetworkUDP UDPNetwork = new NetworkUDP(IPAddress.Parse("127.0.0.1"));
-        KeyboardAdvanced Input = new KeyboardAdvanced();
+        InputInterface Input = new KeyboardInput();
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
@@ -49,9 +51,9 @@ namespace PingPongClient
 
         protected override void Update(GameTime gameTime)
         {
-            Input.UpdateState();
+            Input.Update();
 
-            if(Input.KeyNowPressed(Keys.Escape))
+            if(Input.GetInput() == ClientInput.Quit)
                 this.Exit();
 
             ServerDataUDP data = UDPNetwork.Receive();

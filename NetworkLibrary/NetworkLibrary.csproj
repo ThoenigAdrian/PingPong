@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataStructs\ClientDataUDP.cs" />
+    <Compile Include="DataStructs\PacketAdapter.cs" />
     <Compile Include="DataStructs\ServerDataUDP.cs" />
     <Compile Include="NetworkConstants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

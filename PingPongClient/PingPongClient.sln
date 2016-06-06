@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\Networ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputFunctionality", "..\..\..\Users\Dave\Documents\Visual Studio 2015\Projects\InputFunctionality\InputFunctionality\InputFunctionality.csproj", "{015062DF-869A-4D9C-AAA4-2139ADDBA7ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicLibrary", "..\GameLogicLibrary\GameLogicLibrary.csproj", "{212421D7-F509-4477-A78D-BA638AB63EB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,14 @@ Global
 		{015062DF-869A-4D9C-AAA4-2139ADDBA7ED}.Release|Any CPU.ActiveCfg = Release|x86
 		{015062DF-869A-4D9C-AAA4-2139ADDBA7ED}.Release|x86.ActiveCfg = Release|x86
 		{015062DF-869A-4D9C-AAA4-2139ADDBA7ED}.Release|x86.Build.0 = Release|x86
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|x86.Build.0 = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|x86.ActiveCfg = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
