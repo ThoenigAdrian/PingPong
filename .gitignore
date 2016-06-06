@@ -246,3 +246,9 @@ ModelManifest.xml
 .fake/
 *.cache
 *.cache
+PingPongClient/.vs/PingPongClient/v14/.suo
+*.suo
+PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/PingPongClient.csprojResolveAssemblyReference.cache
+PingPongClient/PingPongClient/PingPongClientContent/obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/PingPongClient.csprojResolveAssemblyReference.cache
+PingPongClient/PingPongClient/PingPongClient/obj/x86/Debug/PingPongClient.csprojResolveAssemblyReference.cache
