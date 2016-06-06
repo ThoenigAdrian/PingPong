@@ -11,16 +11,14 @@ namespace NetworkLibrary.Utility
 
         public DoubleBuffer()
         {
-            Switch = false;
-
             Initialize();
-            Buffer1 = Activator.CreateInstance<T>();
-            Buffer2 = Activator.CreateInstance<T>();
         }
 
         private void Initialize()
         {
-
+            Switch = false;
+            Buffer1 = Activator.CreateInstance<T>();
+            Buffer2 = Activator.CreateInstance<T>();
         }
 
         public T Read()
