@@ -1,6 +1,6 @@
-﻿namespace NetworkLibrary.NetworkConstants
+﻿namespace NetworkLibrary
 {
-    class NetworkConstants
+    public class NetworkConstants
     {
         public const int SERVER_PORT = 4200;
     }

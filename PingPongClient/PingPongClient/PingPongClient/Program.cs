@@ -10,7 +10,7 @@ namespace PingPongClient
         /// </summary>
         static void Main(string[] args)
         {
-            using (Game1 game = new Game1())
+            using (Control game = new Control())
             {
                 game.Run();
             }

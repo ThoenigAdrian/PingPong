@@ -72,10 +72,14 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NetworkLayer\Logger.cs" />
+    <Compile Include="NetworkLayer\Network.cs" />
+    <Compile Include="NetworkLayer\NetworkTCP.cs" />
     <Compile Include="NetworkLayer\NetworkUDP.cs" />
+    <Compile Include="NetworkLayer\PacketAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="ControlLayer\Control.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
@@ -84,6 +88,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Users\Dave\Documents\Visual Studio 2015\Projects\InputFunctionality\InputFunctionality\InputFunctionality.csproj">
+      <Project>{015062df-869a-4d9c-aaa4-2139addba7ed}</Project>
+      <Name>InputFunctionality</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\NetworkLibrary\NetworkLibrary.csproj">
       <Project>{aa01e32b-ab68-49a5-ad9e-07e955d3b357}</Project>
       <Name>NetworkLibrary</Name>
@@ -94,7 +102,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ControlLayer\" />
     <Folder Include="InputLayer\" />
     <Folder Include="VisualizeLayer\" />
   </ItemGroup>
