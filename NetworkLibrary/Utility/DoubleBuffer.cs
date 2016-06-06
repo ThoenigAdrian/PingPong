@@ -1,8 +1,8 @@
-﻿using NetworkLibrary.DataStructs;
+﻿using System;
 
-namespace PingPongClient.NetworkLayer
+namespace NetworkLibrary.Utility
 {
-    class DoubleBuffer<T>
+    public class DoubleBuffer<T>
     {
         T Buffer1 { get; set; }
         T Buffer2 { get; set; }
@@ -13,8 +13,14 @@ namespace PingPongClient.NetworkLayer
         {
             Switch = false;
 
-            Buffer1 = new T;
-            Buffer2 = new T();
+            Initialize();
+            Buffer1 = Activator.CreateInstance<T>();
+            Buffer2 = Activator.CreateInstance<T>();
+        }
+
+        private void Initialize()
+        {
+
         }
 
         public T Read()

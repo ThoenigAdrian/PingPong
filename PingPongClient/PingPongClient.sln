@@ -5,9 +5,9 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingPongClient", "PingPongClient\PingPongClient\PingPongClient.csproj", "{DEEBFE47-26FB-4792-B3B6-D3DF5E47D66E}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "PingPongClientContent", "PingPongClient\PingPongClientContent\PingPongClientContent.contentproj", "{6DA93561-3FB3-49BB-B0DC-E530B87C8C70}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingPongClientContent", "PingPongClient\PingPongClientContent\PingPongClientContent.contentproj", "{6DA93561-3FB3-49BB-B0DC-E530B87C8C70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
