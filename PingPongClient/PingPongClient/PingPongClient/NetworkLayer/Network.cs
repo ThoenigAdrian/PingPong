@@ -15,7 +15,6 @@ namespace PingPongClient.NetworkLayer
         protected bool AbortReceive { get; set; }
         protected AddressFamily NetworkFamily { get { return ServerEndPoint.Address.AddressFamily; } }
 
-
         private DataNetwork()
         {
 
