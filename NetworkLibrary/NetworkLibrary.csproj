@@ -43,7 +43,7 @@
   <ItemGroup>
     <Compile Include="DataStructs\ClientControlPackage.cs" />
     <Compile Include="DataStructs\PackageInterface.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Utility\Logger.cs" />
     <Compile Include="NetworkImplementations\ConnectionInterface.cs" />
     <Compile Include="NetworkImplementations\Network.cs" />
     <Compile Include="NetworkImplementations\NetworkTCP.cs" />
