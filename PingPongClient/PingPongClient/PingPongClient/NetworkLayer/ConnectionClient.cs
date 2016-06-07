@@ -36,17 +36,17 @@ namespace PingPongClient.NetworkLayer
 
         public ServerDataPackage GetServerData()
         {
-            ServerDataPackage package = new ServerDataPackage();
-            package.BallPosX = 100;
-            package.BallPosY = 100;
+            //ServerDataPackage package = new ServerDataPackage();
+            //package.BallPosX = 100;
+            //package.BallPosY = 100;
 
-            package.Player1PosX = 20;
-            package.Player1PosY = 20;
+            //package.Player1PosX = 20;
+            //package.Player1PosY = 20;
 
-            package.Player2PosX = 180;
-            package.Player2PosY = 20;
+            //package.Player2PosX = 180;
+            //package.Player2PosY = 20;
 
-            return package;
+            //return package;
 
             return GetServerDataUDP() as ServerDataPackage;
         }

@@ -1,60 +1,57 @@
 ﻿using Microsoft.Xna.Framework;
 using GameLogicLibrary;
 using System.Collections.Generic;
+using GameLogicLibrary.GameObjects;
 
 namespace PingPongClient.VisualizeLayer
 {
     abstract class GameVisualizerInterface
     {
+        GameStructure Structure { get; set; }
+
         const int PLAYER_COUNT = 2;
 
-        public Vector2 BallPosition { get; set; }
-        public int BallRadius { get; set; }
-
-        protected PlayerDrawingData[] PlayerData { get; private set; }
-        
-        public Vector2 Player1Position
+        protected enum PlayerSlot
         {
-            get { return PlayerData[0].Position; }
-            set { PlayerData[0].Position = value; }
+            Player1,
+            Player2
         }
 
-        public Vector2 Player1BorderSize
+        protected Vector2 BallPosition { get { return new Vector2(Structure.m_ball.PosX, Structure.m_ball.PosY); } }
+        protected int BallRadius { get { return Structure.m_ball.Radius; } }
+
+        public Vector2 FieldSize { get { return new Vector2(Structure.m_field.Width, Structure.m_field.Height); } }
+
+        protected Vector2 GetPlayerPosition(PlayerSlot player)
         {
-            get { return PlayerData[0].BorderSize; }
-            set { PlayerData[0].Position = value; }
+            switch(player)
+            {
+                case PlayerSlot.Player1:
+                    return new Vector2(Structure.m_player1.PosX, Structure.m_player1.PosY);
+                case PlayerSlot.Player2:
+                    return new Vector2(Structure.m_player2.PosX, Structure.m_player2.PosY);
+            }
+
+            return Vector2.Zero;
         }
 
-        public Vector2 Player2Position
+        protected Vector2 GetPlayerBorder(PlayerSlot player)
         {
-            get { return PlayerData[1].Position; }
-            set { PlayerData[1].Position = value; }
+            switch (player)
+            {
+                case PlayerSlot.Player1:
+                    return new Vector2(Structure.m_player1.Width, Structure.m_player1.Height);
+                case PlayerSlot.Player2:
+                    return new Vector2(Structure.m_player2.Width, Structure.m_player2.Height);
+            }
+
+            return Vector2.Zero;
         }
 
-        public Vector2 Player2BorderSize
+        private GameVisualizerInterface() { }
+        protected GameVisualizerInterface(GameStructure structure)
         {
-            get { return PlayerData[1].BorderSize; }
-            set { PlayerData[1].Position = value; }
-        }
-
-        public Vector2 BorderSize { get; set; }
-
-        protected GameVisualizerInterface()
-        {
-            BallPosition = new Vector2(GameInitializers.BALL_POSX, GameInitializers.BALL_POSY);
-            BallRadius = GameInitializers.BALL_RADIUS;
-
-            PlayerData = new PlayerDrawingData[PLAYER_COUNT];
-
-            PlayerData[0] = new PlayerDrawingData();
-            PlayerData[0].Position = new Vector2(GameInitializers.PLAYER_1_X, GameInitializers.PLAYER_Y);
-            PlayerData[0].BorderSize = new Vector2(GameInitializers.PLAYER_WIDTH, GameInitializers.PLAYER_HEIGHT);
-
-            PlayerData[1] = new PlayerDrawingData();
-            PlayerData[1].Position = new Vector2(GameInitializers.PLAYER_2_X, GameInitializers.PLAYER_Y);
-            PlayerData[1].BorderSize = new Vector2(GameInitializers.PLAYER_WIDTH, GameInitializers.PLAYER_HEIGHT);
-
-            BorderSize = new Vector2(GameInitializers.BORDER_WIDTH, GameInitializers.BORDER_HEIGHT);
+            Structure = structure;
         }
 
         public void DrawGame()
@@ -63,9 +60,9 @@ namespace PingPongClient.VisualizeLayer
             DrawBorders();
             DrawBall();
             
-            for (int ID = 0; ID < PLAYER_COUNT; ID++)
-            {
-                DrawPlayer(ID);
+            foreach(PlayerSlot player in PlayerSlot.GetValues(typeof(PlayerSlot)))
+            { 
+                DrawPlayer(player);
             }
 
             DrawEnd();
@@ -75,15 +72,15 @@ namespace PingPongClient.VisualizeLayer
 
         public abstract void LoadContent();
 
-        public abstract void DrawBegin();
+        protected abstract void DrawBegin();
 
-        public abstract void DrawBorders();
+        protected abstract void DrawBorders();
 
-        public abstract void DrawBall();
+        protected abstract void DrawBall();
 
-        public abstract void DrawPlayer(int playerID);
+        protected abstract void DrawPlayer(PlayerSlot player);
 
-        public abstract void DrawEnd();
+        protected abstract void DrawEnd();
     }
 
     class PlayerDrawingData

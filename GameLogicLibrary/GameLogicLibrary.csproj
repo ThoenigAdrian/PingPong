@@ -41,7 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientControls.cs" />
+    <Compile Include="GameObjects\PlayBall.cs" />
+    <Compile Include="GameObjects\GameField.cs" />
     <Compile Include="GameInitializers.cs" />
+    <Compile Include="GameObjects\GameStructure.cs" />
+    <Compile Include="GameObjects\PlayerBar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
