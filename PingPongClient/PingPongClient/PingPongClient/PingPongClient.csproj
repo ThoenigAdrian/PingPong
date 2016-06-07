@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlLayer\Control.cs" />
+    <Compile Include="ControlLayer\Interpolation.cs" />
     <Compile Include="InputLayer\InputInterface.cs" />
     <Compile Include="InputLayer\KeyboardInput.cs" />
     <Compile Include="NetworkLayer\ConnectionClient.cs" />

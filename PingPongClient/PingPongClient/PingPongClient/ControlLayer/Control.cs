@@ -8,22 +8,27 @@ using NetworkLibrary;
 using GameLogicLibrary;
 using NetworkLibrary.DataStructs;
 using PingPongClient.VisualizeLayer;
+using PingPongClient.ControlLayer;
+using GameLogicLibrary.GameObjects;
 
 namespace PingPongClient
 {
     public class Control : Game
     {
+        public GameStructure Structure { get; set; }
+
         ConnectionClient Connection { get; set; }
         GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
-
-        public GraphicsDeviceManager GraphicManager { get; private set; }
+        Interpolation Interpolation;
 
         LogWriter Logger = new LogWriterConsole();
 
         public Control()
         {
-            Visualizer = new XNAGameVisualizer();
+            Structure = new GameStructure();
+            Interpolation = new Interpolation(Structure);
+            Visualizer = new XNAGameVisualizer(Structure);
             Visualizer.Initialize(this);
         }
 
@@ -51,8 +56,22 @@ namespace PingPongClient
                 this.Exit();
 
             ServerDataPackage data = Connection.GetServerData();
+            ApplyServerPositions(data);
+            Interpolation.Interpolate(gameTime);
 
             base.Update(gameTime);
+        }
+
+        protected void ApplyServerPositions(ServerDataPackage data)
+        {
+            Structure.m_player1.PosX = data.Player1PosX;
+            Structure.m_player1.PosY = data.Player1PosY;
+
+            Structure.m_player2.PosX = data.Player2PosX;
+            Structure.m_player2.PosY = data.Player2PosY;
+
+            Structure.m_ball.PosX = data.BallPosX;
+            Structure.m_ball.PosY = data.BallPosY;
         }
 
         protected override void Draw(GameTime gameTime)

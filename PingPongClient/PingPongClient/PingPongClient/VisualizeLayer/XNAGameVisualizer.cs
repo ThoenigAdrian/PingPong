@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GameLogicLibrary.GameObjects;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -17,6 +18,11 @@ namespace PingPongClient.VisualizeLayer
         Texture2D Border;
         Texture2D Ball;
         Texture2D Player;
+
+        public XNAGameVisualizer(GameStructure structure) : base(structure)
+        {
+
+        }
 
         public override void Initialize(Game game)
         {
@@ -40,35 +46,33 @@ namespace PingPongClient.VisualizeLayer
             Player.SetData(new Color[] { Color.White });
         }
 
-        public override void DrawBegin()
+        protected override void DrawBegin()
         {
             Graphics.Clear(Color.Black);
             SpriteBatchMain.Begin();
         }
 
-        public override void DrawBall()
+        protected override void DrawBall()
         {
             int BallPosX = (int)GetAbsoluteX(BallPosition.X - BallRadius);
-            int BallPosY = (int)GetAbsoluteX(BallPosition.Y - BallRadius);
+            int BallPosY = (int)GetAbsoluteY(BallPosition.Y - BallRadius);
             SpriteBatchMain.Draw(Ball, new Rectangle(BallPosX, BallPosY, BallRadius * 2, BallRadius * 2), Color.Black);
         }
 
-        public override void DrawBorders()
+        protected override void DrawBorders()
         {
-            SpriteBatchMain.Draw(Border, new Rectangle((int)GetAbsoluteX(0), (int)GetAbsoluteY(0), (int)BorderSize.X, (int)BorderSize.Y), Color.White);
+            SpriteBatchMain.Draw(Border, new Rectangle((int)GetAbsoluteX(0), (int)GetAbsoluteY(0), (int)FieldSize.X, (int)FieldSize.Y), Color.White);
         }
 
-        public override void DrawPlayer(int playerID)
+        protected override void DrawPlayer(PlayerSlot player)
         {
-            PlayerDrawingData playerData = PlayerData[playerID];
+            int PlayerPosX = (int)GetAbsoluteX(GetPlayerPosition(player).X);
+            int PlayerPosY = (int)GetAbsoluteY(GetPlayerPosition(player).Y);
 
-            int PlayerPosX = (int)GetAbsoluteX(PlayerData[playerID].Position.X);
-            int PlayerPosY = (int)GetAbsoluteY(PlayerData[playerID].Position.Y);
-
-            SpriteBatchMain.Draw(Player, new Rectangle(PlayerPosX, PlayerPosY, (int)playerData.BorderSize.X, (int)playerData.BorderSize.Y), Color.Black);
+            SpriteBatchMain.Draw(Player, new Rectangle(PlayerPosX, PlayerPosY, (int)GetPlayerBorder(player).X, (int)GetPlayerBorder(player).Y), Color.Black);
         }
 
-        public override void DrawEnd()
+        protected override void DrawEnd()
         {
             SpriteBatchMain.End();
         }
