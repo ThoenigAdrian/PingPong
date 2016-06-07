@@ -67,6 +67,8 @@ namespace PingPongClient.VisualizeLayer
             }
         }
 
+        public abstract void Initialize(Game game);
+
         public abstract void DrawBorders();
 
         public abstract void DrawBall();

@@ -9,27 +9,29 @@ using NetworkLibrary.Utility;
 using NetworkLibrary;
 using GameLogicLibrary;
 using NetworkLibrary.DataStructs;
+using PingPongClient.VisualizeLayer;
 
 namespace PingPongClient
 {
     public class Control : Game
     {
         ConnectionClient Connection { get; set; }
-        LogWriter Logger = new LogWriterConsole();
+        GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+
+        LogWriter Logger = new LogWriterConsole();
 
         public Control()
         {
-            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            Visualizer = new XNAGameVisualizer();
         }
 
         protected override void Initialize()
         {
             IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
 
+            Visualizer.Initialize(this);
             Input.Initialize();
             Connection = new ConnectionClient(server);
             base.Initialize();
