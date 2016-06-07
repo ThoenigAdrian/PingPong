@@ -20,22 +20,22 @@ namespace NetworkLibrary.NetworkImplementations
             UDPNetwork = new NetworkUDP(server);
         }
 
-        protected T GetServerDataUDP<T>() where T : class
+        protected PackageInterface GetServerDataUDP()
         {
             if (TCPInAdapter == null)
-                return default(T);
+                return null;
 
             byte[] data = TCPNetwork.Receive();
-            return (TCPInAdapter.ByteToPackage(data) as T);
+            return TCPInAdapter.ByteToPackage(data);
         }
 
-        protected T GetServerDataUDP<T>() where T : class
+        protected PackageInterface GetServerDataUDP()
         {
             if (UDPInAdapter == null)
-                return default(T);
+                return null;
 
             byte[] data = UDPNetwork.Receive();
-            return (UDPInAdapter.ByteToPackage(data) as T);
+            return UDPInAdapter.ByteToPackage(data);
         }
 
         protected void SendClientDataTCP(PackageInterface package)

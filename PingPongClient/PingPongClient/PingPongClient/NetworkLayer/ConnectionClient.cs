@@ -20,7 +20,7 @@ namespace PingPongClient.NetworkLayer
 
         public ServerDataPackage GetServerData()
         {
-            return GetServerDataUDP<ServerDataPackage>();
+            return GetServerDataUDP() as ServerDataPackage;
         }
     }
 }
