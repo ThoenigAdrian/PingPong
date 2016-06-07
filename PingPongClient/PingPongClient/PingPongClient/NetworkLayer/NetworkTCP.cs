@@ -2,10 +2,15 @@
 
 namespace PingPongClient.NetworkLayer
 {
-    class NetworkTCP : DataNetwork<byte[]>
+    class NetworkTCP : DataNetwork
     {
         public NetworkTCP(IPAddress serverIP) : base(serverIP)
         {
+        }
+
+        protected override Socket InitializeSocket()
+        {
+            return new Socket(NetworkFamily, SocketType.Dgram, ProtocolType.Udp);
         }
 
         public override void Send(byte[] data)

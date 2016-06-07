@@ -6,25 +6,29 @@ using System.Threading;
 
 namespace PingPongClient.NetworkLayer
 {
-    class NetworkUDP: DataNetwork<ServerDataUDP>
+    class NetworkUDP: DataNetwork
     {
-        DoubleBuffer<ServerDataUDP> ServerData { get; set; }
+        DoubleBuffer<byte[]> ServerData { get; set; }
         Thread ReceiveThread;
 
         public NetworkUDP(IPAddress serverIP) : base(serverIP)
         {
-            ServerData = new DoubleBuffer<ServerDataUDP>();
-            ConnectionSocket = new Socket(serverIP.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            ServerData = new DoubleBuffer<byte[]>();
         }
 
-        public override ServerDataUDP Receive()
+        protected override Socket InitializeSocket()
+        {
+            return new Socket(NetworkFamily, SocketType.Dgram, ProtocolType.Udp);
+        }
+
+        public override byte[] Receive()
         {
             return ServerData.Read();
         }
 
-        public override void Send(ServerDataUDP data)
+        public override void Send(byte[] data)
         {
-            ConnectionSocket.Send(PacketAdapter.ServerData_Byte(data));
+            ConnectionSocket.Send(data);
         }
 
         protected override void PostConnectActions()
@@ -48,7 +52,7 @@ namespace PingPongClient.NetworkLayer
                     return;
                 }
                 
-                ServerData.Write(PacketAdapter.ServerData_Byte(data));
+                ServerData.Write(data);
             }
         }
 

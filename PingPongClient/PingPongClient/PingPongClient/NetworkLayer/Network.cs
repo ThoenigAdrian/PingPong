@@ -4,15 +4,16 @@ using System.Net.Sockets;
 
 namespace PingPongClient.NetworkLayer
 {
-    abstract class DataNetwork <T>
+    abstract class DataNetwork
     {
         public LogWriter Logger { get; set; }
 
         public bool Connected { get { return ConnectionSocket.Connected; } }
 
-        protected Socket ConnectionSocket { get; set; }
-        private IPAddress ServerIP { get; set; }
+        protected Socket ConnectionSocket { get; private set; }
+        private IPEndPoint ServerEndPoint { get; set; }
         protected bool AbortReceive { get; set; }
+        protected AddressFamily NetworkFamily { get { return ServerEndPoint.Address.AddressFamily; } }
 
 
         private DataNetwork()
@@ -20,20 +21,23 @@ namespace PingPongClient.NetworkLayer
 
         }
 
-        public DataNetwork(IPAddress serverIP)
+        public DataNetwork(IPEndPoint server)
         {
-            ServerIP = serverIP;
+            ServerEndPoint = server;
             AbortReceive = false;
             Logger = null;
+            ConnectionSocket = InitializeSocket();
         }
 
+        protected abstract Socket InitializeSocket();
+   
         public void Connect()
         {
             AbortReceive = false;
 
             try
             {
-                ConnectionSocket.Connect(new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT));
+                ConnectionSocket.Connect(ServerEndPoint);
                 Log("Connected.");
                 PostConnectActions();
             }
@@ -63,9 +67,9 @@ namespace PingPongClient.NetworkLayer
             }
         }
 
-        abstract public T Receive();
+        abstract public byte[] Receive();
 
-        abstract public void Send(T data);
+        abstract public void Send(byte[] data);
 
         abstract protected void PostConnectActions();
     }
