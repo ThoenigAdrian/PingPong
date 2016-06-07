@@ -14,7 +14,7 @@ namespace PingPongClient
 {
     public class Control : Game
     {
-        public GameStructure Structure { get; set; }
+        GameStructure Structure { get; set; }
 
         ClientConnection Connection { get; set; }
         GameVisualizerInterface Visualizer { get; set; }
