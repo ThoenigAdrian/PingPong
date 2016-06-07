@@ -10,7 +10,5 @@ namespace NetworkLibrary.DataStructs
         }
 
         public ClientControls Input;
-
-        
     }
 }
