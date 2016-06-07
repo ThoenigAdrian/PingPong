@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -8,10 +9,13 @@ namespace PingPongClient.VisualizeLayer
     {
         GraphicsDeviceManager GraphicManager { get; set; }
         SpriteBatch SpriteBatchMain { get; set; }
+        ContentManager Content { get; set; }
 
         public override void Initialize(Game game)
         {
             GraphicManager = new GraphicsDeviceManager(game);
+            SpriteBatchMain = new SpriteBatch(GraphicManager.GraphicsDevice);
+            Content.RootDirectory = "Content";
         }
 
         public override void DrawBall()

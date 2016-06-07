@@ -1,10 +1,8 @@
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Net;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
-using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.Utility;
 using NetworkLibrary;
 using GameLogicLibrary;
@@ -23,7 +21,6 @@ namespace PingPongClient
 
         public Control()
         {
-            Content.RootDirectory = "Content";
             Visualizer = new XNAGameVisualizer();
         }
 
@@ -39,7 +36,7 @@ namespace PingPongClient
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            
         }
 
         protected override void UnloadContent()
