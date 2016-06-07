@@ -4,14 +4,15 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace PingPongClient.NetworkLayer
+namespace NetworkLibrary.NetworkImplementations
 {
     class NetworkUDP: DataNetwork
     {
         DoubleBuffer<byte[]> ServerData { get; set; }
         Thread ReceiveThread;
 
-        public NetworkUDP(IPAddress serverIP) : base(serverIP)
+        public NetworkUDP(IPEndPoint serverIP)
+            : base(serverIP)
         {
             ServerData = new DoubleBuffer<byte[]>();
         }

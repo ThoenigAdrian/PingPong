@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PingPongClient.NetworkLayer
+namespace NetworkLibrary
 {
     class LogWriter
     {

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace PingPongClient.NetworkLayer
+namespace NetworkLibrary.NetworkImplementations
 {
     abstract class DataNetwork
     {

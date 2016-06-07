@@ -1,10 +1,12 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 
-namespace PingPongClient.NetworkLayer
+namespace NetworkLibrary.NetworkImplementations
 {
     class NetworkTCP : DataNetwork
     {
-        public NetworkTCP(IPAddress serverIP) : base(serverIP)
+        public NetworkTCP(IPEndPoint serverIP) 
+            : base(serverIP)
         {
         }
 

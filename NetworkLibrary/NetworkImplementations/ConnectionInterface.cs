@@ -1,6 +1,8 @@
+using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
+using System.Net;
 
-namespace PingPongClient.NetworkLayer
+namespace NetworkLibrary.NetworkImplementations
 {
     abstract class ConnectionInterface
     {
@@ -18,19 +20,19 @@ namespace PingPongClient.NetworkLayer
             UDPNetwork = new NetworkUDP(server);
         }
 
-        protected T<T> GetServerDataUDP()
+        protected T GetServerDataUDP<T>() where T : class
         {
             if (TCPInAdapter == null)
-                return null;
+                return default(T);
 
             byte[] data = TCPNetwork.Receive();
             return (TCPInAdapter.ByteToPackage(data) as T);
         }
 
-        protected T<T> GetServerDataUDP()
+        protected T GetServerDataUDP<T>() where T : class
         {
-            if (UDPinAdapter == null)
-                return null;
+            if (UDPInAdapter == null)
+                return default(T);
 
             byte[] data = UDPNetwork.Receive();
             return (UDPInAdapter.ByteToPackage(data) as T);
