@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.Net;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
@@ -32,17 +31,23 @@ namespace PingPongClient
             Visualizer.Initialize(this);
         }
 
+        protected void ConnectToServer(IPAddress ip)
+        {
+            IPEndPoint server = new IPEndPoint(ip, NetworkConstants.SERVER_PORT);
+            Connection = new ClientConnection(server);
+            Connection.Connect();
+        }
+
         protected override void Initialize()
         {
-            IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
-
             Input.Initialize();
-            Connection = new ClientConnection(server);
+            ConnectToServer(IPAddress.Parse("127.0.0.1"));
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
+            Visualizer.ApplyResize();
             Visualizer.LoadContent();
 
             base.LoadContent();
@@ -52,11 +57,24 @@ namespace PingPongClient
         {
             Input.Update();
 
-            if(Input.GetInput() == ClientControls.Quit)
+            if(Input.GetInput() != ClientControls.NoInput)
+            {
+                ClientControlPackage controlPackage = new ClientControlPackage();
+                controlPackage.Input = Input.GetInput();
+                Connection.SendClientControl(controlPackage);
+            }
+
+            if (Input.GetInput() == ClientControls.Quit)
+            {
+                Connection.Disconnect();
                 this.Exit();
+            }
 
             ServerDataPackage data = Connection.GetServerData();
-            ApplyServerPositions(data);
+
+            if (data != null)
+                ApplyServerPositions(data);
+
             Interpolation.Interpolate(gameTime);
 
             base.Update(gameTime);

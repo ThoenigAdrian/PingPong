@@ -72,6 +72,8 @@ namespace PingPongClient.VisualizeLayer
 
         public abstract void LoadContent();
 
+        public abstract void ApplyResize();
+
         protected abstract void DrawBegin();
 
         protected abstract void DrawBorders();

@@ -46,6 +46,14 @@ namespace PingPongClient.VisualizeLayer
             Player.SetData(new Color[] { Color.White });
         }
 
+        public override void ApplyResize()
+        {
+            int screenHeight = GraphicManager.PreferredBackBufferHeight;
+            int screenWidth = GraphicManager.PreferredBackBufferWidth;
+            DrawingOffset.X = screenWidth / 2 - FieldSize.X / 2;
+            DrawingOffset.Y = screenHeight / 2 - FieldSize.Y / 2;
+        }
+
         protected override void DrawBegin()
         {
             Graphics.Clear(Color.Black);

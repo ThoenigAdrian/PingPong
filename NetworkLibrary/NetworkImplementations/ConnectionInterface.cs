@@ -24,6 +24,18 @@ namespace NetworkLibrary.NetworkImplementations
             UDPNetwork.Logger = logger;
         }
 
+        public void Connect()
+        {
+            TCPNetwork.Connect();
+            UDPNetwork.Connect();
+        }
+
+        public void Disconnect()
+        {
+            TCPNetwork.Disconnect();
+            UDPNetwork.Disconnect();
+        }
+
         protected PackageInterface GetServerDataTCP()
         {
             if (TCPInAdapter == null)
