@@ -50,7 +50,6 @@
     <Compile Include="PackageAdapters\ServerUDPAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\DoubleBuffer.cs" />
-    <Compile Include="Utility\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameLogicLibrary\GameLogicLibrary.csproj">
