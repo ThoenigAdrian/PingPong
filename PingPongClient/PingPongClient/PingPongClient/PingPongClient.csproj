@@ -74,10 +74,7 @@
   <ItemGroup>
     <Compile Include="InputLayer\InputInterface.cs" />
     <Compile Include="InputLayer\KeyboardInput.cs" />
-    <Compile Include="NetworkLayer\Logger.cs" />
-    <Compile Include="NetworkLayer\Network.cs" />
-    <Compile Include="NetworkLayer\NetworkTCP.cs" />
-    <Compile Include="NetworkLayer\NetworkUDP.cs" />
+    <Compile Include="NetworkLayer\ConnectionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ControlLayer\Control.cs" />

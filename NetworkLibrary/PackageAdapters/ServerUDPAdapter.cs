@@ -3,7 +3,7 @@ using System;
 
 namespace NetworkLibrary.PackageAdapters
 {
-    class ServerUDPAdapter : PackageAdapterInterface
+    public class ServerUDPAdapter : PackageAdapterInterface
     {
         public override PackageInterface ByteToPackage(byte[] data)
         {

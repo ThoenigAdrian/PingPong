@@ -8,7 +8,7 @@ namespace PingPongClient.InputLayer
 {
     abstract class InputInterface
     {
-        public abstract ClientInput GetInput();
+        public abstract ClientControls GetInput();
 
         public abstract void Initialize();
 

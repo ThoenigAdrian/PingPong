@@ -2,7 +2,7 @@
 
 namespace NetworkLibrary.DataStructs
 {
-    class ClientControlPackage : PackageInterface
+    public class ClientControlPackage : PackageInterface
     {
         public override PackageType PackageType
         {

@@ -1,26 +1,21 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using InputFunctionality.KeyboardAdapter;
-using PingPongClient.NetworkLayer;
 using System.Net;
-using NetworkLibrary.DataStructs;
 using PingPongClient.InputLayer;
+using PingPongClient.NetworkLayer;
+using NetworkLibrary.NetworkImplementations;
+using NetworkLibrary.Utility;
+using NetworkLibrary;
 using GameLogicLibrary;
+using NetworkLibrary.DataStructs;
 
 namespace PingPongClient
 {
     public class Control : Game
     {
-        LogWriter Logger = new LogWriter();
-        NetworkUDP UDPNetwork = new NetworkUDP(IPAddress.Parse("127.0.0.1"));
+        ConnectionClient Connection { get; set; }
+        LogWriter Logger = new LogWriterConsole();
         InputInterface Input = new KeyboardInput();
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -33,9 +28,10 @@ namespace PingPongClient
 
         protected override void Initialize()
         {
+            IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
+
             Input.Initialize();
-            UDPNetwork.Logger = Logger;
-            UDPNetwork.Connect();
+            Connection = new ConnectionClient(server);
             base.Initialize();
         }
 
@@ -46,18 +42,17 @@ namespace PingPongClient
 
         protected override void UnloadContent()
         {
-            UDPNetwork.Disconnect();
+            
         }
 
         protected override void Update(GameTime gameTime)
         {
             Input.Update();
 
-            if(Input.GetInput() == ClientInput.Quit)
+            if(Input.GetInput() == ClientControls.Quit)
                 this.Exit();
 
-            ServerDataUDP data = UDPNetwork.Receive();
-            Logger.Log(Convert.ToString(data.TestValue));
+            ServerDataPackage data = Connection.GetServerData();
 
             base.Update(gameTime);
         }

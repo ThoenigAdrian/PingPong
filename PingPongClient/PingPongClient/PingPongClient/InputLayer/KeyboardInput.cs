@@ -24,27 +24,27 @@ namespace PingPongClient.InputLayer
             KeyboardAdapter.UpdateState();
         }
 
-        public override ClientInput GetInput()
+        public override ClientControls GetInput()
         {
             if (KeyboardAdapter.KeyNowPressed(Keys.Up))
-                return ClientInput.Up;
+                return ClientControls.Up;
 
             if (KeyboardAdapter.KeyNowPressed(Keys.Down))
-                return ClientInput.Down;
+                return ClientControls.Down;
 
             if (KeyboardAdapter.KeyNowPressed(Keys.Space))
-                return ClientInput.Pause;
+                return ClientControls.Pause;
 
             if (KeyboardAdapter.KeyNowPressed(Keys.Escape))
-                return ClientInput.Quit;
+                return ClientControls.Quit;
 
             if (KeyboardAdapter.KeyNowPressed(Keys.Enter))
-                return ClientInput.Restart;
+                return ClientControls.Restart;
 
             if (KeyboardAdapter.KeyNowReleased(Keys.Up) || KeyboardAdapter.KeyNowReleased(Keys.Down))
-                return ClientInput.StopMoving;
+                return ClientControls.StopMoving;
 
-            return ClientInput.NoInput;
+            return ClientControls.NoInput;
         }
     }
 }

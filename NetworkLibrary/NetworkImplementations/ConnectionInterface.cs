@@ -1,10 +1,11 @@
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
+using NetworkLibrary.Utility;
 using System.Net;
 
 namespace NetworkLibrary.NetworkImplementations
 {
-    abstract class ConnectionInterface
+    public abstract class ConnectionInterface
     {
         NetworkTCP TCPNetwork;
         NetworkUDP UDPNetwork;
@@ -14,13 +15,16 @@ namespace NetworkLibrary.NetworkImplementations
         protected PackageAdapterInterface TCPInAdapter;
         protected PackageAdapterInterface TCPOutAdapter;
 
-        protected ConnectionInterface(IPEndPoint server)
+        protected ConnectionInterface(IPEndPoint server, LogWriter logger)
         {
             TCPNetwork = new NetworkTCP(server);
+            TCPNetwork.Logger = logger;
+
             UDPNetwork = new NetworkUDP(server);
+            UDPNetwork.Logger = logger;
         }
 
-        protected PackageInterface GetServerDataUDP()
+        protected PackageInterface GetServerDataTCP()
         {
             if (TCPInAdapter == null)
                 return null;

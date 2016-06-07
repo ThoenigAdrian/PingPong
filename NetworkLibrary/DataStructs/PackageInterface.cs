@@ -5,12 +5,12 @@ using System.Text;
 
 namespace NetworkLibrary.DataStructs
 {
-    abstract class PackageInterface
+    public abstract class PackageInterface
     {
         public abstract PackageType PackageType { get; }
     }
 
-    enum PackageType
+    public enum PackageType
     {
         ClientControl,
         ServerData
