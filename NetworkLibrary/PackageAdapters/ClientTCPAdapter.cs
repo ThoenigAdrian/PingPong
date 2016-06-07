@@ -3,7 +3,7 @@ using System;
 
 namespace NetworkLibrary.PackageAdapters
 {
-    public class PacketAdapter : PackageAdapterInterface
+    public class ClientTCPAdapter : PackageAdapterInterface
     {
         public override PackageInterface ByteToPackage(byte[] data)
         {
