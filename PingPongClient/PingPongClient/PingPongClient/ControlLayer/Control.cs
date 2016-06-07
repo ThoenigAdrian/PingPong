@@ -1,29 +1,30 @@
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Net;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
-using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.Utility;
 using NetworkLibrary;
 using GameLogicLibrary;
 using NetworkLibrary.DataStructs;
+using PingPongClient.VisualizeLayer;
 
 namespace PingPongClient
 {
     public class Control : Game
     {
         ConnectionClient Connection { get; set; }
-        LogWriter Logger = new LogWriterConsole();
+        GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+
+        public GraphicsDeviceManager GraphicManager { get; private set; }
+
+        LogWriter Logger = new LogWriterConsole();
 
         public Control()
         {
-            graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
+            Visualizer = new XNAGameVisualizer();
+            Visualizer.Initialize(this);
         }
 
         protected override void Initialize()
@@ -37,12 +38,9 @@ namespace PingPongClient
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-        }
+            Visualizer.LoadContent();
 
-        protected override void UnloadContent()
-        {
-            
+            base.LoadContent();
         }
 
         protected override void Update(GameTime gameTime)
@@ -52,14 +50,14 @@ namespace PingPongClient
             if(Input.GetInput() == ClientControls.Quit)
                 this.Exit();
 
-            //ServerDataPackage data = Connection.GetServerData();
+            ServerDataPackage data = Connection.GetServerData();
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            Visualizer.DrawGame();
 
             base.Draw(gameTime);
         }
