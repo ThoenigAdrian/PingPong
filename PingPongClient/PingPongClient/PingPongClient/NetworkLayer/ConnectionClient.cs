@@ -6,7 +6,11 @@ namespace PingPongClient.NetworkLayer
         public ConnectionClient(IPEndPoint server)
             : base(server)
         {
-            UDPInAdapter = new 
+            UDPOutAdapter = new ClientUDPAdapter();
+            UDPInAdapter = new ServerUDPAdapter();
+
+            TCPOutAdapter = new ClientTCPAdapter();
+            TCPInAdapter = new ServerTCPAdapter();
         }
 
         public void SendClientControl(ClientControlPackage package)

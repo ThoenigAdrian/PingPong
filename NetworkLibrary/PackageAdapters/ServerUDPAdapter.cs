@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NetworkLibrary.PackageAdapters
+﻿namespace NetworkLibrary.PackageAdapters
 {
     class ServerUDPAdapter
     {
