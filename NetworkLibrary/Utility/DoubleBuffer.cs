@@ -17,8 +17,8 @@ namespace NetworkLibrary.Utility
         private void Initialize()
         {
             Switch = false;
-            Buffer1 = Activator.CreateInstance<T>();
-            Buffer2 = Activator.CreateInstance<T>();
+            Buffer1 = default(T);
+            Buffer2 = default(T);
         }
 
         public T Read()

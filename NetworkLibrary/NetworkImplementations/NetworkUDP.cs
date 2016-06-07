@@ -1,5 +1,4 @@
 ﻿using NetworkLibrary.Utility;
-using NetworkLibrary.DataStructs;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;

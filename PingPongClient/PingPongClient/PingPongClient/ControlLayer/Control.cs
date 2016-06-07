@@ -52,7 +52,7 @@ namespace PingPongClient
             if(Input.GetInput() == ClientControls.Quit)
                 this.Exit();
 
-            ServerDataPackage data = Connection.GetServerData();
+            //ServerDataPackage data = Connection.GetServerData();
 
             base.Update(gameTime);
         }
