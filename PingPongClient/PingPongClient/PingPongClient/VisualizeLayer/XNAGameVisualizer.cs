@@ -40,7 +40,7 @@ namespace PingPongClient.VisualizeLayer
             Border = new Texture2D(Graphics, 1, 1);
             Border.SetData(new Color[] { Color.White });
 
-            Ball = createCircleText(100);
+            Ball = CreateCircleTexture(100);
 
             Player = new Texture2D(Graphics, 1, 1);
             Player.SetData(new Color[] { Color.White });
@@ -56,6 +56,7 @@ namespace PingPongClient.VisualizeLayer
         {
             int BallPosX = (int)GetAbsoluteX(BallPosition.X - BallRadius);
             int BallPosY = (int)GetAbsoluteY(BallPosition.Y - BallRadius);
+
             SpriteBatchMain.Draw(Ball, new Rectangle(BallPosX, BallPosY, BallRadius * 2, BallRadius * 2), Color.Black);
         }
 
@@ -92,7 +93,7 @@ namespace PingPongClient.VisualizeLayer
             return DrawingOffset.Y + relativeY;
         }
 
-        Texture2D createCircleText(int radius)
+        Texture2D CreateCircleTexture(int radius)
         {
             Texture2D texture = new Texture2D(Graphics, radius, radius);
             Color[] colorData = new Color[radius * radius];

@@ -6,15 +6,15 @@ using System.Net;
 
 namespace PingPongClient.NetworkLayer
 {
-    class ConnectionClient : ConnectionInterface
+    class ClientConnection : ConnectionInterface
     {
-        public ConnectionClient(IPEndPoint server)
+        public ClientConnection(IPEndPoint server)
             : base(server, null)
         {
             Initialize();
         }
 
-        public ConnectionClient(IPEndPoint server, LogWriter logger)
+        public ClientConnection(IPEndPoint server, LogWriter logger)
             : base(server, logger)
         {
             Initialize();

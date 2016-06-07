@@ -17,7 +17,7 @@ namespace PingPongClient
     {
         public GameStructure Structure { get; set; }
 
-        ConnectionClient Connection { get; set; }
+        ClientConnection Connection { get; set; }
         GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
         Interpolation Interpolation;
@@ -37,7 +37,7 @@ namespace PingPongClient
             IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
 
             Input.Initialize();
-            Connection = new ConnectionClient(server);
+            Connection = new ClientConnection(server);
             base.Initialize();
         }
 
