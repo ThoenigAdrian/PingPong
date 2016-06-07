@@ -17,18 +17,20 @@ namespace PingPongClient
         GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
 
+        public GraphicsDeviceManager GraphicManager { get; private set; }
+
         LogWriter Logger = new LogWriterConsole();
 
         public Control()
         {
             Visualizer = new XNAGameVisualizer();
+            Visualizer.Initialize(this);
         }
 
         protected override void Initialize()
         {
             IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
 
-            Visualizer.Initialize(this);
             Input.Initialize();
             Connection = new ConnectionClient(server);
             base.Initialize();
@@ -36,12 +38,9 @@ namespace PingPongClient
 
         protected override void LoadContent()
         {
-            
-        }
+            Visualizer.LoadContent();
 
-        protected override void UnloadContent()
-        {
-            
+            base.LoadContent();
         }
 
         protected override void Update(GameTime gameTime)
@@ -58,7 +57,7 @@ namespace PingPongClient
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            Visualizer.DrawGame();
 
             base.Draw(gameTime);
         }

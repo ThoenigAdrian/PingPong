@@ -41,23 +41,25 @@ namespace PingPongClient.VisualizeLayer
 
         protected GameVisualizerInterface()
         {
-            BallPosition = new Vector2();
+            BallPosition = new Vector2(GameInitializers.BALL_POSX, GameInitializers.BALL_POSY);
             BallRadius = GameInitializers.BALL_RADIUS;
 
             PlayerData = new PlayerDrawingData[PLAYER_COUNT];
 
-            for (int i = 0; i < PLAYER_COUNT; i++)
-            {
-                PlayerData[i] = new PlayerDrawingData();
-                PlayerData[i].Position = new Vector2();
-                PlayerData[i].BorderSize = new Vector2(GameInitializers.PLAYER_WIDTH, GameInitializers.PLAYER_HEIGHT);
-            }
+            PlayerData[0] = new PlayerDrawingData();
+            PlayerData[0].Position = new Vector2(GameInitializers.PLAYER_1_X, GameInitializers.PLAYER_Y);
+            PlayerData[0].BorderSize = new Vector2(GameInitializers.PLAYER_WIDTH, GameInitializers.PLAYER_HEIGHT);
+
+            PlayerData[1] = new PlayerDrawingData();
+            PlayerData[1].Position = new Vector2(GameInitializers.PLAYER_2_X, GameInitializers.PLAYER_Y);
+            PlayerData[1].BorderSize = new Vector2(GameInitializers.PLAYER_WIDTH, GameInitializers.PLAYER_HEIGHT);
 
             BorderSize = new Vector2(GameInitializers.BORDER_WIDTH, GameInitializers.BORDER_HEIGHT);
         }
 
         public void DrawGame()
         {
+            DrawBegin();
             DrawBorders();
             DrawBall();
             
@@ -65,15 +67,23 @@ namespace PingPongClient.VisualizeLayer
             {
                 DrawPlayer(ID);
             }
+
+            DrawEnd();
         }
 
         public abstract void Initialize(Game game);
+
+        public abstract void LoadContent();
+
+        public abstract void DrawBegin();
 
         public abstract void DrawBorders();
 
         public abstract void DrawBall();
 
         public abstract void DrawPlayer(int playerID);
+
+        public abstract void DrawEnd();
     }
 
     class PlayerDrawingData
