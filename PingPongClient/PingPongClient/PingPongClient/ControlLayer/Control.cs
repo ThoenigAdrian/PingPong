@@ -21,6 +21,8 @@ namespace PingPongClient
         InputInterface Input = new KeyboardInput();
         Interpolation Interpolation;
 
+        public IPAddress ServerIP { get; set; }
+
         LogWriter Logger = new LogWriterConsole();
 
         public Control()
@@ -31,9 +33,12 @@ namespace PingPongClient
             Visualizer.Initialize(this);
         }
 
-        protected void ConnectToServer(IPAddress ip)
+        protected void ConnectToServer()
         {
-            IPEndPoint server = new IPEndPoint(ip, NetworkConstants.SERVER_PORT);
+            if (ServerIP == null)
+                return;
+
+            IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
             Connection = new ClientConnection(server);
             Connection.Connect();
         }
@@ -41,7 +46,7 @@ namespace PingPongClient
         protected override void Initialize()
         {
             Input.Initialize();
-            ConnectToServer(IPAddress.Parse("127.0.0.1"));
+            ConnectToServer();
             base.Initialize();
         }
 
@@ -57,23 +62,30 @@ namespace PingPongClient
         {
             Input.Update();
 
-            if(Input.GetInput() != ClientControls.NoInput)
+            if (Connection != null)
             {
-                ClientControlPackage controlPackage = new ClientControlPackage();
-                controlPackage.Input = Input.GetInput();
-                Connection.SendClientControl(controlPackage);
-            }
+                if (Input.GetInput() != ClientControls.NoInput)
+                {
+                    ClientControlPackage controlPackage = new ClientControlPackage();
+                    controlPackage.Input = Input.GetInput();
+                    Connection.SendClientControl(controlPackage);
+                }
 
-            if (Input.GetInput() == ClientControls.Quit)
+                if (Input.GetInput() == ClientControls.Quit)
+                {
+                    Connection.Disconnect();
+                    this.Exit();
+                }
+
+                ServerDataPackage data = Connection.GetServerData();
+
+                if (data != null)
+                    ApplyServerPositions(data);
+            }
+            else if (Input.GetInput() == ClientControls.Quit)
             {
-                Connection.Disconnect();
                 this.Exit();
             }
-
-            ServerDataPackage data = Connection.GetServerData();
-
-            if (data != null)
-                ApplyServerPositions(data);
 
             Interpolation.Interpolate(gameTime);
 
