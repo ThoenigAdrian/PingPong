@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
+namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class TCPClientConnection : TCPConnection
     {

@@ -1,9 +1,9 @@
-using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 
-namespace NetworkLibrary.ConnectionImplementations
+namespace NetworkLibrary.NetworkImplementations
 {
     public abstract class NetworkInterface
     {

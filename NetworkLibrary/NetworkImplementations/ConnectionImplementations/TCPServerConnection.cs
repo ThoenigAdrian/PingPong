@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
+namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class TCPServerConnection : TCPConnection
     {
