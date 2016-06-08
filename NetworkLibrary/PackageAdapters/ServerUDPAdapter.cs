@@ -11,10 +11,10 @@ namespace NetworkLibrary.PackageAdapters
             byte[] buffer = new byte[4];
 
             Array.Copy(data, 0, buffer, 0, buffer.Length);
-            package.BallPosX = Convert.ToInt32(buffer);
+            package.BallPosX = BitConverter.ToInt32(buffer, 0);
 
             Array.Copy(data, 4, buffer, 0, buffer.Length);
-            package.BallPosY = Convert.ToInt32(buffer);
+            package.BallPosY = BitConverter.ToInt32(buffer, 0);
 
             return package;
         }
@@ -25,10 +25,10 @@ namespace NetworkLibrary.PackageAdapters
  
             byte[] data = new byte[8];
 
-            byte[] buffer = BitConverter.GetBytes(serverPackage.BallPosX);
+            byte[] buffer = BitConverter.GetBytes((int)serverPackage.BallPosX);
             Array.Copy(buffer, 0, data, 0, buffer.Length);
 
-            buffer = BitConverter.GetBytes(serverPackage.BallPosY);
+            buffer = BitConverter.GetBytes((int)serverPackage.BallPosY);
             Array.Copy(buffer, 0, data, 4, buffer.Length);
 
             return data;
