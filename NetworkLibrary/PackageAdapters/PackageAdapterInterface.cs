@@ -1,10 +1,14 @@
 ﻿using NetworkLibrary.DataStructs;
+using Newtonsoft;
 
 namespace NetworkLibrary.PackageAdapters
 {
-    public abstract class PackageAdapterInterface
+    public class PackageAdapter
     {
-        public abstract PackageInterface ByteToPackage(byte[] data);
-        public abstract byte[] PackageToByte(PackageInterface package);
+        public byte[] CreatePackage(PackageType type, byte[] data)
+        {
+            Newton
+        }
+        public byte[] ExtractPackage(byte[] data);
     }
 }

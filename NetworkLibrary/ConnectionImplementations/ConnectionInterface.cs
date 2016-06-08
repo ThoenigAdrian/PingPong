@@ -8,15 +8,15 @@ namespace NetworkLibrary.ConnectionImplementations
 { 
     public abstract class ConnectionInterface
     {
-        NetworkTCP TCPNetwork;
-        NetworkUDP UDPNetwork;
+        TCPConnection TCPNetwork;
+        UDPConnection UDPNetwork;
 
         protected PackageAdapterInterface UDPInAdapter;
         protected PackageAdapterInterface UDPOutAdapter;
         protected PackageAdapterInterface TCPInAdapter;
         protected PackageAdapterInterface TCPOutAdapter;
 
-        protected ConnectionInterface(NetworkTCP tcpNetwork, NetworkUDP udpNetwork , LogWriter logger)
+        protected ConnectionInterface(TCPConnection tcpNetwork, UDPConnection udpNetwork , LogWriter logger)
         {
             TCPNetwork = tcpNetwork;
             TCPNetwork.Logger = logger;
