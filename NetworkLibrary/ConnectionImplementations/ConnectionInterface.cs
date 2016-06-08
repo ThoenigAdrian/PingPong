@@ -3,6 +3,7 @@ using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System.Net;
+using System.Net.Sockets;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -16,14 +17,16 @@ namespace NetworkLibrary.NetworkImplementations
         protected PackageAdapterInterface TCPInAdapter;
         protected PackageAdapterInterface TCPOutAdapter;
 
-        protected ConnectionInterface(IPEndPoint server, LogWriter logger)
+        protected ConnectionInterface(NetworkTCP tcpNetwork, NetworkUDP udpNetwork , LogWriter logger)
         {
-            TCPNetwork = new NetworkTCPClient(server);
+            TCPNetwork = tcpNetwork;
             TCPNetwork.Logger = logger;
 
-            UDPNetwork = new NetworkUDP(server);
+            UDPNetwork = udpNetwork;
             UDPNetwork.Logger = logger;
         }
+
+        protected abstract NetworkTCP CreateTCPNetwork(Socket tcpSocket);
 
         public void Disconnect()
         {
