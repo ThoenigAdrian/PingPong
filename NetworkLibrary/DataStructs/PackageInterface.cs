@@ -9,6 +9,7 @@
     {
         ClientControl,
         ClientPlayerMovement,
+        ClientAddRequest,
         ServerData
     }
 }
