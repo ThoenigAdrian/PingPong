@@ -1,7 +1,6 @@
 ﻿using InputFunctionality.KeyboardAdapter;
 using GameLogicLibrary;
 using Microsoft.Xna.Framework.Input;
-using System;
 
 namespace PingPongClient.InputLayer
 {
