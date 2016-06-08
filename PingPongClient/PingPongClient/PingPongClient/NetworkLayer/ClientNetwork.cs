@@ -43,6 +43,11 @@ namespace PingPongClient.NetworkLayer
             SendDataTCP(package);
         }
 
+        public void SendPlayerMovement(PlayerMovementPackage package)
+        {
+            SendDataTCP(package);
+        }
+
         public ServerDataPackage GetServerData()
         {
             return GetDataUDP() as ServerDataPackage;

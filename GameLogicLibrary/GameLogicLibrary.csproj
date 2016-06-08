@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientControls.cs" />
+    <Compile Include="ClientMovement.cs" />
     <Compile Include="GameObjects\PlayBall.cs" />
     <Compile Include="GameObjects\GameField.cs" />
     <Compile Include="GameInitializers.cs" />

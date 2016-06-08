@@ -9,6 +9,8 @@ using NetworkLibrary.DataStructs;
 using PingPongClient.VisualizeLayer;
 using PingPongClient.ControlLayer;
 using GameLogicLibrary.GameObjects;
+using PingPongClient.InputLayer.InputTranslation;
+using System.Collections.Generic;
 
 namespace PingPongClient
 {
@@ -18,7 +20,8 @@ namespace PingPongClient
 
         ClientNetwork Network { get; set; }
         GameVisualizerInterface Visualizer { get; set; }
-        InputInterface Input = new KeyboardInput();
+        List<PlayerInput> ActivePlayers { get; set; }
+        InputInterface ControlInput = new KeyboardInput(new ControlTranslation());
         Interpolation Interpolation;
 
         public IPAddress ServerIP { get; set; }
@@ -28,6 +31,7 @@ namespace PingPongClient
         public Control()
         {
             Structure = new GameStructure();
+            ActivePlayers = new List<PlayerInput>();
             Interpolation = new Interpolation(Structure);
             Visualizer = new XNAGameVisualizer(Structure);
             Visualizer.Initialize(this);
@@ -52,7 +56,7 @@ namespace PingPongClient
 
         protected override void Initialize()
         {
-            Input.Initialize();
+            ControlInput.Initialize();
             ConnectToServer();
             base.Initialize();
         }
@@ -66,29 +70,15 @@ namespace PingPongClient
 
         protected override void Update(GameTime gameTime)
         {
-            Input.Update();
+            ControlInput.Update(); // global keyboard update - dont call update on any other input!
 
             if (Network != null)
             {
-                if (Input.GetInput() != ClientControls.NoInput)
-                {
-                    ClientControlPackage controlPackage = new ClientControlPackage();
-                    controlPackage.Input = Input.GetInput();
-                    Network.SendClientControl(controlPackage);
-                }
-
-                if (Input.GetInput() == ClientControls.Quit)
-                {
-                    Network.Disconnect();
-                    this.Exit();
-                }
-
-                ServerDataPackage data = Network.GetServerData();
-
-                if (data != null)
-                    ApplyServerPositions(data);
+                ApplyMovementInputs();
+                ApplyControlInputs();
             }
-            else if (Input.GetInput() == ClientControls.Quit)
+
+            else if (ControlInput.GetControlInput() == ClientControls.Quit)
             {
                 this.Exit();
             }
@@ -98,8 +88,46 @@ namespace PingPongClient
             base.Update(gameTime);
         }
 
-        protected void ApplyServerPositions(ServerDataPackage data)
+        protected void ApplyControlInputs()
         {
+            if (ControlInput.GetControlInput() != ClientControls.NoInput)
+            {
+                ClientControlPackage controlPackage = new ClientControlPackage();
+                controlPackage.ControlInput = ControlInput.GetControlInput();
+                Network.SendClientControl(controlPackage);
+            }
+
+            if (ControlInput.GetControlInput() == ClientControls.Quit)
+            {
+                Network.Disconnect();
+                this.Exit();
+            }
+        }
+
+        protected void ApplyMovementInputs()
+        {
+            foreach (PlayerInput player in ActivePlayers)
+            {
+                ClientMovement playerInput = player.Input.GetMovementInput();
+
+                if (playerInput != ClientMovement.NoInput)
+                {
+                    PlayerMovementPackage movementPackage = new PlayerMovementPackage();
+                    movementPackage.PlayerID = player.ID;
+                    movementPackage.PlayerMovement = playerInput;
+
+                    Network.SendPlayerMovement(movementPackage);
+                }
+            }
+        }
+
+        protected void ApplyServerPositions()
+        {
+            ServerDataPackage data = Network.GetServerData();
+
+            if (data == null)
+                return;
+
             for (int i = 0; i < Structure.m_players.Count; i++)
             {
                 

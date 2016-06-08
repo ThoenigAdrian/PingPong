@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NetworkLibrary.DataStructs
+﻿namespace NetworkLibrary.DataStructs
 {
     public abstract class PackageInterface
     {
@@ -13,6 +8,7 @@ namespace NetworkLibrary.DataStructs
     public enum PackageType
     {
         ClientControl,
+        ClientPlayerMovement,
         ServerData
     }
 }

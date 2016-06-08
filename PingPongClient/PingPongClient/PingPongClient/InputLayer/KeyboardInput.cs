@@ -1,16 +1,19 @@
-﻿using InputFunctionality.KeyboardAdapter;
+﻿using System;
+using InputFunctionality.KeyboardAdapter;
 using GameLogicLibrary;
-using Microsoft.Xna.Framework.Input;
+using PingPongClient.InputLayer.InputTranslation;
 
 namespace PingPongClient.InputLayer
 {
     class KeyboardInput : InputInterface
     {
-        KeyboardAdvanced KeyboardAdapter = new KeyboardAdvanced();
+        static KeyboardAdvanced KeyboardAdapter = new KeyboardAdvanced();
 
-        public KeyboardInput()
+        KeyboardControlTranslation Translation { get; set; }
+
+        public KeyboardInput(KeyboardControlTranslation translation)
         {
-            
+            Translation = translation;
         }
 
         public override void Initialize()
@@ -23,25 +26,34 @@ namespace PingPongClient.InputLayer
             KeyboardAdapter.UpdateState();
         }
 
-        public override ClientControls GetInput()
+        public override ClientMovement GetMovementInput()
         {
-            if (KeyboardAdapter.KeyNowPressed(Keys.Up))
-                return ClientControls.Up;
+            if (Translation == null)
+                return ClientMovement.NoInput;
 
-            if (KeyboardAdapter.KeyNowPressed(Keys.Down))
-                return ClientControls.Down;
+            foreach (ClientMovement movement in Enum.GetValues(typeof(ClientMovement)))
+            {
+                if (KeyboardAdapter.KeyNowPressed(Translation.GetMovementKey(movement)))
+                    return movement;
+            }
 
-            if (KeyboardAdapter.KeyNowPressed(Keys.Space))
-                return ClientControls.Pause;
+            if (KeyboardAdapter.KeyNowReleased(Translation.GetMovementKey(ClientMovement.Up)) 
+                || KeyboardAdapter.KeyNowReleased(Translation.GetMovementKey(ClientMovement.Down)))
+                return ClientMovement.StopMoving;
 
-            if (KeyboardAdapter.KeyNowPressed(Keys.Escape))
-                return ClientControls.Quit;
+            return ClientMovement.NoInput;
+        }
 
-            if (KeyboardAdapter.KeyNowPressed(Keys.Enter))
-                return ClientControls.Restart;
+        public override ClientControls GetControlInput()
+        {
+            if (Translation == null)
+                return ClientControls.NoInput;
 
-            if (KeyboardAdapter.KeyNowReleased(Keys.Up) || KeyboardAdapter.KeyNowReleased(Keys.Down))
-                return ClientControls.StopMoving;
+            foreach (ClientControls control in Enum.GetValues(typeof(ClientControls)))
+            {
+                if (KeyboardAdapter.KeyNowPressed(Translation.GetControlKey(control)))
+                    return control;
+            }
 
             return ClientControls.NoInput;
         }
