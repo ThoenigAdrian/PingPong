@@ -40,13 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnectionImplementations\NetworkImplementations\NetworkTCPClient.cs" />
+    <Compile Include="ConnectionImplementations\NetworkImplementations\NetworkTCPServer.cs" />
     <Compile Include="DataStructs\ClientControlPackage.cs" />
     <Compile Include="DataStructs\PackageInterface.cs" />
     <Compile Include="Utility\Logger.cs" />
-    <Compile Include="NetworkImplementations\ConnectionInterface.cs" />
-    <Compile Include="NetworkImplementations\Network.cs" />
-    <Compile Include="NetworkImplementations\NetworkTCP.cs" />
-    <Compile Include="NetworkImplementations\NetworkUDP.cs" />
+    <Compile Include="ConnectionImplementations\ConnectionInterface.cs" />
+    <Compile Include="ConnectionImplementations\NetworkImplementations\Network.cs" />
+    <Compile Include="ConnectionImplementations\NetworkImplementations\NetworkTCP.cs" />
+    <Compile Include="ConnectionImplementations\NetworkImplementations\NetworkUDP.cs" />
     <Compile Include="PackageAdapters\ClientTCPAdapter.cs" />
     <Compile Include="DataStructs\ServerDataPackage.cs" />
     <Compile Include="NetworkConstants.cs" />

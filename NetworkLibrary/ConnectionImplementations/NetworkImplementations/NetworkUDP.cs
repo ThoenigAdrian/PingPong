@@ -3,27 +3,24 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace NetworkLibrary.NetworkImplementations
+namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
     class NetworkUDP: DataNetwork
     {
-        DoubleBuffer<byte[]> ServerData { get; set; }
+        DoubleBuffer<byte[]> ReceivedData { get; set; }
         Thread ReceiveThread;
+        IPEndPoint NetworkEndPoint { get; set; }
 
-        public NetworkUDP(IPEndPoint serverIP)
-            : base(serverIP)
+        public NetworkUDP(IPEndPoint target) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
-            ServerData = new DoubleBuffer<byte[]>();
-        }
+            NetworkEndPoint = target;
 
-        protected override Socket InitializeSocket()
-        {
-            return new Socket(NetworkFamily, SocketType.Dgram, ProtocolType.Udp);
+            ReceivedData = new DoubleBuffer<byte[]>();
         }
 
         public override byte[] Receive()
         {
-            return ServerData.Read();
+            return ReceivedData.Read();
         }
 
         public override void Send(byte[] data)
@@ -31,8 +28,10 @@ namespace NetworkLibrary.NetworkImplementations
             ConnectionSocket.Send(data);
         }
 
-        protected override void PostConnectActions()
+        protected override void NetworkSpecificInitializing()
         {
+            ConnectionSocket.Connect(NetworkEndPoint);
+
             ReceiveThread = new Thread(StartReceiveLoop);
             ReceiveThread.Start();
         }
@@ -52,8 +51,13 @@ namespace NetworkLibrary.NetworkImplementations
                     return;
                 }
                 
-                ServerData.Write(data);
+                ReceivedData.Write(data);
             }
+        }
+
+        protected override void WaitForDisconnect()
+        {
+            ReceiveThread.Join();
         }
 
     }
