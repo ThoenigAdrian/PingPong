@@ -5,17 +5,17 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
     public class TCPClientConnection : TCPConnection
     {
-        IPEndPoint NetworkEndPoint { get; set; }
+        IPEndPoint ConnectionEndPoint { get; set; }
 
         public TCPClientConnection(IPEndPoint target)
             : base(new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
         {
-            NetworkEndPoint = target;
+            ConnectionEndPoint = target;
         }
 
-        protected override void NetworkSpecificInitializing()
+        protected override void ConnectionSpecificInitializing()
         {
-            ConnectionSocket.Connect(NetworkEndPoint);
+            ConnectionSocket.Connect(ConnectionEndPoint);
         }
     }
 

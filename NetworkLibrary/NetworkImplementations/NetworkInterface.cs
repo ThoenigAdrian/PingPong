@@ -2,26 +2,25 @@ using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
-using System.Net.Sockets;
 
 namespace NetworkLibrary.ConnectionImplementations
-{ 
-    public abstract class ConnectionInterface
+{
+    public abstract class NetworkInterface
     {
-        NetworkTCP TCPNetwork;
-        NetworkUDP UDPNetwork;
+        TCPConnection TCPNetwork;
+        UDPConnection UDPNetwork;
 
         protected PackageAdapterInterface UDPInAdapter;
         protected PackageAdapterInterface UDPOutAdapter;
         protected PackageAdapterInterface TCPInAdapter;
         protected PackageAdapterInterface TCPOutAdapter;
 
-        protected ConnectionInterface(NetworkTCP tcpNetwork, NetworkUDP udpNetwork , LogWriter logger)
+        protected NetworkInterface(TCPConnection tcpConnection, UDPConnection udpConnection, LogWriter logger)
         {
-            TCPNetwork = tcpNetwork;
+            TCPNetwork = tcpConnection;
             TCPNetwork.Logger = logger;
 
-            UDPNetwork = udpNetwork;
+            UDPNetwork = udpConnection;
             UDPNetwork.Logger = logger;
         }
 
