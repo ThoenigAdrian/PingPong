@@ -13,15 +13,15 @@ namespace PingPongClient.VisualizeLayer
         ContentManager Content { get; set; }
         GraphicsDevice Graphics { get { return GraphicManager.GraphicsDevice; } }
 
-        Vector2 DrawingOffset;
-
         Texture2D FieldTexture;
         Texture2D BallTexture;
         Texture2D PlayerTexture;
 
+        DrawingOffsetTranslation DrawingTranslation;
+
         public XNAGameVisualizer(GameStructure structure) : base(structure)
         {
-
+            DrawingTranslation = new DrawingOffsetTranslation();
         }
 
         public override void Initialize(Game game)
@@ -29,8 +29,6 @@ namespace PingPongClient.VisualizeLayer
             GraphicManager = new GraphicsDeviceManager(game);
             Content = new ContentManager(game.Services);
             Content.RootDirectory = "Content";
-
-            DrawingOffset = new Vector2(0, 0);
         }
 
         public override void LoadContent()
@@ -53,10 +51,13 @@ namespace PingPongClient.VisualizeLayer
             if (GraphicManager == null)
                 return;
 
+            DrawingTranslation.Scaling = 1.3F;
+
             int screenHeight = GraphicManager.PreferredBackBufferHeight;
             int screenWidth = GraphicManager.PreferredBackBufferWidth;
-            DrawingOffset.X = screenWidth / 2 - FieldSize.X / 2;
-            DrawingOffset.Y = screenHeight / 2 - FieldSize.Y / 2;
+            DrawingTranslation.DrawingOffset = new Vector2(
+                screenWidth / 2 - DrawingTranslation.GetAbsoluteSize(FieldSize.X / 2), 
+                screenHeight / 2 - DrawingTranslation.GetAbsoluteSize(FieldSize.Y / 2));
         }
 
         protected override void DrawBegin()
@@ -67,43 +68,39 @@ namespace PingPongClient.VisualizeLayer
 
         protected override void DrawBall()
         {
-            int BallPosX = (int)GetAbsoluteX(Ball.PosX - Ball.Radius);
-            int BallPosY = (int)GetAbsoluteY(Ball.PosY - Ball.Radius);
+            int BallPosX = (int)DrawingTranslation.GetAbsoluteX(Ball.PosX - Ball.Radius);
+            int BallPosY = (int)DrawingTranslation.GetAbsoluteY(Ball.PosY - Ball.Radius);
+            int BallRadius = (int)DrawingTranslation.GetAbsoluteSize(Ball.Radius);
 
-            SpriteBatchMain.Draw(BallTexture, new Rectangle(BallPosX, BallPosY, Ball.Radius * 2, Ball.Radius * 2), Color.Black);
+            SpriteBatchMain.Draw(BallTexture, new Rectangle(BallPosX, BallPosY, BallRadius * 2, BallRadius * 2), Color.Black);
         }
 
         protected override void DrawBorders()
         {
-            SpriteBatchMain.Draw(FieldTexture, new Rectangle((int)GetAbsoluteX(0), (int)GetAbsoluteY(0), (int)FieldSize.X, (int)FieldSize.Y), Color.White);
+            SpriteBatchMain.Draw(
+                FieldTexture, 
+                new Rectangle(
+                    (int)DrawingTranslation.GetAbsoluteX(0), 
+                    (int)DrawingTranslation.GetAbsoluteY(0), 
+                    (int)DrawingTranslation.GetAbsoluteSize(FieldSize.X), 
+                    (int)DrawingTranslation.GetAbsoluteSize(FieldSize.Y)), 
+                Color.White);
         }
 
         protected override void DrawPlayer(PlayerBar player)
         {
-            int playerPosX = (int)GetAbsoluteX(player.PosX);
-            int playerPosY = (int)GetAbsoluteY(player.PosY);
+            int playerPosX = (int)DrawingTranslation.GetAbsoluteX(player.PosX);
+            int playerPosY = (int)DrawingTranslation.GetAbsoluteY(player.PosY);
+            int playerWidth = (int)DrawingTranslation.GetAbsoluteSize(player.Width);
+            int playerHeight = (int)DrawingTranslation.GetAbsoluteSize(player.Height);
 
-            SpriteBatchMain.Draw(PlayerTexture, new Rectangle(playerPosX, playerPosY, (int)player.Width, (int)player.Height), Color.Black);
+
+            SpriteBatchMain.Draw(PlayerTexture, new Rectangle(playerPosX, playerPosY, playerWidth, playerHeight), Color.Black);
         }
 
         protected override void DrawEnd()
         {
             SpriteBatchMain.End();
-        }
-
-        Vector2 GetAbsolutePoint(Vector2 relativePoint)
-        {
-            return new Vector2(DrawingOffset.X + relativePoint.X, DrawingOffset.Y + relativePoint.Y);
-        }
-
-        float GetAbsoluteX(float relativeX)
-        {
-            return DrawingOffset.X + relativeX;
-        }
-
-        float GetAbsoluteY(float relativeY)
-        {
-            return DrawingOffset.Y + relativeY;
         }
     }
 }
