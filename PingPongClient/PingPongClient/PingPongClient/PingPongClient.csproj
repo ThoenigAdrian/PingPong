@@ -18,6 +18,7 @@
     <XnaOutputType>Game</XnaOutputType>
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -30,7 +31,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -79,6 +79,7 @@
     <Compile Include="ControlLayer\Control.cs" />
     <Compile Include="ControlLayer\Interpolation.cs" />
     <Compile Include="InputLayer\InputInterface.cs" />
+    <Compile Include="InputLayer\InputTranslation\KeyboardControllTranslation.cs" />
     <Compile Include="InputLayer\KeyboardInput.cs" />
     <Compile Include="NetworkLayer\ClientNetwork.cs" />
     <Compile Include="Program.cs" />

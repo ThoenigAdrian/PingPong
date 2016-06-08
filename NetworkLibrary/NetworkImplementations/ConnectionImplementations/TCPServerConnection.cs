@@ -9,7 +9,7 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 
         }
 
-        protected override void ConnectionSpecificInitializing()
+        public override void Initialize()
         {
             return;
         }

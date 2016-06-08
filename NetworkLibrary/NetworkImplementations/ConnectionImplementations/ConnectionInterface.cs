@@ -38,8 +38,6 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 
             ConnectionSocket = socket;
 
-            ConnectionSpecificInitializing();
-
             if (!Connected)
                 Log("Initializing failed.");
         }
@@ -63,7 +61,7 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 
         abstract public void Send(byte[] data);
 
-        abstract protected void ConnectionSpecificInitializing();
+        abstract public void Initialize();
 
         protected abstract void WaitForDisconnect();
 

@@ -13,7 +13,7 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
             ConnectionEndPoint = target;
         }
 
-        protected override void ConnectionSpecificInitializing()
+        public override void Initialize()
         {
             ConnectionSocket.Connect(ConnectionEndPoint);
         }

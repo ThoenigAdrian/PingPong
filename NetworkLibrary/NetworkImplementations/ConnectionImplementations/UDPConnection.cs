@@ -28,7 +28,7 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
             ConnectionSocket.Send(data);
         }
 
-        protected override void ConnectionSpecificInitializing()
+        public override void Initialize()
         {
             ConnectionSocket.Connect(ConnectionEndPoint);
 
