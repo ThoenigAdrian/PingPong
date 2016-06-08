@@ -16,8 +16,7 @@ namespace NetworkLibrary.PackageAdapters
             if (GetPackageType(networkDataString) == PackageType.ClientControl)
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<ClientControlPackage>(networkDataString);
             else
-                throw new InvalidPackageException();
-        
+                throw new InvalidPackageException();        
         }
 
         public byte[] CreateNetworkDataFromPackage(object package)
