@@ -40,7 +40,6 @@ namespace PingPongClient
 
             IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
             Connection = new ClientConnection(server);
-            Connection.Connect();
         }
 
         protected override void Initialize()

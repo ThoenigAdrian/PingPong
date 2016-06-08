@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
-    abstract class DataNetwork
+    public abstract class DataNetwork
     {
         public LogWriter Logger { get; set; }
 

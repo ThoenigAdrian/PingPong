@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
-    class NetworkUDP: DataNetwork
+    public class NetworkUDP: DataNetwork
     {
         DoubleBuffer<byte[]> ReceivedData { get; set; }
         Thread ReceiveThread;

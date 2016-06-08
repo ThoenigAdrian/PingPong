@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
-    class NetworkTCPClient : NetworkTCP
+    public class NetworkTCPClient : NetworkTCP
     {
         IPEndPoint NetworkEndPoint { get; set; }
 

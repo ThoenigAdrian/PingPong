@@ -1,21 +1,30 @@
-using NetworkLibrary.NetworkImplementations;
+
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.Utility;
 using System.Net;
+using NetworkLibrary.ConnectionImplementations;
+using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
 
 namespace PingPongClient.NetworkLayer
 {
     class ClientConnection : ConnectionInterface
     {
         public ClientConnection(IPEndPoint server)
-            : base(server, null)
+            : base (
+                  new NetworkTCPClient(server),
+                  new NetworkUDP(server),
+                  null)
+
         {
             Initialize();
         }
 
         public ClientConnection(IPEndPoint server, LogWriter logger)
-            : base(server, logger)
+            : base (
+                  new NetworkTCPClient(server),
+                  new NetworkUDP(server),
+                  logger)
         {
             Initialize();
         }

@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
-    abstract class NetworkTCP : DataNetwork
+    public abstract class NetworkTCP : DataNetwork
     {
         public NetworkTCP(Socket socket) 
             : base(socket)

@@ -2,7 +2,7 @@
 
 namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
-    class NetworkTCPServer : NetworkTCP
+    public class NetworkTCPServer : NetworkTCP
     {
         public NetworkTCPServer(Socket acceptedSocket) : base(acceptedSocket)
         {

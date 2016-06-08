@@ -2,11 +2,10 @@ using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
-using System.Net;
 using System.Net.Sockets;
 
-namespace NetworkLibrary.NetworkImplementations
-{
+namespace NetworkLibrary.ConnectionImplementations
+{ 
     public abstract class ConnectionInterface
     {
         NetworkTCP TCPNetwork;
@@ -25,8 +24,6 @@ namespace NetworkLibrary.NetworkImplementations
             UDPNetwork = udpNetwork;
             UDPNetwork.Logger = logger;
         }
-
-        protected abstract NetworkTCP CreateTCPNetwork(Socket tcpSocket);
 
         public void Disconnect()
         {
