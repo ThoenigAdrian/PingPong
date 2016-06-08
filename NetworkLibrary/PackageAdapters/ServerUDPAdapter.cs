@@ -29,7 +29,7 @@ namespace NetworkLibrary.PackageAdapters
             Array.Copy(buffer, 0, data, 0, buffer.Length);
 
             buffer = BitConverter.GetBytes(serverPackage.BallPosY);
-            Array.Copy(buffer, 0, data, 0, buffer.Length);
+            Array.Copy(buffer, 0, data, 4, buffer.Length);
 
             return data;
         }
