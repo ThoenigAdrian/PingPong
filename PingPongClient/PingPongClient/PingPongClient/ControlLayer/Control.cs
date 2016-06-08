@@ -16,7 +16,7 @@ namespace PingPongClient
     {
         GameStructure Structure { get; set; }
 
-        ClientConnection Connection { get; set; }
+        ClientNetwork Connection { get; set; }
         GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
         Interpolation Interpolation;
@@ -42,7 +42,7 @@ namespace PingPongClient
 
             try
             {
-                Connection = new ClientConnection(server);
+                Connection = new ClientNetwork(server);
             }
             catch
             {

@@ -80,7 +80,7 @@
     <Compile Include="ControlLayer\Interpolation.cs" />
     <Compile Include="InputLayer\InputInterface.cs" />
     <Compile Include="InputLayer\KeyboardInput.cs" />
-    <Compile Include="NetworkLayer\ClientConnection.cs" />
+    <Compile Include="NetworkLayer\ClientNetwork.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />

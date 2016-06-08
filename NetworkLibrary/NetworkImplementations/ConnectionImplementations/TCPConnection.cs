@@ -3,9 +3,9 @@ using System.Net.Sockets;
 
 namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 {
-    public abstract class NetworkTCP : DataNetwork
+    public abstract class TCPConnection : ConnectionInterface
     {
-        public NetworkTCP(Socket socket) 
+        public TCPConnection(Socket socket) 
             : base(socket)
         {
         }

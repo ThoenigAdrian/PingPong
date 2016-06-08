@@ -8,22 +8,22 @@ using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
 
 namespace PingPongClient.NetworkLayer
 {
-    class ClientConnection : ConnectionInterface
+    class ClientNetwork : NetworkInterface
     {
-        public ClientConnection(IPEndPoint server)
+        public ClientNetwork(IPEndPoint server)
             : base (
-                  new NetworkTCPClient(server),
-                  new NetworkUDP(server),
+                  new TCPClientConnection(server),
+                  new UDPConnection(server),
                   null)
 
         {
             Initialize();
         }
 
-        public ClientConnection(IPEndPoint server, LogWriter logger)
+        public ClientNetwork(IPEndPoint server, LogWriter logger)
             : base (
-                  new NetworkTCPClient(server),
-                  new NetworkUDP(server),
+                  new TCPClientConnection(server),
+                  new UDPConnection(server),
                   logger)
         {
             Initialize();
