@@ -3,17 +3,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
+namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
-    public class UDPConnection: DataNetwork
+    public class UDPConnection: ConnectionInterface
     {
         DoubleBuffer<byte[]> ReceivedData { get; set; }
         Thread ReceiveThread;
-        IPEndPoint NetworkEndPoint { get; set; }
+        IPEndPoint ConnectionEndPoint { get; set; }
 
         public UDPConnection(IPEndPoint target) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
-            NetworkEndPoint = target;
+            ConnectionEndPoint = target;
 
             ReceivedData = new DoubleBuffer<byte[]>();
         }
@@ -28,9 +28,9 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
             ConnectionSocket.Send(data);
         }
 
-        protected override void NetworkSpecificInitializing()
+        public override void Initialize()
         {
-            ConnectionSocket.Connect(NetworkEndPoint);
+            ConnectionSocket.Connect(ConnectionEndPoint);
 
             ReceiveThread = new Thread(StartReceiveLoop);
             ReceiveThread.Start();

@@ -1,14 +1,20 @@
 ﻿using NetworkLibrary.DataStructs;
 using Newtonsoft;
+using System;
 
 namespace NetworkLibrary.PackageAdapters
 {
-    public class PackageAdapter
+    public abstract class PackageAdapterInterface
     {
-        public byte[] CreatePackage(PackageType type, byte[] data)
+        public abstract PackageInterface ByteToPackage(byte[] data);
+        public abstract byte[] PackageToByte(PackageInterface package);
+
+        protected PackageType GetPackageType(string json)
         {
-            Newton
+            string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
+            return (PackageType) Enum.Parse(typeof(PackageType), PackageType);
         }
-        public byte[] ExtractPackage(byte[] data);
+    
     }
+
 }

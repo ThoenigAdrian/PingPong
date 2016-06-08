@@ -1,11 +1,9 @@
 ﻿using NetworkLibrary.Utility;
-using System;
-using System.Net;
 using System.Net.Sockets;
 
-namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
+namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
-    public abstract class DataNetwork
+    public abstract class ConnectionInterface
     {
         public LogWriter Logger { get; set; }
 
@@ -15,32 +13,30 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
         
         protected bool AbortReceive { get; set; }
 
-        private DataNetwork()
+        private ConnectionInterface()
         {
         }
 
-        public DataNetwork(Socket connectionSocket)
+        public ConnectionInterface(Socket connectionSocket)
         {
             Logger = null;
 
-            InitializeNetwork(connectionSocket);
+            InitializeConnection(connectionSocket);
         }
 
-        public void RestartNetwork(Socket socket)
+        public void RestartConnection(Socket socket)
         {
             Disconnect();
             WaitForDisconnect();
 
-            InitializeNetwork(socket);
+            InitializeConnection(socket);
         }
 
-        private void InitializeNetwork(Socket socket)
+        private void InitializeConnection(Socket socket)
         {
             AbortReceive = false;
 
             ConnectionSocket = socket;
-
-            NetworkSpecificInitializing();
 
             if (!Connected)
                 Log("Initializing failed.");
@@ -65,7 +61,7 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 
         abstract public void Send(byte[] data);
 
-        abstract protected void NetworkSpecificInitializing();
+        abstract public void Initialize();
 
         protected abstract void WaitForDisconnect();
 

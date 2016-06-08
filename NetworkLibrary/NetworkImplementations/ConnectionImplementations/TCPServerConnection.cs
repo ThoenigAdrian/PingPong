@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
+namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class TCPServerConnection : TCPConnection
     {
@@ -9,7 +9,7 @@ namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
 
         }
 
-        protected override void NetworkSpecificInitializing()
+        public override void Initialize()
         {
             return;
         }

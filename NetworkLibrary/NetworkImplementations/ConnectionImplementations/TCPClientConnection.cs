@@ -1,21 +1,21 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace NetworkLibrary.ConnectionImplementations.NetworkImplementations
+namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class TCPClientConnection : TCPConnection
     {
-        IPEndPoint NetworkEndPoint { get; set; }
+        IPEndPoint ConnectionEndPoint { get; set; }
 
         public TCPClientConnection(IPEndPoint target)
             : base(new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
         {
-            NetworkEndPoint = target;
+            ConnectionEndPoint = target;
         }
 
-        protected override void NetworkSpecificInitializing()
+        public override void Initialize()
         {
-            ConnectionSocket.Connect(NetworkEndPoint);
+            ConnectionSocket.Connect(ConnectionEndPoint);
         }
     }
 
