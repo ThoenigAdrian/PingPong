@@ -9,6 +9,6 @@ namespace NetworkLibrary.DataStructs
             get { return PackageType.ClientControl; }
         }
 
-        public ClientControls Input;
+        public ClientControls ControlInput;
     }
 }

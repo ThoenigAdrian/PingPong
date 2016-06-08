@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructs\PlayerMovementPackage.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\TCPClientConnection.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\TCPServerConnection.cs" />
     <Compile Include="DataStructs\ClientControlPackage.cs" />
