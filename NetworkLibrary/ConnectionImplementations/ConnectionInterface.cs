@@ -1,3 +1,4 @@
+using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
@@ -17,17 +18,11 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected ConnectionInterface(IPEndPoint server, LogWriter logger)
         {
-            TCPNetwork = new NetworkTCP(server);
+            TCPNetwork = new NetworkTCPClient(server);
             TCPNetwork.Logger = logger;
 
             UDPNetwork = new NetworkUDP(server);
             UDPNetwork.Logger = logger;
-        }
-
-        public void Connect()
-        {
-            TCPNetwork.Connect();
-            UDPNetwork.Connect();
         }
 
         public void Disconnect()
