@@ -60,6 +60,10 @@
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="InputFunctionality, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\InputFunctionality\InputFunctionality.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -96,10 +100,6 @@
     <ProjectReference Include="..\..\..\..\..\..\..\..\Projects\PingPong\NetworkLibrary\NetworkLibrary.csproj">
       <Project>{aa01e32b-ab68-49a5-ad9e-07e955d3b357}</Project>
       <Name>NetworkLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\Users\Dave\Documents\Visual Studio 2015\Projects\InputFunctionality\InputFunctionality\InputFunctionality.csproj">
-      <Project>{015062df-869a-4d9c-aaa4-2139addba7ed}</Project>
-      <Name>InputFunctionality</Name>
     </ProjectReference>
     <ProjectReference Include="..\PingPongClientContent\PingPongClientContent.contentproj">
       <Name>PingPongClientContent</Name>
