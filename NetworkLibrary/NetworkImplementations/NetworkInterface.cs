@@ -5,7 +5,7 @@ using NetworkLibrary.Utility;
 
 namespace NetworkLibrary.NetworkImplementations
 {
-    public abstract class NetworkInterface
+    public abstract class ConnectionInterface
     {
         TCPConnection TCPNetwork;
         UDPConnection UDPNetwork;
@@ -15,7 +15,9 @@ namespace NetworkLibrary.NetworkImplementations
         protected PackageAdapterInterface TCPInAdapter;
         protected PackageAdapterInterface TCPOutAdapter;
 
-        protected NetworkInterface(TCPConnection tcpConnection, UDPConnection udpConnection, LogWriter logger)
+
+        protected ConnectionInterface(TCPConnection tcpConnection, UDPConnection udpConnection , LogWriter logger)
+
         {
             TCPNetwork = tcpConnection;
             TCPNetwork.Logger = logger;
