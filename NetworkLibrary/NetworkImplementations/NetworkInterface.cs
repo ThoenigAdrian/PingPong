@@ -22,6 +22,9 @@ namespace NetworkLibrary.ConnectionImplementations
 
             UDPNetwork = udpConnection;
             UDPNetwork.Logger = logger;
+
+            TCPNetwork.Initialize();
+            UDPNetwork.Initialize();
         }
 
         public void Disconnect()

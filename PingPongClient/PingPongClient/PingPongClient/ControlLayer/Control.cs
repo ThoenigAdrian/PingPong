@@ -16,7 +16,7 @@ namespace PingPongClient
     {
         GameStructure Structure { get; set; }
 
-        ClientNetwork Connection { get; set; }
+        ClientNetwork Network { get; set; }
         GameVisualizerInterface Visualizer { get; set; }
         InputInterface Input = new KeyboardInput();
         Interpolation Interpolation;
@@ -42,7 +42,7 @@ namespace PingPongClient
 
             try
             {
-                Connection = new ClientNetwork(server);
+                Network = new ClientNetwork(server);
             }
             catch
             {
@@ -68,22 +68,22 @@ namespace PingPongClient
         {
             Input.Update();
 
-            if (Connection != null)
+            if (Network != null)
             {
                 if (Input.GetInput() != ClientControls.NoInput)
                 {
                     ClientControlPackage controlPackage = new ClientControlPackage();
                     controlPackage.Input = Input.GetInput();
-                    Connection.SendClientControl(controlPackage);
+                    Network.SendClientControl(controlPackage);
                 }
 
                 if (Input.GetInput() == ClientControls.Quit)
                 {
-                    Connection.Disconnect();
+                    Network.Disconnect();
                     this.Exit();
                 }
 
-                ServerDataPackage data = Connection.GetServerData();
+                ServerDataPackage data = Network.GetServerData();
 
                 if (data != null)
                     ApplyServerPositions(data);
