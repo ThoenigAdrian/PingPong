@@ -39,7 +39,15 @@ namespace PingPongClient
                 return;
 
             IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
-            Connection = new ClientConnection(server);
+
+            try
+            {
+                Connection = new ClientConnection(server);
+            }
+            catch
+            {
+                Logger.Log("Could not establish connection!");
+            }
         }
 
         protected override void Initialize()
@@ -51,7 +59,6 @@ namespace PingPongClient
 
         protected override void LoadContent()
         {
-            Visualizer.ApplyResize();
             Visualizer.LoadContent();
 
             base.LoadContent();
@@ -93,11 +100,16 @@ namespace PingPongClient
 
         protected void ApplyServerPositions(ServerDataPackage data)
         {
-            Structure.m_player1.PosX = data.Player1PosX;
-            Structure.m_player1.PosY = data.Player1PosY;
+            for (int i = 0; i < Structure.m_players.Count; i++)
+            {
+                
+            }
 
-            Structure.m_player2.PosX = data.Player2PosX;
-            Structure.m_player2.PosY = data.Player2PosY;
+            Structure.m_players[0].PosX = data.Player1PosX;
+            Structure.m_players[0].PosY = data.Player1PosY;
+
+            Structure.m_players[1].PosX = data.Player2PosX;
+            Structure.m_players[1].PosY = data.Player2PosY;
 
             Structure.m_ball.PosX = data.BallPosX;
             Structure.m_ball.PosY = data.BallPosY;

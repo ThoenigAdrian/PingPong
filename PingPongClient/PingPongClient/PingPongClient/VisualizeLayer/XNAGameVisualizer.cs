@@ -15,9 +15,9 @@ namespace PingPongClient.VisualizeLayer
 
         Vector2 DrawingOffset;
 
-        Texture2D Border;
-        Texture2D Ball;
-        Texture2D Player;
+        Texture2D FieldTexture;
+        Texture2D BallTexture;
+        Texture2D PlayerTexture;
 
         public XNAGameVisualizer(GameStructure structure) : base(structure)
         {
@@ -30,24 +30,29 @@ namespace PingPongClient.VisualizeLayer
             Content = new ContentManager(game.Services);
             Content.RootDirectory = "Content";
 
-            DrawingOffset = new Vector2(100, 100);
+            DrawingOffset = new Vector2(0, 0);
         }
 
         public override void LoadContent()
         {
             SpriteBatchMain = new SpriteBatch(Graphics);
+            CreateObjectTextures();
 
-            Border = new Texture2D(Graphics, 1, 1);
-            Border.SetData(new Color[] { Color.White });
+            ApplyResize();
+        }
 
-            Ball = CreateCircleTexture(100);
-
-            Player = new Texture2D(Graphics, 1, 1);
-            Player.SetData(new Color[] { Color.White });
+        private void CreateObjectTextures()
+        {
+            FieldTexture = TextureFactory.CreateRectangeTexture(Graphics);
+            BallTexture = TextureFactory.CreateCircleTexture(100, Graphics);
+            PlayerTexture = TextureFactory.CreateRectangeTexture(Graphics);
         }
 
         public override void ApplyResize()
         {
+            if (GraphicManager == null)
+                return;
+
             int screenHeight = GraphicManager.PreferredBackBufferHeight;
             int screenWidth = GraphicManager.PreferredBackBufferWidth;
             DrawingOffset.X = screenWidth / 2 - FieldSize.X / 2;
@@ -62,23 +67,23 @@ namespace PingPongClient.VisualizeLayer
 
         protected override void DrawBall()
         {
-            int BallPosX = (int)GetAbsoluteX(BallPosition.X - BallRadius);
-            int BallPosY = (int)GetAbsoluteY(BallPosition.Y - BallRadius);
+            int BallPosX = (int)GetAbsoluteX(Ball.PosX - Ball.Radius);
+            int BallPosY = (int)GetAbsoluteY(Ball.PosY - Ball.Radius);
 
-            SpriteBatchMain.Draw(Ball, new Rectangle(BallPosX, BallPosY, BallRadius * 2, BallRadius * 2), Color.Black);
+            SpriteBatchMain.Draw(BallTexture, new Rectangle(BallPosX, BallPosY, Ball.Radius * 2, Ball.Radius * 2), Color.Black);
         }
 
         protected override void DrawBorders()
         {
-            SpriteBatchMain.Draw(Border, new Rectangle((int)GetAbsoluteX(0), (int)GetAbsoluteY(0), (int)FieldSize.X, (int)FieldSize.Y), Color.White);
+            SpriteBatchMain.Draw(FieldTexture, new Rectangle((int)GetAbsoluteX(0), (int)GetAbsoluteY(0), (int)FieldSize.X, (int)FieldSize.Y), Color.White);
         }
 
-        protected override void DrawPlayer(PlayerSlot player)
+        protected override void DrawPlayer(PlayerBar player)
         {
-            int PlayerPosX = (int)GetAbsoluteX(GetPlayerPosition(player).X);
-            int PlayerPosY = (int)GetAbsoluteY(GetPlayerPosition(player).Y);
+            int playerPosX = (int)GetAbsoluteX(player.PosX);
+            int playerPosY = (int)GetAbsoluteY(player.PosY);
 
-            SpriteBatchMain.Draw(Player, new Rectangle(PlayerPosX, PlayerPosY, (int)GetPlayerBorder(player).X, (int)GetPlayerBorder(player).Y), Color.Black);
+            SpriteBatchMain.Draw(PlayerTexture, new Rectangle(playerPosX, playerPosY, (int)player.Width, (int)player.Height), Color.Black);
         }
 
         protected override void DrawEnd()
@@ -99,35 +104,6 @@ namespace PingPongClient.VisualizeLayer
         float GetAbsoluteY(float relativeY)
         {
             return DrawingOffset.Y + relativeY;
-        }
-
-        Texture2D CreateCircleTexture(int radius)
-        {
-            Texture2D texture = new Texture2D(Graphics, radius, radius);
-            Color[] colorData = new Color[radius * radius];
-
-            float diam = radius / 2f;
-            float diamsq = diam * diam;
-
-            for (int x = 0; x < radius; x++)
-            {
-                for (int y = 0; y < radius; y++)
-                {
-                    int index = x * radius + y;
-                    Vector2 pos = new Vector2(x - diam, y - diam);
-                    if (pos.LengthSquared() <= diamsq)
-                    {
-                        colorData[index] = Color.White;
-                    }
-                    else
-                    {
-                        colorData[index] = Color.Transparent;
-                    }
-                }
-            }
-
-            texture.SetData(colorData);
-            return texture;
         }
     }
 }
