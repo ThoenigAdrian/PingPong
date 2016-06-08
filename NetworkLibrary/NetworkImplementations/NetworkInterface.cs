@@ -5,10 +5,10 @@ using NetworkLibrary.Utility;
 
 namespace NetworkLibrary.NetworkImplementations
 {
-    public abstract class ConnectionInterface
+    public abstract class NetworkInterface
     {
-        TCPConnection TCPNetwork;
-        UDPConnection UDPNetwork;
+        TCPConnection TcpConnection { get; set; }
+        UDPConnection UdpConnection { get; set; }
 
         protected PackageAdapterInterface UDPInAdapter;
         protected PackageAdapterInterface UDPOutAdapter;
@@ -16,59 +16,58 @@ namespace NetworkLibrary.NetworkImplementations
         protected PackageAdapterInterface TCPOutAdapter;
 
 
-        protected ConnectionInterface(TCPConnection tcpConnection, UDPConnection udpConnection , LogWriter logger)
-
+        protected NetworkInterface(TCPConnection tcpConnection, UDPConnection udpConnection , LogWriter logger)
         {
-            TCPNetwork = tcpConnection;
-            TCPNetwork.Logger = logger;
+            TcpConnection = tcpConnection;
+            TcpConnection.Logger = logger;
 
-            UDPNetwork = udpConnection;
-            UDPNetwork.Logger = logger;
+            UdpConnection = udpConnection;
+            UdpConnection.Logger = logger;
 
-            TCPNetwork.Initialize();
-            UDPNetwork.Initialize();
+            TcpConnection.Initialize();
+            UdpConnection.Initialize();
         }
 
         public void Disconnect()
         {
-            TCPNetwork.Disconnect();
-            UDPNetwork.Disconnect();
+            TcpConnection.Disconnect();
+            UdpConnection.Disconnect();
         }
 
-        protected PackageInterface GetServerDataTCP()
+        protected PackageInterface GetDataTCP()
         {
             if (TCPInAdapter == null)
                 return null;
 
-            byte[] data = TCPNetwork.Receive();
+            byte[] data = TcpConnection.Receive();
             return TCPInAdapter.ByteToPackage(data);
         }
 
-        protected PackageInterface GetServerDataUDP()
+        protected PackageInterface GetDataUDP()
         {
             if (UDPInAdapter == null)
                 return null;
 
-            byte[] data = UDPNetwork.Receive();
+            byte[] data = UdpConnection.Receive();
             return UDPInAdapter.ByteToPackage(data);
         }
 
-        protected void SendClientDataTCP(PackageInterface package)
+        protected void SendDataTCP(PackageInterface package)
         {
             if (TCPOutAdapter == null)
                 return;
 
             byte[] data = TCPOutAdapter.PackageToByte(package);
-            TCPNetwork.Send(data);
+            TcpConnection.Send(data);
         }
 
-        protected void SendClientDataUDP(PackageInterface package)
+        protected void SendDataUDP(PackageInterface package)
         {
             if (UDPOutAdapter == null)
                 return;
 
             byte[] data = UDPOutAdapter.PackageToByte(package);
-            UDPNetwork.Send(data);
+            UdpConnection.Send(data);
         }
     }
 }

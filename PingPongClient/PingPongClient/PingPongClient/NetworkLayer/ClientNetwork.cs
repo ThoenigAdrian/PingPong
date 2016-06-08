@@ -40,12 +40,12 @@ namespace PingPongClient.NetworkLayer
 
         public void SendClientControl(ClientControlPackage package)
         {
-            SendClientDataTCP(package);
+            SendDataTCP(package);
         }
 
         public ServerDataPackage GetServerData()
         {
-            return GetServerDataUDP() as ServerDataPackage;
+            return GetDataUDP() as ServerDataPackage;
         }
     }
 }
