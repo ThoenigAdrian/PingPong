@@ -47,7 +47,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 }
                 catch
                 {
-                    Logger.Log("Receive loop threw exception");
+                    Log("Receive loop threw exception");
                     return;
                 }
                 
