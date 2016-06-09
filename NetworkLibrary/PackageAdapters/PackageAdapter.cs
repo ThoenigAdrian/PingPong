@@ -1,5 +1,5 @@
 ﻿using NetworkLibrary.DataStructs;
-using Newtonsoft;
+using Newtonsoft.Json;
 using System;
 
 namespace NetworkLibrary.PackageAdapters
@@ -15,17 +15,24 @@ namespace NetworkLibrary.PackageAdapters
 
             string networkDataString = ConvertNetworkDataToString(data);
 
-            if (GetPackageType(networkDataString) == PackageType.ServerData)
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<ServerDataPackage>(networkDataString);
-            if (GetPackageType(networkDataString) == PackageType.ClientControl)
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<ClientControlPackage>(networkDataString);
-            else
-                throw new InvalidPackageException();        
+            PackageType type = GetPackageType(networkDataString);
+
+            switch (type)
+            {
+                case PackageType.ServerData:
+                    return JsonConvert.DeserializeObject<ServerDataPackage>(networkDataString);
+                case PackageType.ClientControl:
+                    return JsonConvert.DeserializeObject<ClientControlPackage>(networkDataString);
+                case PackageType.ClientAddRequest:
+                    return JsonConvert.DeserializeObject<ClientAddPlayerRequest>(networkDataString);
+            }
+
+            return null;   
         }
 
         public byte[] CreateNetworkDataFromPackage(PackageInterface package)
         {
-            string networkDataString = Newtonsoft.Json.JsonConvert.SerializeObject(package);
+            string networkDataString = JsonConvert.SerializeObject(package);
             return System.Text.Encoding.Default.GetBytes(networkDataString);
         }
 
