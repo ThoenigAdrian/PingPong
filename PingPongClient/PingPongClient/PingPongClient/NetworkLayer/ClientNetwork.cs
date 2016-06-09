@@ -5,6 +5,7 @@ using NetworkLibrary.Utility;
 using System.Net;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.NetworkImplementations;
+using System;
 
 namespace PingPongClient.NetworkLayer
 {
@@ -15,9 +16,7 @@ namespace PingPongClient.NetworkLayer
                   new TCPClientConnection(server),
                   new UDPConnection(server),
                   null)
-
         {
-            Initialize();
         }
 
         public ClientNetwork(IPEndPoint server, LogWriter logger)
@@ -26,12 +25,11 @@ namespace PingPongClient.NetworkLayer
                   new UDPConnection(server),
                   logger)
         {
-            Initialize();
         }
 
-        protected void Initialize()
+        protected override PackageAdapter InitializeAdapter()
         {
-            m_packageAdapter = new PackageAdapter();
+            return new PackageAdapter();
         }
 
         public void SendClientControl(ClientControlPackage package)

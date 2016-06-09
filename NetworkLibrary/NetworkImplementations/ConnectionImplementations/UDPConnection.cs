@@ -9,9 +9,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     {
         DoubleBuffer<byte[]> ReceivedData { get; set; }
         Thread ReceiveThread;
-        IPEndPoint ConnectionEndPoint { get; set; }
+        EndPoint ConnectionEndPoint { get; set; }
 
-        public UDPConnection(IPEndPoint target) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+        public UDPConnection(EndPoint target) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
             ConnectionEndPoint = target;
 
