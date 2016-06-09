@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using NetworkLibrary;
+﻿using NetworkLibrary;
 using System.Net.Sockets;
 using System.Net;
 using NetworkLibrary.Utility;
 using System.Threading;
-using NetworkLibrary.DataStructs;
 using GameLogicLibrary;
 using NetworkLibrary.PackageAdapters;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongServer
 {
