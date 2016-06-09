@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\ClientSourcePackages\ClientAddPlayerRequest.cs" />
-    <Compile Include="Packages\ClientSourcePackages\ClientRegisteredPackage.cs" />
     <Compile Include="Packages\ClientSourcePackages\PlayerMovementPackage.cs" />
     <Compile Include="Packages\ClientSourcePackages\ClientControlPackage.cs" />
     <Compile Include="Packages\PackageInterface.cs" />
