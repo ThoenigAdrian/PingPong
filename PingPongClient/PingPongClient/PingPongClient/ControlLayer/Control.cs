@@ -56,7 +56,7 @@ namespace PingPongClient
             try
             {
                 connectionSocket.Connect(server);
-                Network = new ClientNetwork(connectionSocket);
+                Network = new ClientNetwork(connectionSocket, Logger);
             }
             catch
             {

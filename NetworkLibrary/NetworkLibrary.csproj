@@ -43,16 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataStructs\ClientAddPlayerRequest.cs" />
-    <Compile Include="DataStructs\PlayerMovementPackage.cs" />
-    <Compile Include="DataStructs\ClientControlPackage.cs" />
-    <Compile Include="DataStructs\PackageInterface.cs" />
+    <Compile Include="Packages\ClientSourcePackages\ClientAddPlayerRequest.cs" />
+    <Compile Include="Packages\ClientSourcePackages\PlayerMovementPackage.cs" />
+    <Compile Include="Packages\ClientSourcePackages\ClientControlPackage.cs" />
+    <Compile Include="Packages\PackageInterface.cs" />
+    <Compile Include="Packages\ClientSourcePackages\RegisteredClientPackage.cs" />
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="NetworkImplementations\NetworkInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\ConnectionInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\TCPConnection.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\UDPConnection.cs" />
-    <Compile Include="DataStructs\ServerDataPackage.cs" />
+    <Compile Include="Packages\ServerSourcePackages\ServerDataPackage.cs" />
     <Compile Include="NetworkConstants.cs" />
     <Compile Include="PackageAdapters\PackageAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -64,6 +65,7 @@
       <Name>GameLogicLibrary</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
