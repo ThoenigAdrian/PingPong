@@ -1,9 +1,9 @@
 
 using NetworkLibrary.PackageAdapters;
-using NetworkLibrary.DataStructs;
 using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
 using System.Net.Sockets;
+using NetworkLibrary.Packages;
 
 namespace PingPongClient.NetworkLayer
 {

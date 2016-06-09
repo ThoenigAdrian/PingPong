@@ -5,7 +5,6 @@ using PingPongClient.NetworkLayer;
 using NetworkLibrary.Utility;
 using NetworkLibrary;
 using GameLogicLibrary;
-using NetworkLibrary.DataStructs;
 using PingPongClient.VisualizeLayer;
 using PingPongClient.ControlLayer;
 using GameLogicLibrary.GameObjects;
@@ -13,6 +12,7 @@ using PingPongClient.InputLayer.InputTranslation;
 using System.Collections.Generic;
 using System;
 using System.Net.Sockets;
+using NetworkLibrary.Packages;
 
 namespace PingPongClient
 {
@@ -56,7 +56,7 @@ namespace PingPongClient
             try
             {
                 connectionSocket.Connect(server);
-                Network = new ClientNetwork(connectionSocket, Logger);
+                Network = new ClientNetwork(connectionSocket);
             }
             catch
             {
