@@ -1,6 +1,6 @@
 ﻿using GameLogicLibrary;
 
-namespace NetworkLibrary.Packages
+namespace NetworkLibrary.DataPackages
 {
     public class PlayerMovementPackage : ClientRegisteredPackage
     {

@@ -1,4 +1,4 @@
-﻿namespace NetworkLibrary.Packages
+﻿namespace NetworkLibrary.DataPackages
 {
     public abstract class PackageInterface
     {

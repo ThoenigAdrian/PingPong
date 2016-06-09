@@ -1,6 +1,6 @@
 ﻿using GameLogicLibrary;
 
-namespace NetworkLibrary.Packages
+namespace NetworkLibrary.DataPackages
 {
     class ClientAddPlayerRequest : ClientRegisteredPackage
     {
