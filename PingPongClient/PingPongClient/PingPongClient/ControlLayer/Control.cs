@@ -12,7 +12,7 @@ using PingPongClient.InputLayer.InputTranslation;
 using System.Collections.Generic;
 using System;
 using System.Net.Sockets;
-using NetworkLibrary.Packages;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongClient
 {

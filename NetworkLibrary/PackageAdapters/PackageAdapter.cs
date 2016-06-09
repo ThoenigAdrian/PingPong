@@ -1,4 +1,4 @@
-﻿using NetworkLibrary.Packages;
+﻿using NetworkLibrary.DataPackages;
 using Newtonsoft.Json;
 using System;
 

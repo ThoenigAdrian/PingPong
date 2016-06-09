@@ -3,7 +3,7 @@ using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
 using System.Net.Sockets;
-using NetworkLibrary.Packages;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongClient.NetworkLayer
 {
