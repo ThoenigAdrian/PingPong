@@ -15,58 +15,70 @@ namespace PingPongServer
     {
         static void Main(string[] args)
         {
-            List<TCPServerConnection> ClientConnections = new List<TCPServerConnection>();
-            Socket MasterListeningSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterListeningSocket.Listen(1); // Allow two Clients for now
             LogWriter Logger = new LogWriterConsole();
 
             PackageAdapter adapter = new PackageAdapter();
 
+            Socket acceptSocket = MasterListeningSocket.Accept();
+
+            ServerNetwork serverNetwork = new ServerNetwork(acceptSocket, Logger);
+
+            //Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            Logger.Log("Client connected");
+
+            SpamUDPPositionData(serverNetwork);
+        }
+
+        static void SpamUDPSocket(Socket udpSocket, PackageAdapter adapter, IPEndPoint client, LogWriter Logger)
+        {
+            ServerDataPackage package = new ServerDataPackage();
+            package.BallPosX = 50;
+            package.BallPosY = 50;
+            int turn = 1;
+
+            udpSocket.Connect(client);
 
             while (true)
             {
-                ClientConnections.Add(new TCPServerConnection(MasterListeningSocket.Accept()));
-                Logger.Log("Client connected");
-                ServerDataPackage package = new ServerDataPackage();
-                package.BallPosX = 50;
-                package.BallPosY = 50;
-                int turn = 1;
-                while (true)
-                {
 
-                    package.BallPosX += 1 * turn;
+                package.BallPosX += 1 * turn;
 
-                    if (GameInitializers.BORDER_HEIGHT - 4 <= package.BallPosX)
-                        turn *= -1;
-                    if (package.BallPosX <= 4)
-                        turn *= -1;
+                if (GameInitializers.BORDER_HEIGHT - 4 <= package.BallPosX)
+                    turn *= -1;
+                if (package.BallPosX <= 4)
+                    turn *= -1;
 
+                udpSocket.Send(adapter.CreateNetworkDataFromPackage(package));
 
+                Logger.Log("Sent package to " + client.Address + ":" + client.Port);
 
-                    ClientConnections[0].Send(adapter.CreateNetworkDataFromPackage(package));
-                    Thread.Sleep(16);
-                }
-
-                foreach (TCPServerConnection Server in ClientConnections)
-                {
-                    try
-                    {
-                        Server.Send(adapter.CreateNetworkDataFromPackage(package));
-                    }
-
-                    catch (SocketException)
-                    {
-
-                    }
-                }
-
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
             }
         }
 
+        static void SpamUDPPositionData(ServerNetwork spamNetwork)
+        {
+            ServerDataPackage package = new ServerDataPackage();
+            package.BallPosX = 50;
+            package.BallPosY = 50;
+            int turn = 1;
+            while (true)
+            {
 
+                package.BallPosX += 1 * turn;
+
+                if (GameInitializers.BORDER_HEIGHT - 4 <= package.BallPosX)
+                    turn *= -1;
+                if (package.BallPosX <= 4)
+                    turn *= -1;
+
+                spamNetwork.SendObjectPositions(package);
+                Thread.Sleep(16);
+            }
+        }
     }
-}
-
 }
