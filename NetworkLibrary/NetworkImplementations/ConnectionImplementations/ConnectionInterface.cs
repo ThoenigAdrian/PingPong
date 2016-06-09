@@ -55,7 +55,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             ConnectionSocket.Send(data);
         }
 
-        public virtual byte[] Receive()
+        public byte[] Receive()
         {
             return ReceivedData.Read();
         }
@@ -73,22 +73,31 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             AbortReceive = false;
 
-            byte[] data;
             while (!AbortReceive)
             {
                 try
                 {
-                    data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
-                    ConnectionSocket.Receive(data);
+                    ReceivedData.Write(ReceiveFromSocket());
                 }
                 catch (Exception ex)
                 {
                     Log("Receive loop threw exception: " + ex.Message);
                     return;
                 }
-
-                ReceivedData.Write(data);
             }
+        }
+
+        protected virtual byte[] ReceiveFromSocket()
+        {
+            byte[] data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
+            int size = ConnectionSocket.Receive(data);
+
+            if (data.Length == size)
+                return data;
+
+            byte[] returnData = new byte[size];
+            Array.Copy(data, 0, returnData, 0, size);
+            return returnData;
         }
 
         public void Disconnect()

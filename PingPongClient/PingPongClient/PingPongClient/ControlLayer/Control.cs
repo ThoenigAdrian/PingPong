@@ -42,6 +42,7 @@ namespace PingPongClient
         protected override void Initialize()
         {
             ControlInput.Initialize();
+            ActivePlayers.Add(new PlayerInput(new KeyboardInput(TranslationFactory.GetTranslationForPlayerIndex(0))));
             base.Initialize();
         }
 

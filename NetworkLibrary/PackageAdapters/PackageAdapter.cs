@@ -25,6 +25,8 @@ namespace NetworkLibrary.PackageAdapters
                     return JsonConvert.DeserializeObject<ClientControlPackage>(networkDataString);
                 case PackageType.ClientAddRequest:
                     return JsonConvert.DeserializeObject<ClientAddPlayerRequest>(networkDataString);
+                case PackageType.ClientPlayerMovement:
+                    return JsonConvert.DeserializeObject<PlayerMovementPackage>(networkDataString);
             }
 
             return null;   
