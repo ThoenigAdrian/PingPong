@@ -10,6 +10,9 @@ namespace NetworkLibrary.PackageAdapters
     {
         public PackageInterface CreatePackageFromNetworkData(byte[] data)
         {
+            if (data == null)
+                return null;
+
             string networkDataString = ConvertNetworkDataToString(data);
 
             if (GetPackageType(networkDataString) == PackageType.ServerData)
