@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NetworkLibrary.Utility
+﻿namespace NetworkLibrary.Utility
 {
     public class DoubleBuffer<T> : DataContainer<T>
     {

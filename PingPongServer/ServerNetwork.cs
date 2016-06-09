@@ -15,9 +15,10 @@ namespace PingPongServer
         }
 
         public ServerNetwork(Socket acceptedSocket, LogWriter logger)
-            : base(acceptedSocket, logger)
+            : base(NetworkLibrary.NetworkConstants.SERVER_PORT, logger)
         {
             Log("Built up network.");
+            AddTCPConnection(acceptedSocket);
         }
 
         protected override PackageAdapter InitializeAdapter()
@@ -27,12 +28,12 @@ namespace PingPongServer
 
         public void SendObjectPositions(ServerDataPackage serverData)
         {
-            SendDataUDP(serverData);
+            SendDataUDP(serverData, 0);
         }
 
         public PlayerMovementPackage GetPlayerMovement()
         {
-            return GetDataTCP() as PlayerMovementPackage;
+            return GetDataTCP(0) as PlayerMovementPackage;
         }
     }
 }

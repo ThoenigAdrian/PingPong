@@ -1,19 +1,24 @@
 ﻿using NetworkLibrary.Utility;
 using System.Net;
 using System.Net.Sockets;
-using System;
+using System.Collections.Generic;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class UDPConnection: ConnectionInterface
     {
-        protected IPEndPoint connectionEnd;
+        protected List<IPEndPoint> connectionEnds;
         protected IPEndPoint connectionLocal;
 
-        public UDPConnection(IPEndPoint target, IPEndPoint local) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
-            connectionEnd = target;
             connectionLocal = local;
+            connectionEnds = new List<IPEndPoint>();
+        }
+
+        public void AddEndpoint(IPEndPoint endPoint)
+        {
+            connectionEnds.Add(endPoint);
         }
 
         protected override DataContainer<byte[]> InitializeDataContainer()
@@ -21,9 +26,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             return new DoubleBuffer<byte[]>();
         }
 
-        public override void Send(byte[] data)
+        public virtual void Send(byte[] data, int session)
         {
-            ConnectionSocket.SendTo(data, connectionEnd);
+            ConnectionSocket.SendTo(data, connectionEnds[session]);
+        }
+
+        public virtual void Broadcast(byte[] data)
+        {
+            foreach (IPEndPoint endPoint in connectionEnds)
+            {
+                ConnectionSocket.SendTo(data, endPoint);
+            }
         }
 
         public override void InitializeConnection()

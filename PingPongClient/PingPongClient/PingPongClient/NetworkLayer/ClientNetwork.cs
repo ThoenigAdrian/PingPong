@@ -4,6 +4,7 @@ using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
 using System.Net.Sockets;
 using NetworkLibrary.DataPackages;
+using System.Net;
 
 namespace PingPongClient.NetworkLayer
 {
@@ -15,8 +16,9 @@ namespace PingPongClient.NetworkLayer
         }
 
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
-            : base (connectedSocket, logger)
+            : base ((connectedSocket.LocalEndPoint as IPEndPoint).Port, logger)
         {
+            AddTCPConnection(connectedSocket);
         }
 
         protected override PackageAdapter InitializeAdapter()
@@ -26,17 +28,17 @@ namespace PingPongClient.NetworkLayer
 
         public void SendClientControl(ClientControlPackage package)
         {
-            SendDataTCP(package);
+            SendDataTCP(package, 0);
         }
 
         public void SendPlayerMovement(PlayerMovementPackage package)
         {
-            SendDataTCP(package);
+            SendDataTCP(package, 0);
         }
 
         public void SendUDPTestData(PlayerMovementPackage package)
         {
-            SendDataUDP(package);
+            SendDataUDP(package, 0);
         }
 
         public ServerDataPackage GetServerData()

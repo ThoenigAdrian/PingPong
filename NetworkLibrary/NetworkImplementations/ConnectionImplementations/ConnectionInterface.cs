@@ -5,6 +5,11 @@ using System.Threading;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
+    public class ConnectionException : Exception
+    {
+
+    }
+
     public abstract class ConnectionInterface
     {
         public LogWriter Logger { get; set; }
@@ -48,11 +53,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         private void InitializeSocket(Socket socket)
         {
             ConnectionSocket = socket;
-        }
-
-        public virtual void Send(byte[] data)
-        {
-            ConnectionSocket.Send(data);
         }
 
         public byte[] Receive()
