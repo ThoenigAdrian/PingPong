@@ -45,7 +45,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             InitializeReceiving();
         }
 
-        protected void InitializeSocket(Socket socket)
+        private void InitializeSocket(Socket socket)
         {
             ConnectionSocket = socket;
         }
@@ -87,7 +87,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
         }
 
-        protected virtual byte[] ReceiveFromSocket()
+        private byte[] ReceiveFromSocket()
         {
             byte[] data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
             int size = ConnectionSocket.Receive(data);
