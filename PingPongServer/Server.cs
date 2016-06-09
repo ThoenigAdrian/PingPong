@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NetworkLibrary.ConnectionImplementations.NetworkImplementations;
+﻿using System.Collections.Generic;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary;
 using System.Net.Sockets;
 using System.Net;
 using NetworkLibrary.Utility;
 using System.Threading;
 using NetworkLibrary.DataStructs;
-using NetworkLibrary.PackageAdapters;
 using GameLogicLibrary;
-using System.Text;
-using System.Threading.Tasks;
+using NetworkLibrary.PackageAdapters;
 
 namespace PingPongServer
 {
@@ -25,7 +21,7 @@ namespace PingPongServer
             MasterListeningSocket.Listen(1); // Allow two Clients for now
             LogWriter Logger = new LogWriterConsole();
 
-            ServerUDPAdapter udp = new ServerUDPAdapter();
+            PackageAdapter adapter = new PackageAdapter();
 
 
             while (true)
@@ -48,7 +44,7 @@ namespace PingPongServer
 
 
 
-                    ClientConnections[0].Send(udp.PackageToByte(package));
+                    ClientConnections[0].Send(adapter.CreateNetworkDataFromPackage(package));
                     Thread.Sleep(16);
                 }
 
@@ -56,7 +52,7 @@ namespace PingPongServer
                 {
                     try
                     {
-                        Server.Send(udp.PackageToByte(package));
+                        Server.Send(adapter.CreateNetworkDataFromPackage(package));
                     }
 
                     catch (SocketException)
