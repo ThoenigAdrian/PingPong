@@ -2,7 +2,7 @@
 using NetworkLibrary.Utility;
 using System.Net.Sockets;
 using NetworkLibrary.PackageAdapters;
-using NetworkLibrary.DataStructs;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongServer
 {
@@ -28,6 +28,11 @@ namespace PingPongServer
         public void SendObjectPositions(ServerDataPackage serverData)
         {
             SendDataUDP(serverData);
+        }
+
+        public PlayerMovementPackage GetPlayerMovement()
+        {
+            return GetDataTCP() as PlayerMovementPackage;
         }
     }
 }
