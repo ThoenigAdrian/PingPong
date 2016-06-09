@@ -2,6 +2,8 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
+using System.Net;
+using System.Net.Sockets;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -10,26 +12,25 @@ namespace NetworkLibrary.NetworkImplementations
         TCPConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
 
+        LogWriter Logger { get; set; }
+
         protected PackageAdapter NetworkPackageAdapter { get; private set; }
 
-        protected NetworkInterface(TCPConnection tcpConnection, UDPConnection udpConnection , LogWriter logger)
+        public bool Connected { get { return TcpConnection.Connected && UdpConnection.Connected; } }
+
+        protected NetworkInterface(Socket connectedTCPSocket, LogWriter logger)
         {
-            TcpConnection = tcpConnection;
-            TcpConnection.Logger = logger;
+            Logger = logger;
 
-            UdpConnection = udpConnection;
-            UdpConnection.Logger = logger;
-        }
-
-        /// <summary>
-        /// Initializes Network so data can be sent.
-        /// </summary>
-        public void Initialize()
-        {
-            NetworkPackageAdapter = InitializeAdapter();
-
+            TcpConnection = new TCPConnection(connectedTCPSocket);
+            TcpConnection.Logger = Logger;
             TcpConnection.Initialize();
+
+            UdpConnection = new UDPConnection(connectedTCPSocket.RemoteEndPoint as IPEndPoint, connectedTCPSocket.LocalEndPoint as IPEndPoint);
+            UdpConnection.Logger = Logger;
             UdpConnection.Initialize();
+
+            NetworkPackageAdapter = InitializeAdapter();
         }
 
         protected abstract PackageAdapter InitializeAdapter();
@@ -74,6 +75,14 @@ namespace NetworkLibrary.NetworkImplementations
 
             byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
             UdpConnection.Send(data);
+        }
+
+        protected void Log(string text)
+        {
+            if (Logger == null)
+                return;
+
+            Logger.Log(text);
         }
     }
 }

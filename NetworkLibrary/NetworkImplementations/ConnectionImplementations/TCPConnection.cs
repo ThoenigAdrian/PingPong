@@ -1,8 +1,9 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
-    public abstract class TCPConnection : ConnectionInterface
+    public class TCPConnection : ConnectionInterface
     {
         public TCPConnection(Socket socket) 
             : base(socket)
@@ -22,6 +23,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         }
 
         protected override void WaitForDisconnect()
+        {
+            return;
+        }
+
+        public override void Initialize()
         {
             return;
         }

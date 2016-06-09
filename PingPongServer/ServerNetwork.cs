@@ -1,32 +1,33 @@
 ﻿using NetworkLibrary.NetworkImplementations;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using System.Net.Sockets;
 using NetworkLibrary.PackageAdapters;
+using NetworkLibrary.DataStructs;
 
 namespace PingPongServer
 {
     class ServerNetwork : NetworkInterface
     {
         public ServerNetwork(Socket acceptedSocket)
-            : base(new TCPServerConnection(acceptedSocket),
-                 new UDPConnection(acceptedSocket.RemoteEndPoint),
-                 null)
+            : this(acceptedSocket, null)
         {
-
+            
         }
 
         public ServerNetwork(Socket acceptedSocket, LogWriter logger)
-            : base(new TCPServerConnection(acceptedSocket),
-                 new UDPConnection(acceptedSocket.RemoteEndPoint),
-                 logger)
+            : base(acceptedSocket, logger)
         {
-
+            Log("Built up network.");
         }
 
         protected override PackageAdapter InitializeAdapter()
         {
             return new PackageAdapter();
+        }
+
+        public void SendObjectPositions(ServerDataPackage serverData)
+        {
+            SendDataUDP(serverData);
         }
     }
 }

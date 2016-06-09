@@ -9,7 +9,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public bool Connected { get { return ConnectionSocket.Connected; } }
 
-        protected Socket ConnectionSocket { get; set; }
+        public Socket ConnectionSocket { get; set; }
         
         protected bool AbortReceive { get; set; }
 
@@ -37,9 +37,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             AbortReceive = false;
 
             ConnectionSocket = socket;
-
-            if (!Connected)
-                Log("Initializing failed.");
         }
 
         public void Disconnect()

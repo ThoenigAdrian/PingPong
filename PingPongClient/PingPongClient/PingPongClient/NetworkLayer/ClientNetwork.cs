@@ -2,28 +2,20 @@
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.DataStructs;
 using NetworkLibrary.Utility;
-using System.Net;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.NetworkImplementations;
-using System;
+using System.Net.Sockets;
 
 namespace PingPongClient.NetworkLayer
 {
     class ClientNetwork : NetworkInterface
     {
-        public ClientNetwork(IPEndPoint server)
-            : base (
-                  new TCPClientConnection(server),
-                  new UDPConnection(server),
-                  null)
+        public ClientNetwork(Socket connectedSocket)
+            : this(connectedSocket, null)
         {
         }
 
-        public ClientNetwork(IPEndPoint server, LogWriter logger)
-            : base (
-                  new TCPClientConnection(server),
-                  new UDPConnection(server),
-                  logger)
+        public ClientNetwork(Socket connectedSocket, LogWriter logger)
+            : base (connectedSocket, logger)
         {
         }
 
@@ -40,6 +32,11 @@ namespace PingPongClient.NetworkLayer
         public void SendPlayerMovement(PlayerMovementPackage package)
         {
             SendDataTCP(package);
+        }
+
+        public void SendUDPTestData(PlayerMovementPackage package)
+        {
+            SendDataUDP(package);
         }
 
         public ServerDataPackage GetServerData()

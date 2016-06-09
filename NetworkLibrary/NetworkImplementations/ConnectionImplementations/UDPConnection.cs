@@ -1,4 +1,5 @@
 ﻿using NetworkLibrary.Utility;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -9,11 +10,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     {
         DoubleBuffer<byte[]> ReceivedData { get; set; }
         Thread ReceiveThread;
-        EndPoint ConnectionEndPoint { get; set; }
+        protected IPEndPoint connectionEnd;
+        public IPEndPoint connectionLocal;
 
-        public UDPConnection(EndPoint target) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+        public UDPConnection(IPEndPoint target, IPEndPoint local) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
-            ConnectionEndPoint = target;
+            connectionEnd = target;
+            connectionLocal = local;
 
             ReceivedData = new DoubleBuffer<byte[]>();
         }
@@ -25,29 +28,31 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public override void Send(byte[] data)
         {
-            ConnectionSocket.Send(data);
+            ConnectionSocket.SendTo(data, connectionEnd);
         }
 
         public override void Initialize()
         {
-            ConnectionSocket.Connect(ConnectionEndPoint);
-
             ReceiveThread = new Thread(StartReceiveLoop);
             ReceiveThread.Start();
         }
 
         private void StartReceiveLoop()
         {
-            byte[] data = new byte[0];
+            ConnectionSocket.Bind(connectionLocal);
+
+            byte[] data;
             while (!AbortReceive)
             {
                 try
                 {
+                    data = new byte[1024];
                     ConnectionSocket.Receive(data);
+                    Log("UDP data received.");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Log("Receive loop threw exception");
+                    Log("Receive loop threw exception: " + ex.Message);
                     return;
                 }
                 
