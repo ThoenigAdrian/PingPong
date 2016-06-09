@@ -1,4 +1,4 @@
-﻿using System;
+﻿using NetworkLibrary.Utility;
 using System.Net.Sockets;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
@@ -10,26 +10,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
         }
 
-        public override void Send(byte[] data)
+        protected override DataContainer<byte[]> InitializeDataContainer()
         {
-            ConnectionSocket.Send(data);
-        }
-
-        public override byte[] Receive()
-        {
-            byte[] data = null;
-            ConnectionSocket.Receive(data);
-            return data;
-        }
-
-        protected override void WaitForDisconnect()
-        {
-            return;
-        }
-
-        public override void Initialize()
-        {
-            return;
+            return new SafeStack<byte[]>();
         }
     }
 }

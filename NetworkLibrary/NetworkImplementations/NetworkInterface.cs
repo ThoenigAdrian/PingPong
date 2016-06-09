@@ -24,11 +24,9 @@ namespace NetworkLibrary.NetworkImplementations
 
             TcpConnection = new TCPConnection(connectedTCPSocket);
             TcpConnection.Logger = Logger;
-            TcpConnection.Initialize();
 
             UdpConnection = new UDPConnection(connectedTCPSocket.RemoteEndPoint as IPEndPoint, connectedTCPSocket.LocalEndPoint as IPEndPoint);
             UdpConnection.Logger = Logger;
-            UdpConnection.Initialize();
 
             NetworkPackageAdapter = InitializeAdapter();
         }

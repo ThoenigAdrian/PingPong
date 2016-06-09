@@ -1,15 +1,12 @@
 ﻿using NetworkLibrary.Utility;
-using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+using System;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class UDPConnection: ConnectionInterface
     {
-        DoubleBuffer<byte[]> ReceivedData { get; set; }
-        Thread ReceiveThread;
         protected IPEndPoint connectionEnd;
         public IPEndPoint connectionLocal;
 
@@ -17,13 +14,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             connectionEnd = target;
             connectionLocal = local;
-
-            ReceivedData = new DoubleBuffer<byte[]>();
         }
 
-        public override byte[] Receive()
+        protected override DataContainer<byte[]> InitializeDataContainer()
         {
-            return ReceivedData.Read();
+            return new DoubleBuffer<byte[]>();
         }
 
         public override void Send(byte[] data)
@@ -31,39 +26,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             ConnectionSocket.SendTo(data, connectionEnd);
         }
 
-        public override void Initialize()
+        protected override void InitializeSocket(Socket socket)
         {
-            ReceiveThread = new Thread(StartReceiveLoop);
-            ReceiveThread.Start();
-        }
+            base.InitializeSocket(socket);
 
-        private void StartReceiveLoop()
-        {
             ConnectionSocket.Bind(connectionLocal);
-
-            byte[] data;
-            while (!AbortReceive)
-            {
-                try
-                {
-                    data = new byte[1024];
-                    ConnectionSocket.Receive(data);
-                    Log("UDP data received.");
-                }
-                catch (Exception ex)
-                {
-                    Log("Receive loop threw exception: " + ex.Message);
-                    return;
-                }
-                
-                ReceivedData.Write(data);
-            }
         }
-
-        protected override void WaitForDisconnect()
-        {
-            ReceiveThread.Join();
-        }
-
     }
 }

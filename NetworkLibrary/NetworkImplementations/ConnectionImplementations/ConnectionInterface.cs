@@ -1,5 +1,7 @@
 ﻿using NetworkLibrary.Utility;
+using System;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
@@ -10,7 +12,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public bool Connected { get { return ConnectionSocket.Connected; } }
 
         public Socket ConnectionSocket { get; set; }
-        
+
+        protected DataContainer<byte[]> ReceivedData { get; set; }
+        protected Thread ReceiveThread { get; set; }
         protected bool AbortReceive { get; set; }
 
         private ConnectionInterface()
@@ -21,8 +25,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Logger = null;
 
+            ReceivedData = InitializeDataContainer();
+
             InitializeConnection(connectionSocket);
         }
+
+        protected abstract DataContainer<byte[]> InitializeDataContainer();
 
         public void RestartConnection(Socket socket)
         {
@@ -34,9 +42,54 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void InitializeConnection(Socket socket)
         {
+            InitializeSocket(socket);
+            InitializeReceiving();
+        }
+
+        protected virtual void InitializeSocket(Socket socket)
+        {
+            ConnectionSocket = socket;
+        }
+
+        public virtual void Send(byte[] data)
+        {
+            ConnectionSocket.Send(data);
+        }
+
+        public virtual byte[] Receive()
+        {
+            return ReceivedData.Read();
+        }
+
+        private void InitializeReceiving()
+        {
+            if (ReceiveThread.ThreadState != ThreadState.Unstarted)
+                return;
+
+            ReceiveThread = new Thread(ReceiveLoop);
+            ReceiveThread.Start();
+        }
+
+        private void ReceiveLoop()
+        {
             AbortReceive = false;
 
-            ConnectionSocket = socket;
+            byte[] data;
+            while (!AbortReceive)
+            {
+                try
+                {
+                    data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
+                    ConnectionSocket.Receive(data);
+                }
+                catch (Exception ex)
+                {
+                    Log("Receive loop threw exception: " + ex.Message);
+                    return;
+                }
+
+                ReceivedData.Write(data);
+            }
         }
 
         public void Disconnect()
@@ -54,13 +107,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
         }
 
-        abstract public byte[] Receive();
-
-        abstract public void Send(byte[] data);
-
-        abstract public void Initialize();
-
-        protected abstract void WaitForDisconnect();
+        protected virtual void WaitForDisconnect()
+        {
+            ReceiveThread.Join();
+        }
 
         protected void Log(string text)
         {

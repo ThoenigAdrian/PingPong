@@ -48,6 +48,7 @@
     <Compile Include="DataPackages\ClientSourcePackages\PlayerMovementPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientControlPackage.cs" />
     <Compile Include="DataPackages\PackageInterface.cs" />
+    <Compile Include="Utility\DataContainer\DataContainer.cs" />
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="NetworkImplementations\NetworkInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\ConnectionInterface.cs" />
@@ -57,7 +58,8 @@
     <Compile Include="NetworkConstants.cs" />
     <Compile Include="PackageAdapters\PackageAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\DoubleBuffer.cs" />
+    <Compile Include="Utility\DataContainer\DoubleBuffer.cs" />
+    <Compile Include="Utility\DataContainer\SafeStack.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameLogicLibrary\GameLogicLibrary.csproj">

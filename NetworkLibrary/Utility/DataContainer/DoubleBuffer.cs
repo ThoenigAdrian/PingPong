@@ -2,7 +2,7 @@
 
 namespace NetworkLibrary.Utility
 {
-    public class DoubleBuffer<T>
+    public class DoubleBuffer<T> : DataContainer<T>
     {
         T Buffer1 { get; set; }
         T Buffer2 { get; set; }
@@ -21,7 +21,7 @@ namespace NetworkLibrary.Utility
             Buffer2 = default(T);
         }
 
-        public T Read()
+        public override T Read()
         {
             if (Switch)
                 return Buffer1;
@@ -29,7 +29,7 @@ namespace NetworkLibrary.Utility
                 return Buffer2;
         }
 
-        public void Write(T buffer)
+        public override void Write(T buffer)
         {
             if (!Switch)
                 Buffer1 = buffer;
