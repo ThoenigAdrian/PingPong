@@ -10,11 +10,7 @@ namespace NetworkLibrary.NetworkImplementations
         TCPConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
 
-        protected PackageAdapterInterface UDPInAdapter;
-        protected PackageAdapterInterface UDPOutAdapter;
-        protected PackageAdapterInterface TCPInAdapter;
-        protected PackageAdapterInterface TCPOutAdapter;
-
+        protected PackageAdapter m_packageAdapter;
 
         protected NetworkInterface(TCPConnection tcpConnection, UDPConnection udpConnection , LogWriter logger)
         {
@@ -36,37 +32,37 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected PackageInterface GetDataTCP()
         {
-            if (TCPInAdapter == null)
+            if (m_packageAdapter == null)
                 return null;
 
             byte[] data = TcpConnection.Receive();
-            return TCPInAdapter.ByteToPackage(data);
+            return m_packageAdapter.CreatePackageFromNetworkData(data);
         }
 
         protected PackageInterface GetDataUDP()
         {
-            if (UDPInAdapter == null)
+            if (m_packageAdapter == null)
                 return null;
 
             byte[] data = UdpConnection.Receive();
-            return UDPInAdapter.ByteToPackage(data);
+            return m_packageAdapter.CreatePackageFromNetworkData(data);
         }
 
         protected void SendDataTCP(PackageInterface package)
         {
-            if (TCPOutAdapter == null)
+            if (m_packageAdapter == null)
                 return;
 
-            byte[] data = TCPOutAdapter.PackageToByte(package);
+            byte[] data = m_packageAdapter.CreateNetworkDataFromPackage(package);
             TcpConnection.Send(data);
         }
 
         protected void SendDataUDP(PackageInterface package)
         {
-            if (UDPOutAdapter == null)
+            if (m_packageAdapter == null)
                 return;
 
-            byte[] data = UDPOutAdapter.PackageToByte(package);
+            byte[] data = m_packageAdapter.CreateNetworkDataFromPackage(package);
             UdpConnection.Send(data);
         }
     }

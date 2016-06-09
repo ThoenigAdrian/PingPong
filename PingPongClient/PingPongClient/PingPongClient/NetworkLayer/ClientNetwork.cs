@@ -31,11 +31,7 @@ namespace PingPongClient.NetworkLayer
 
         protected void Initialize()
         {
-            UDPOutAdapter = new ClientUDPAdapter();
-            UDPInAdapter = new ServerUDPAdapter();
-
-            TCPOutAdapter = new ClientTCPAdapter();
-            TCPInAdapter = new ServerTCPAdapter();
+            m_packageAdapter = new PackageAdapter();
         }
 
         public void SendClientControl(ClientControlPackage package)

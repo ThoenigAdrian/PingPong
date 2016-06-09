@@ -5,9 +5,10 @@ using System;
 namespace NetworkLibrary.PackageAdapters
 {
     public class InvalidPackageException : Exception { };
-    public class Package
+
+    public class PackageAdapter
     {
-        public object CreatePackageFromNetworkData(byte[] data)
+        public PackageInterface CreatePackageFromNetworkData(byte[] data)
         {
             string networkDataString = ConvertNetworkDataToString(data);
 
@@ -19,7 +20,7 @@ namespace NetworkLibrary.PackageAdapters
                 throw new InvalidPackageException();        
         }
 
-        public byte[] CreateNetworkDataFromPackage(object package)
+        public byte[] CreateNetworkDataFromPackage(PackageInterface package)
         {
             string networkDataString = Newtonsoft.Json.JsonConvert.SerializeObject(package);
             return System.Text.Encoding.Default.GetBytes(networkDataString);

@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\InvestmentTracker\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>.\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -54,13 +54,9 @@
     <Compile Include="NetworkImplementations\ConnectionImplementations\ConnectionInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\TCPConnection.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\UDPConnection.cs" />
-    <Compile Include="PackageAdapters\ClientTCPAdapter.cs" />
     <Compile Include="DataStructs\ServerDataPackage.cs" />
     <Compile Include="NetworkConstants.cs" />
-    <Compile Include="PackageAdapters\ClientUDPAdapter.cs" />
-    <Compile Include="PackageAdapters\PackageAdapterInterface.cs" />
-    <Compile Include="PackageAdapters\ServerTCPAdapter.cs" />
-    <Compile Include="PackageAdapters\ServerUDPAdapter.cs" />
+    <Compile Include="PackageAdapters\PackageAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\DoubleBuffer.cs" />
   </ItemGroup>
