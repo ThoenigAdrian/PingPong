@@ -43,16 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\ClientSourcePackages\ClientAddPlayerRequest.cs" />
-    <Compile Include="Packages\ClientSourcePackages\PlayerMovementPackage.cs" />
-    <Compile Include="Packages\ClientSourcePackages\ClientControlPackage.cs" />
-    <Compile Include="Packages\PackageInterface.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\ClientAddPlayerRequest.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\PlayerMovementPackage.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\ClientControlPackage.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\ClientRegisteredPackage.cs" />
+    <Compile Include="DataPackages\PackageInterface.cs" />
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="NetworkImplementations\NetworkInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\ConnectionInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\TCPConnection.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\UDPConnection.cs" />
-    <Compile Include="Packages\ServerSourcePackages\ServerDataPackage.cs" />
+    <Compile Include="DataPackages\ServerSourcePackages\ServerDataPackage.cs" />
     <Compile Include="NetworkConstants.cs" />
     <Compile Include="PackageAdapters\PackageAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
