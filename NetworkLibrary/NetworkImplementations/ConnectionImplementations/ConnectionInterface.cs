@@ -27,7 +27,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             ReceivedData = InitializeDataContainer();
 
-            InitializeConnection(connectionSocket);
+            InitializeSocket(connectionSocket);
         }
 
         protected abstract DataContainer<byte[]> InitializeDataContainer();
@@ -37,16 +37,15 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             Disconnect();
             WaitForDisconnect();
 
-            InitializeConnection(socket);
+            InitializeSocket(socket);
         }
 
-        private void InitializeConnection(Socket socket)
+        public virtual void InitializeConnection()
         {
-            InitializeSocket(socket);
             InitializeReceiving();
         }
 
-        protected virtual void InitializeSocket(Socket socket)
+        protected void InitializeSocket(Socket socket)
         {
             ConnectionSocket = socket;
         }
@@ -63,7 +62,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void InitializeReceiving()
         {
-            if (ReceiveThread.ThreadState != ThreadState.Unstarted)
+            if (ReceiveThread != null && ReceiveThread.ThreadState != ThreadState.Unstarted)
                 return;
 
             ReceiveThread = new Thread(ReceiveLoop);

@@ -8,7 +8,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     public class UDPConnection: ConnectionInterface
     {
         protected IPEndPoint connectionEnd;
-        public IPEndPoint connectionLocal;
+        protected IPEndPoint connectionLocal;
 
         public UDPConnection(IPEndPoint target, IPEndPoint local) : base(new Socket(target.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
@@ -26,11 +26,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             ConnectionSocket.SendTo(data, connectionEnd);
         }
 
-        protected override void InitializeSocket(Socket socket)
+        public override void InitializeConnection()
         {
-            base.InitializeSocket(socket);
-
             ConnectionSocket.Bind(connectionLocal);
+
+            base.InitializeConnection();
         }
     }
 }
