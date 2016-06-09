@@ -11,6 +11,8 @@ using PingPongClient.ControlLayer;
 using GameLogicLibrary.GameObjects;
 using PingPongClient.InputLayer.InputTranslation;
 using System.Collections.Generic;
+using System;
+using System.Net.Sockets;
 
 namespace PingPongClient
 {
@@ -37,16 +39,24 @@ namespace PingPongClient
             Visualizer.Initialize(this);
         }
 
-        protected void ConnectToServer()
+        protected override void Initialize()
+        {
+            ControlInput.Initialize();
+            base.Initialize();
+        }
+
+        protected void InitializeNetwork()
         {
             if (ServerIP == null)
                 return;
 
             IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
+            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
-                Network = new ClientNetwork(server);
+                connectionSocket.Connect(server);
+                Network = new ClientNetwork(connectionSocket);
             }
             catch
             {
@@ -54,12 +64,6 @@ namespace PingPongClient
             }
         }
 
-        protected override void Initialize()
-        {
-            ControlInput.Initialize();
-            ConnectToServer();
-            base.Initialize();
-        }
 
         protected override void LoadContent()
         {
@@ -74,37 +78,37 @@ namespace PingPongClient
 
             if (Network != null)
             {
-                ApplyMovementInputs();
-                ApplyControlInputs();
+                SendClientCommandos();
+                SendMovementInputs();
+                ApplyServerPositions();
             }
 
-            else if (ControlInput.GetControlInput() == ClientControls.Quit)
-            {
-                this.Exit();
-            }
+            HandleControlInputs();
 
             Interpolation.Interpolate(gameTime);
 
             base.Update(gameTime);
         }
 
-        protected void ApplyControlInputs()
+        protected void HandleControlInputs()
         {
-            if (ControlInput.GetControlInput() != ClientControls.NoInput)
+            //if (ControlInput.GetControlInput() != ClientControls.NoInput)
+            //{
+            //    ClientControlPackage controlPackage = new ClientControlPackage();
+            //    controlPackage.ControlInput = ControlInput.GetControlInput();
+            //    Network.SendClientControl(controlPackage);
+            //}
+
+            if (ControlInput.GetControlInput() == ClientControls.Pause)
             {
-                ClientControlPackage controlPackage = new ClientControlPackage();
-                controlPackage.ControlInput = ControlInput.GetControlInput();
-                Network.SendClientControl(controlPackage);
+                InitializeNetwork();
             }
 
             if (ControlInput.GetControlInput() == ClientControls.Quit)
-            {
-                Network.Disconnect();
                 this.Exit();
-            }
         }
 
-        protected void ApplyMovementInputs()
+        protected void SendMovementInputs()
         {
             foreach (PlayerInput player in ActivePlayers)
             {
@@ -143,11 +147,25 @@ namespace PingPongClient
             Structure.m_ball.PosY = data.BallPosY;
         }
 
+        protected void SendClientCommandos()
+        {
+            if (ControlInput.GetControlInput() == ClientControls.Restart)
+            {
+                Network.SendUDPTestData(new PlayerMovementPackage());
+            }
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             Visualizer.DrawGame();
 
             base.Draw(gameTime);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            if (Network != null)
+                Network.Disconnect();
         }
     }
 }

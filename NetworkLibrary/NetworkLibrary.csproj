@@ -45,8 +45,6 @@
   <ItemGroup>
     <Compile Include="DataStructs\ClientAddPlayerRequest.cs" />
     <Compile Include="DataStructs\PlayerMovementPackage.cs" />
-    <Compile Include="NetworkImplementations\ConnectionImplementations\TCPClientConnection.cs" />
-    <Compile Include="NetworkImplementations\ConnectionImplementations\TCPServerConnection.cs" />
     <Compile Include="DataStructs\ClientControlPackage.cs" />
     <Compile Include="DataStructs\PackageInterface.cs" />
     <Compile Include="Utility\Logger.cs" />
