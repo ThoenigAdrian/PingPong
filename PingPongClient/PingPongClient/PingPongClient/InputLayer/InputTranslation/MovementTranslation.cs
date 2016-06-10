@@ -1,10 +1,8 @@
-﻿using System;
-using GameLogicLibrary;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 
 namespace PingPongClient.InputLayer.InputTranslation
 {
-    class MovementTranslation : KeyboardControlTranslation
+    class MovementTranslation
     {
         Keys Up { get; set; }
         Keys Down { get; set; }
@@ -15,20 +13,15 @@ namespace PingPongClient.InputLayer.InputTranslation
             Down = down;
         }
 
-        public override Keys GetMovementKey(ClientMovement action)
+        public Keys GetMovementKey(PlayerMovementInputs action)
         {
             switch (action)
             {
-                case ClientMovement.Up:
+                case PlayerMovementInputs.Up:
                     return Up;
-                case ClientMovement.Down:
+                case PlayerMovementInputs.Down:
                     return Down;
             }
-            return Keys.None;
-        }
-
-        public override Keys GetControlKey(ClientControls control)
-        {
             return Keys.None;
         }
     }

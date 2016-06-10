@@ -78,20 +78,28 @@
   <ItemGroup>
     <Compile Include="ControlLayer\Control.cs" />
     <Compile Include="ControlLayer\Interpolation.cs" />
+    <Compile Include="ControlLayer\Lobby.cs" />
+    <Compile Include="InputLayer\KeyboardInputs\ControlInput.cs" />
     <Compile Include="InputLayer\InputInterface.cs" />
-    <Compile Include="InputLayer\InputTranslation\KeyboardControlTranslation.cs" />
+    <Compile Include="InputLayer\InputManager.cs" />
     <Compile Include="InputLayer\InputTranslation\ControlTranslation.cs" />
     <Compile Include="InputLayer\InputTranslation\MovementTranslation.cs" />
+    <Compile Include="InputLayer\InputTranslation\TextEditTranslation.cs" />
     <Compile Include="InputLayer\InputTranslation\TranslationFactory.cs" />
-    <Compile Include="InputLayer\KeyboardInput.cs" />
-    <Compile Include="InputLayer\PlayerInput.cs" />
+    <Compile Include="InputLayer\KeyboardInputs\PlayerInput.cs" />
+    <Compile Include="InputLayer\KeyboardInputs\TextEditInput.cs" />
     <Compile Include="NetworkLayer\ClientNetwork.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
-    <Compile Include="VisualizeLayer\GameVisualizerInterface.cs" />
-    <Compile Include="VisualizeLayer\TextureFactory.cs" />
-    <Compile Include="VisualizeLayer\XNAGameVisualizer.cs" />
+    <Compile Include="VisualizeLayer\LobbyVisualizer.cs" />
+    <Compile Include="VisualizeLayer\VisualizeManager.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNALobbyViszualizer.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNAVisualizeManager.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNAVisualizer.cs" />
+    <Compile Include="VisualizeLayer\GameStructureVisualizer.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\TextureFactory.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNAGameVisualizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

@@ -1,15 +1,18 @@
-﻿using GameLogicLibrary;
+﻿using InputFunctionality.KeyboardAdapter;
 
 namespace PingPongClient.InputLayer
 {
     abstract class InputInterface
     {
-        public abstract ClientMovement GetMovementInput();
+    }
 
-        public abstract ClientControls GetControlInput();
+    abstract class InputInterfaceKeyboard
+    {
+        protected KeyboardAdvanced Keyboard { get; private set; }
 
-        public abstract void Initialize();
-
-        public abstract void Update();
+        protected InputInterfaceKeyboard(KeyboardAdvanced keyboard)
+        {
+            Keyboard = keyboard;
+        }
     }
 }
