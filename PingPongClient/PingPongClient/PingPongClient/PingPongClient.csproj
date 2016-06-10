@@ -89,7 +89,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
-    <Compile Include="VisualizeLayer\GameVisualizerInterface.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualizeManager.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualizer.cs" />
+    <Compile Include="VisualizeLayer\GameStructureVisualizer.cs" />
     <Compile Include="VisualizeLayer\TextureFactory.cs" />
     <Compile Include="VisualizeLayer\XNAGameVisualizer.cs" />
   </ItemGroup>

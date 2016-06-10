@@ -6,7 +6,7 @@ using System;
 
 namespace PingPongClient.VisualizeLayer
 {
-    class XNAGameVisualizer : GameVisualizerInterface
+    class XNAStructureVisualizer : GameStructureVisualizer, XNAVisualizer
     {
         GraphicsDeviceManager GraphicManager { get; set; }
         SpriteBatch SpriteBatchMain { get; set; }
@@ -19,21 +19,26 @@ namespace PingPongClient.VisualizeLayer
 
         DrawingOffsetTranslation DrawingTranslation;
 
-        public XNAGameVisualizer(GameStructure structure) : base(structure)
+        bool m_initialized = false;
+
+        public XNAStructureVisualizer()
         {
             DrawingTranslation = new DrawingOffsetTranslation();
         }
 
-        public override void Initialize(Game game)
+        void XNAVisualizer.Initialize(XNAInitializationData initData)
         {
-            GraphicManager = new GraphicsDeviceManager(game);
-            Content = new ContentManager(game.Services);
-            Content.RootDirectory = "Content";
+            GraphicManager = initData.GraphicManager;
+            Content = initData.Content;
+            SpriteBatchMain = initData.SpriteBatch;
+
+            CreateObjectTextures();
+
+            m_initialized = true;
         }
 
         public override void LoadContent()
         {
-            SpriteBatchMain = new SpriteBatch(Graphics);
             CreateObjectTextures();
 
             ApplyResize();
@@ -58,6 +63,11 @@ namespace PingPongClient.VisualizeLayer
             DrawingTranslation.DrawingOffset = new Vector2(
                 screenWidth / 2 - DrawingTranslation.GetAbsoluteSize(FieldSize.X / 2), 
                 screenHeight / 2 - DrawingTranslation.GetAbsoluteSize(FieldSize.Y / 2));
+        }
+
+        protected override bool CanDraw()
+        {
+            return m_initialized;
         }
 
         protected override void DrawBegin()

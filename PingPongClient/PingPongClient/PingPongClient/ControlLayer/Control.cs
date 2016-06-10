@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System;
 using System.Net.Sockets;
 using NetworkLibrary.DataPackages;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace PingPongClient
 {
@@ -21,10 +22,13 @@ namespace PingPongClient
         GameStructure Structure { get; set; }
 
         ClientNetwork Network { get; set; }
-        GameVisualizerInterface Visualizer { get; set; }
+
+        GraphicsDeviceManager GraphicsManager { get; set; }
+        XNAVisualizeManager Visualizers { get; set; }
+        Interpolation Interpolation;
+
         List<PlayerInput> ActivePlayers { get; set; }
         InputInterface ControlInput = new KeyboardInput(new ControlTranslation());
-        Interpolation Interpolation;
 
         public IPAddress ServerIP { get; set; }
 
@@ -35,8 +39,8 @@ namespace PingPongClient
             Structure = new GameStructure();
             ActivePlayers = new List<PlayerInput>();
             Interpolation = new Interpolation(Structure);
-            Visualizer = new XNAGameVisualizer(Structure);
-            Visualizer.Initialize(this);
+            Visualizers = new XNAVisualizeManager();
+            GraphicsManager = new GraphicsDeviceManager(this);
         }
 
         protected override void Initialize()
@@ -73,7 +77,16 @@ namespace PingPongClient
 
         protected override void LoadContent()
         {
-            Visualizer.LoadContent();
+            Content.RootDirectory = "Content";
+
+            XNAInitializationData initData = new XNAInitializationData();
+            initData.Content = Content;
+            initData.GraphicManager = GraphicsManager;
+            initData.SpriteBatch = new SpriteBatch(GraphicsManager.GraphicsDevice);
+
+            Visualizers.InitializeData = initData;
+
+            Visualizers.GameVisualizer.SetGameStructure(Structure);
 
             base.LoadContent();
         }
@@ -163,7 +176,7 @@ namespace PingPongClient
 
         protected override void Draw(GameTime gameTime)
         {
-            Visualizer.DrawGame();
+            Visualizers.GameVisualizer.DrawGame();
 
             base.Draw(gameTime);
         }
