@@ -82,6 +82,7 @@
     <Compile Include="InputLayer\InputTranslation\KeyboardControlTranslation.cs" />
     <Compile Include="InputLayer\InputTranslation\ControlTranslation.cs" />
     <Compile Include="InputLayer\InputTranslation\MovementTranslation.cs" />
+    <Compile Include="InputLayer\InputTranslation\TextEditTranslation.cs" />
     <Compile Include="InputLayer\InputTranslation\TranslationFactory.cs" />
     <Compile Include="InputLayer\KeyboardInput.cs" />
     <Compile Include="InputLayer\PlayerInput.cs" />

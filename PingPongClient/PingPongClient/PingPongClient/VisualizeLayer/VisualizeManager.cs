@@ -2,12 +2,6 @@
 
 namespace PingPongClient.VisualizeLayer
 {
-    enum GameMode
-    {
-        Lobby,
-        Game
-    }
-
     abstract class VisualizeManager
     {
         public GameMode CurrentMode { get; set; }
