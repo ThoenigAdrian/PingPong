@@ -1,42 +1,25 @@
-﻿using NetworkLibrary.Utility;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Collections.Generic;
+using System;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class UDPConnection: ConnectionInterface
     {
-        protected List<IPEndPoint> connectionEnds;
+        public delegate void DataReceivedHandler(byte[] data, IPEndPoint endPoint);
+
+        public event DataReceivedHandler DataReceivedEvent;
+
         protected IPEndPoint connectionLocal;
 
         public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
         {
             connectionLocal = local;
-            connectionEnds = new List<IPEndPoint>();
         }
 
-        public void AddEndpoint(IPEndPoint endPoint)
+        public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
         {
-            connectionEnds.Add(endPoint);
-        }
-
-        protected override DataContainer<byte[]> InitializeDataContainer()
-        {
-            return new DoubleBuffer<byte[]>();
-        }
-
-        public virtual void Send(byte[] data, int session)
-        {
-            ConnectionSocket.SendTo(data, connectionEnds[session]);
-        }
-
-        public virtual void Broadcast(byte[] data)
-        {
-            foreach (IPEndPoint endPoint in connectionEnds)
-            {
-                ConnectionSocket.SendTo(data, endPoint);
-            }
+            ConnectionSocket.SendTo(data, remoteEndPoint);
         }
 
         public override void InitializeConnection()
@@ -44,6 +27,22 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             ConnectionSocket.Bind(connectionLocal);
 
             base.InitializeConnection();
+        }
+
+        protected override void ReceiveFromSocket()
+        {
+            byte[] data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
+            EndPoint source = new IPEndPoint(connectionLocal.Address, connectionLocal.Port);
+
+            int size = ConnectionSocket.ReceiveFrom(data, ref source);
+
+            RaiseReceivedEvent(TrimData(data, size), source as IPEndPoint);
+        }
+
+        private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
+        {
+            if (DataReceivedEvent != null)
+                DataReceivedEvent.Invoke(data, source);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace PingPongClient.NetworkLayer
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
             : base ((connectedSocket.LocalEndPoint as IPEndPoint).Port, logger)
         {
-            AddTCPConnection(connectedSocket);
+            AddClientConnection(connectedSocket);
         }
 
         protected override PackageAdapter InitializeAdapter()
@@ -43,7 +43,7 @@ namespace PingPongClient.NetworkLayer
 
         public ServerDataPackage GetServerData()
         {
-            return GetDataUDP() as ServerDataPackage;
+            return GetDataUDP(0) as ServerDataPackage;
         }
     }
 }

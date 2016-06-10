@@ -51,11 +51,16 @@ namespace PingPongClient
             if (ServerIP == null)
                 return;
 
+            Logger.Log("Initializing network...");
+
             IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
             Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
+                if (Network != null)
+                    Network.Disconnect();
+
                 connectionSocket.Connect(server);
                 Network = new ClientNetwork(connectionSocket);
             }

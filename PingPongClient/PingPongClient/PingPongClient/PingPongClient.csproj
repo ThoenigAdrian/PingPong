@@ -100,11 +100,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\..\..\Projects\PingPong\GameLogicLibrary\GameLogicLibrary.csproj">
+    <ProjectReference Include="..\..\..\GameLogicLibrary\GameLogicLibrary.csproj">
       <Project>{212421d7-f509-4477-a78d-ba638ab63eb1}</Project>
       <Name>GameLogicLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\..\..\Projects\PingPong\NetworkLibrary\NetworkLibrary.csproj">
+    <ProjectReference Include="..\..\..\NetworkLibrary\NetworkLibrary.csproj">
       <Project>{aa01e32b-ab68-49a5-ad9e-07e955d3b357}</Project>
       <Name>NetworkLibrary</Name>
     </ProjectReference>

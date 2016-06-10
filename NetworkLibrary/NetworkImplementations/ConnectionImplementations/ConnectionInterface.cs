@@ -1,5 +1,6 @@
 ﻿using NetworkLibrary.Utility;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -10,15 +11,16 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
     }
 
+
     public abstract class ConnectionInterface
     {
         public LogWriter Logger { get; set; }
 
         public bool Connected { get { return ConnectionSocket.Connected; } }
 
-        public Socket ConnectionSocket { get; set; }
+        protected Socket ConnectionSocket { get; set; }
 
-        protected DataContainer<byte[]> ReceivedData { get; set; }
+        //protected DataContainer<byte[]> ReceivedData { get; set; }
         protected Thread ReceiveThread { get; set; }
         protected bool AbortReceive { get; set; }
 
@@ -30,12 +32,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Logger = null;
 
-            ReceivedData = InitializeDataContainer();
-
             InitializeSocket(connectionSocket);
         }
-
-        protected abstract DataContainer<byte[]> InitializeDataContainer();
 
         public void RestartConnection(Socket socket)
         {
@@ -55,11 +53,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             ConnectionSocket = socket;
         }
 
-        public byte[] Receive()
-        {
-            return ReceivedData.Read();
-        }
-
         private void InitializeReceiving()
         {
             if (ReceiveThread != null && ReceiveThread.ThreadState != ThreadState.Unstarted)
@@ -77,7 +70,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             {
                 try
                 {
-                    ReceivedData.Write(ReceiveFromSocket());
+                    ReceiveFromSocket();
                 }
                 catch (Exception ex)
                 {
@@ -87,18 +80,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
         }
 
-        private byte[] ReceiveFromSocket()
+        protected byte[] TrimData(byte[] data, int size)
         {
-            byte[] data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
-            int size = ConnectionSocket.Receive(data);
-
-            if (data.Length == size)
+            if (data.Length <= size)
                 return data;
 
             byte[] returnData = new byte[size];
             Array.Copy(data, 0, returnData, 0, size);
             return returnData;
         }
+
+        protected abstract void ReceiveFromSocket();
 
         public void Disconnect()
         {
