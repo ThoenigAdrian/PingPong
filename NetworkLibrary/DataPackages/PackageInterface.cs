@@ -12,4 +12,5 @@
         ClientAddRequest,
         ServerData
     }
+    public enum 
 }
