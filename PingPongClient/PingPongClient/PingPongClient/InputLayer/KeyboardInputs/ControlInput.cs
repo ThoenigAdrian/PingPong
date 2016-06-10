@@ -2,7 +2,7 @@
 using PingPongClient.InputLayer.InputTranslation;
 using System;
 
-namespace PingPongClient.InputLayer
+namespace PingPongClient.InputLayer.KeyboardInputs
 {
     class ControlInput : InputInterfaceKeyboard
     {
