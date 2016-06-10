@@ -7,8 +7,6 @@ using NetworkLibrary;
 using GameLogicLibrary;
 using PingPongClient.ControlLayer;
 using GameLogicLibrary.GameObjects;
-using PingPongClient.InputLayer.InputTranslation;
-using System.Collections.Generic;
 using System;
 using System.Net.Sockets;
 using NetworkLibrary.DataPackages;
@@ -25,9 +23,20 @@ namespace PingPongClient
 
     public class Control : Game
     {
-        GameMode Mode = GameMode.Lobby;
+        GameMode m_mode = GameMode.Lobby;
+        GameMode Mode
+        {
+            get { return m_mode; }
+            set
+            {
+                m_mode = value;
+                Visualizers.CurrentMode = value;
+            }
+        }
 
         GameStructure Structure { get; set; }
+
+        Lobby GameLobby { get; set; }
 
         ClientNetwork Network { get; set; }
 
@@ -35,8 +44,7 @@ namespace PingPongClient
         XNAVisualizeManager Visualizers { get; set; }
         Interpolation Interpolation;
 
-        List<PlayerInput> ActivePlayers { get; set; }
-        InputInterface ControlInput = new KeyboardInput(new ControlTranslation());
+        InputManager InputManager { get; set; }
 
         public IPAddress ServerIP { get; set; }
 
@@ -45,7 +53,8 @@ namespace PingPongClient
         public Control()
         {
             Structure = new GameStructure();
-            ActivePlayers = new List<PlayerInput>();
+            GameLobby = new Lobby();
+            InputManager = new InputManager();
             Interpolation = new Interpolation(Structure);
             Visualizers = new XNAVisualizeManager();
             GraphicsManager = new GraphicsDeviceManager(this);
@@ -53,19 +62,25 @@ namespace PingPongClient
 
         protected override void Initialize()
         {
-            ControlInput.Initialize();
-            ActivePlayers.Add(new PlayerInput(new KeyboardInput(TranslationFactory.GetTranslationForPlayerIndex(0))));
+            GameLobby.ServerIP = ServerIP.ToString();
+            Visualizers.SetLobby(GameLobby);
+            InputManager.Initialize();
             base.Initialize();
         }
 
         protected void InitializeNetwork()
         {
-            if (ServerIP == null)
-                return;
+            GameLobby.Status = "";
+
+            IPAddress serverIP;
+            if (!IPAddress.TryParse(GameLobby.ServerIP, out serverIP))
+            {
+                GameLobby.Status = "Invalid IP!";
+            }
 
             Logger.Log("Initializing network...");
 
-            IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
+            IPEndPoint server = new IPEndPoint(serverIP, NetworkConstants.SERVER_PORT);
             Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try
@@ -75,11 +90,15 @@ namespace PingPongClient
 
                 connectionSocket.Connect(server);
                 Network = new ClientNetwork(connectionSocket);
+                Mode = GameMode.Game;
+                return;
             }
             catch
             {
                 Logger.Log("Could not establish connection!");
             }
+
+            GameLobby.Status = "Could not establish connection!";
         }
 
 
@@ -101,9 +120,11 @@ namespace PingPongClient
 
         protected override void Update(GameTime gameTime)
         {
-            ControlInput.Update(); // global keyboard update - dont call update on any other input!
+            InputManager.Update();
 
-            switch(Mode)
+            HandleControlInputs();
+
+            switch (Mode)
             {
                 case GameMode.Lobby:
                     {
@@ -115,12 +136,10 @@ namespace PingPongClient
                     {
                         if (Network != null)
                         {
-                            SendClientCommandos();
+                            //SendClientCommandos();
                             SendMovementInputs();
                             ApplyServerPositions();
                         }
-
-                        HandleControlInputs();
 
                         Interpolation.Interpolate(gameTime);
 
@@ -133,7 +152,26 @@ namespace PingPongClient
 
         protected void HandleTextInput()
         {
-            //ControlInput.GetTextInput() == 
+            TextEditInputs editControl = InputManager.GetTextEditInput();
+
+            if (editControl != TextEditInputs.NoInput)
+            {
+                switch (editControl)
+                {
+                    case TextEditInputs.Enter:
+                        InitializeNetwork();
+                        return;
+
+                    case TextEditInputs.Delete:
+                        if(GameLobby.ServerIP.Length > 0)
+                            GameLobby.ServerIP = GameLobby.ServerIP.Substring(0, GameLobby.ServerIP.Length - 1);
+                        return;
+                }
+            }
+            else
+            {
+                GameLobby.ServerIP += InputManager.GetNumberInput();
+            }
         }
 
         protected void HandleControlInputs()
@@ -145,26 +183,35 @@ namespace PingPongClient
             //    Network.SendClientControl(controlPackage);
             //}
 
-            if (ControlInput.GetControlInput() == ClientControls.Pause)
-            {
-                InitializeNetwork();
-            }
-
-            if (ControlInput.GetControlInput() == ClientControls.Quit)
+            if (InputManager.GetControlInput() == ControlInputs.Quit)
                 this.Exit();
         }
 
         protected void SendMovementInputs()
         {
-            foreach (PlayerInput player in ActivePlayers)
-            {
-                ClientMovement playerInput = player.Input.GetMovementInput();
+            PlayerInputs[] playerInputs = InputManager.GetMovementInput();
 
-                if (playerInput != ClientMovement.NoInput)
+            foreach (PlayerInputs inputs in playerInputs)
+            {
+                if (inputs.MovementInput != PlayerMovementInputs.NoInput)
                 {
                     PlayerMovementPackage movementPackage = new PlayerMovementPackage();
-                    movementPackage.PlayerID = player.ID;
-                    movementPackage.PlayerMovement = playerInput;
+                    movementPackage.PlayerID = inputs.ID;
+
+                    switch (inputs.MovementInput)
+                    {
+                        case PlayerMovementInputs.Up:
+                            movementPackage.PlayerMovement = ClientMovement.Up;
+                            break;
+
+                        case PlayerMovementInputs.Down:
+                            movementPackage.PlayerMovement = ClientMovement.Down;
+                            break;
+
+                        case PlayerMovementInputs.StopMoving:
+                            movementPackage.PlayerMovement = ClientMovement.StopMoving;
+                            break;
+                    }
 
                     Network.SendPlayerMovement(movementPackage);
                 }
@@ -193,13 +240,13 @@ namespace PingPongClient
             Structure.m_ball.PosY = data.BallPosY;
         }
 
-        protected void SendClientCommandos()
-        {
-            if (ControlInput.GetControlInput() == ClientControls.Restart)
-            {
-                Network.SendUDPTestData(new PlayerMovementPackage());
-            }
-        }
+        //protected void SendClientCommandos()
+        //{
+        //    if (ControlInput.GetControlInput() == ClientControls.Restart)
+        //    {
+        //        Network.SendUDPTestData(new PlayerMovementPackage());
+        //    }
+        //}
 
         protected override void Draw(GameTime gameTime)
         {

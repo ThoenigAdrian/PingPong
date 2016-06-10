@@ -4,7 +4,7 @@ namespace PingPongClient.InputLayer.InputTranslation
 {
     class TranslationFactory
     {
-        public static KeyboardControlTranslation GetTranslationForPlayerIndex(int playerIndex)
+        public static MovementTranslation GetTranslationForPlayerIndex(int playerIndex)
         {
             switch (playerIndex)
             {

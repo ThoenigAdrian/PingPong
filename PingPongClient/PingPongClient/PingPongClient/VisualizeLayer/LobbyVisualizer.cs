@@ -1,15 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using PingPongClient.ControlLayer;
 
 namespace PingPongClient.VisualizeLayer
 {
     abstract class LobbyVisualizer
     {
         Lobby GameLobby;
-
-        public LobbyVisualizer()
-        {
-            GameLobby = new Lobby();
-        }
 
         public void SetLobby(Lobby lobby)
         {
@@ -23,7 +18,8 @@ namespace PingPongClient.VisualizeLayer
 
             DrawBegin();
 
-            DrawString(GameLobby.ServerIP);
+            DrawString(CreateServerIPString());
+            DrawString(CreateStatusString());
 
             DrawEnd();
         }
@@ -35,20 +31,31 @@ namespace PingPongClient.VisualizeLayer
         protected abstract void DrawEnd();
 
         protected abstract bool CanDraw();
-    }
 
-    class Lobby
-    {
-        public DrawableString ServerIP = new DrawableString("ServerIP");
+        DrawableString CreateServerIPString()
+        {
+            DrawableString serverIPDraw = new DrawableString("Enter server IP: " + GameLobby.ServerIP);
+            serverIPDraw.PosX = 100;
+            serverIPDraw.PosY = 100;
+
+            return serverIPDraw;
+        }
+
+        DrawableString CreateStatusString()
+        {
+            DrawableString statusDraw = new DrawableString(GameLobby.Status);
+            statusDraw.PosX = 100;
+            statusDraw.PosY = 150;
+
+            return statusDraw;
+        }
     }
 
     class DrawableString
     {
         public string Value;
-        public float PosX;
-        public float PosY;
-        public float Height;
-        public float Width;
+        public float PosX = 0;
+        public float PosY = 0;
 
         public DrawableString(string value)
         {

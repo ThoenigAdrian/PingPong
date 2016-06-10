@@ -1,27 +1,20 @@
-﻿using System;
-using GameLogicLibrary;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 
 namespace PingPongClient.InputLayer.InputTranslation
 {
-    class ControlTranslation : KeyboardControlTranslation
+    class ControlTranslation
     {
-        public override Keys GetControlKey(ClientControls action)
+        public Keys GetControlKey(ControlInputs action)
         {
             switch (action)
             {
-                case ClientControls.Pause:
+                case ControlInputs.Pause:
                     return Keys.Space;
-                case ClientControls.Quit:
+                case ControlInputs.Quit:
                     return Keys.Escape;
-                case ClientControls.Restart:
+                case ControlInputs.Restart:
                     return Keys.Enter;
             }
-            return Keys.None;
-        }
-
-        public override Keys GetMovementKey(ClientMovement action)
-        {
             return Keys.None;
         }
     }

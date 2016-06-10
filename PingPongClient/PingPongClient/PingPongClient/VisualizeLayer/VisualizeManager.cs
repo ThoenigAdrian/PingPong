@@ -1,4 +1,5 @@
 ﻿using GameLogicLibrary.GameObjects;
+using PingPongClient.ControlLayer;
 
 namespace PingPongClient.VisualizeLayer
 {
