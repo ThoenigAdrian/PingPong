@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace PingPongClient.VisualizeLayer
+﻿namespace PingPongClient.VisualizeLayer.XNAVisualization
 {
-    class XNAVisualizeManager
+    class XNAVisualizeManager : VisualizeManager
     {
         XNAInitializationData m_initData;
         public XNAInitializationData InitializeData
@@ -18,10 +13,9 @@ namespace PingPongClient.VisualizeLayer
             }
         }
 
-        public XNAStructureVisualizer GameVisualizer { get; private set; }
-
         public XNAVisualizeManager()
         {
+            LobbyVisualizer = new XNALobbyVisualizer();
             GameVisualizer = new XNAStructureVisualizer();
         }
 
@@ -29,6 +23,9 @@ namespace PingPongClient.VisualizeLayer
         {
             if (GameVisualizer != null)
                 (GameVisualizer as XNAVisualizer).Initialize(InitializeData);
+
+            if (LobbyVisualizer != null)
+                (LobbyVisualizer as XNAVisualizer).Initialize(InitializeData);
         }
     }
 }

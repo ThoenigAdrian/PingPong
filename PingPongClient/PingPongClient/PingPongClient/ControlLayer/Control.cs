@@ -5,7 +5,6 @@ using PingPongClient.NetworkLayer;
 using NetworkLibrary.Utility;
 using NetworkLibrary;
 using GameLogicLibrary;
-using PingPongClient.VisualizeLayer;
 using PingPongClient.ControlLayer;
 using GameLogicLibrary.GameObjects;
 using PingPongClient.InputLayer.InputTranslation;
@@ -14,11 +13,20 @@ using System;
 using System.Net.Sockets;
 using NetworkLibrary.DataPackages;
 using Microsoft.Xna.Framework.Graphics;
+using PingPongClient.VisualizeLayer.XNAVisualization;
 
 namespace PingPongClient
 {
+    enum GameMode
+    {
+        Lobby,
+        Game
+    }
+
     public class Control : Game
     {
+        GameMode Mode = GameMode.Lobby;
+
         GameStructure Structure { get; set; }
 
         ClientNetwork Network { get; set; }
@@ -86,7 +94,7 @@ namespace PingPongClient
 
             Visualizers.InitializeData = initData;
 
-            Visualizers.GameVisualizer.SetGameStructure(Structure);
+            Visualizers.SetGameStructure(Structure);
 
             base.LoadContent();
         }
@@ -95,18 +103,37 @@ namespace PingPongClient
         {
             ControlInput.Update(); // global keyboard update - dont call update on any other input!
 
-            if (Network != null)
+            switch(Mode)
             {
-                SendClientCommandos();
-                SendMovementInputs();
-                ApplyServerPositions();
+                case GameMode.Lobby:
+                    {
+                        HandleTextInput();
+                        break;
+                    }
+
+                case GameMode.Game:
+                    {
+                        if (Network != null)
+                        {
+                            SendClientCommandos();
+                            SendMovementInputs();
+                            ApplyServerPositions();
+                        }
+
+                        HandleControlInputs();
+
+                        Interpolation.Interpolate(gameTime);
+
+                        break;
+                    }
             }
 
-            HandleControlInputs();
-
-            Interpolation.Interpolate(gameTime);
-
             base.Update(gameTime);
+        }
+
+        protected void HandleTextInput()
+        {
+            //ControlInput.GetTextInput() == 
         }
 
         protected void HandleControlInputs()
@@ -176,7 +203,7 @@ namespace PingPongClient
 
         protected override void Draw(GameTime gameTime)
         {
-            Visualizers.GameVisualizer.DrawGame();
+            Visualizers.Draw();
 
             base.Draw(gameTime);
         }

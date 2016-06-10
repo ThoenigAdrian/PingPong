@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace PingPongClient.VisualizeLayer
+namespace PingPongClient.VisualizeLayer.XNAVisualization
 {
     public struct XNAInitializationData
     {

@@ -89,11 +89,14 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
-    <Compile Include="VisualizeLayer\XNAVisualizeManager.cs" />
-    <Compile Include="VisualizeLayer\XNAVisualizer.cs" />
+    <Compile Include="VisualizeLayer\LobbyVisualizer.cs" />
+    <Compile Include="VisualizeLayer\VisualizeManager.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNALobbyViszualizer.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNAVisualizeManager.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNAVisualizer.cs" />
     <Compile Include="VisualizeLayer\GameStructureVisualizer.cs" />
-    <Compile Include="VisualizeLayer\TextureFactory.cs" />
-    <Compile Include="VisualizeLayer\XNAGameVisualizer.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\TextureFactory.cs" />
+    <Compile Include="VisualizeLayer\XNAVisualization\XNAGameVisualizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
