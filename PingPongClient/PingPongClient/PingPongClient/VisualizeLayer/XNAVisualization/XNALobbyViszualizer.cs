@@ -5,7 +5,7 @@ using System;
 
 namespace PingPongClient.VisualizeLayer.XNAVisualization
 {
-    class XNALobbyVisualizer : LobbyVisualizer, XNAVisualizer
+    class XNALobbyVisualizer : LobbyVisualizer
     {
         GraphicsDeviceManager GraphicManager { get; set; }
         SpriteBatch SpriteBatchMain { get; set; }
@@ -16,11 +16,12 @@ namespace PingPongClient.VisualizeLayer.XNAVisualization
 
         bool m_initialized = false;
 
-        void XNAVisualizer.Initialize(XNAInitializationData initData)
+        public override void Initialize(VisualizerInitializationData initData)
         {
-            GraphicManager = initData.GraphicManager;
-            Content = initData.Content;
-            SpriteBatchMain = initData.SpriteBatch;
+            XNAInitializationData xnaInitData = (XNAInitializationData)initData;
+            GraphicManager = xnaInitData.GraphicManager;
+            Content = xnaInitData.Content;
+            SpriteBatchMain = xnaInitData.SpriteBatch;
 
             Font = Content.Load<SpriteFont>("Lobby");
 

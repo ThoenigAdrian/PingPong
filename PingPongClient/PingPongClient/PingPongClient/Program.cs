@@ -12,11 +12,6 @@ namespace PingPongClient
         {
             using (Control game = new Control())
             {
-                if (args.Length > 0)
-                    game.ServerIP = IPAddress.Parse(args[0]);
-                else
-                    game.ServerIP = IPAddress.Parse("127.0.0.1");
-
                 game.Run();
             }
         }

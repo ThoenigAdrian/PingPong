@@ -5,7 +5,7 @@ using GameLogicLibrary.GameObjects;
 
 namespace PingPongClient.VisualizeLayer
 {
-    abstract class GameStructureVisualizer
+    abstract class GameStructureVisualizer : VisualizerInterface
     {
         GameStructure Structure { get; set; }
 
@@ -22,7 +22,7 @@ namespace PingPongClient.VisualizeLayer
             ApplyResize();
         }
 
-        public void DrawGame()
+        public override void Draw(GameTime gameTime)
         {
             if (Structure == null || !CanDraw())
                 return;
@@ -38,8 +38,6 @@ namespace PingPongClient.VisualizeLayer
 
             DrawEnd();
         }
-
-        public abstract void LoadContent();
 
         public abstract void ApplyResize();
 
