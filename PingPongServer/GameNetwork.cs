@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameLogicLibrary;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 
@@ -9,16 +10,20 @@ namespace PingPongServer
     
     class GameNetwork
     {
-        public int GameID;
-        private ServerNetwork ServerNetwork;
-        public GameNetwork(ServerNetwork ServerNetwork)
+        
+        public GameNetwork()
         {
-            this.ServerNetwork = ServerNetwork;
+            
         }
 
         public void BroadcastFramesToClients(ServerDataPackage Frame)
         {
-            ServerNetwork.BroadcastFramesToClients(Frame, GameID);
+            SendAllUDP();
+        }
+
+        private void SendAllUDP()
+        {
+
         }
 
         public List<ClientControls> GetAllClientControls()
@@ -46,6 +51,7 @@ namespace PingPongServer
             return lastControl;
         }
 
+        
 
         public ClientMovement GetLastPlayerMovement(int session)
         {
