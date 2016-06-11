@@ -2,6 +2,7 @@
 using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 using PingPongClient.InputLayer;
 using PingPongClient.VisualizeLayer;
 using PingPongClient.VisualizeLayer.XNAVisualization;
@@ -93,11 +94,11 @@ namespace PingPongClient.ControlLayer
 
             }
 
-            Structure.m_players[0].PosX = data.Player1PosX;
-            Structure.m_players[0].PosY = data.Player1PosY;
+            //Structure.m_players[0].PosX = data.Player1PosX;
+            //Structure.m_players[0].PosY = data.Player1PosY;
 
-            Structure.m_players[1].PosX = data.Player2PosX;
-            Structure.m_players[1].PosY = data.Player2PosY;
+            //Structure.m_players[1].PosX = data.Player2PosX;
+            //Structure.m_players[1].PosY = data.Player2PosY;
 
             Structure.m_ball.PosX = data.BallPosX;
             Structure.m_ball.PosY = data.BallPosY;

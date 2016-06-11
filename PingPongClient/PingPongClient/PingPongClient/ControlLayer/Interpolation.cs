@@ -1,6 +1,6 @@
 ﻿using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework;
-using NetworkLibrary.DataPackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 
 namespace PingPongClient.ControlLayer
 {
