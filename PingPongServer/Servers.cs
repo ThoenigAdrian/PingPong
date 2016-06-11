@@ -50,6 +50,10 @@ namespace PingPongServer
 
             ServerNetwork.
             if (genericPackage.PackageType == PackageType.ClientInitalizeGamePackage)
+            {
+                GameNetwork newGameNetwork = new GameNetwork();
+            }
+                
                 
 
         }
