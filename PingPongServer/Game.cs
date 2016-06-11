@@ -6,6 +6,7 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongServer
 {
@@ -42,10 +43,13 @@ namespace PingPongServer
         {
             for(int ClientID = 0; ClientID < Clients.Count; ClientID++)
             {
-                Clients[ClientID].AddPlayer(ClientID);
+                ClientAddPlayerRequest Packet = Network.GetLastAddPlayerRequest(ClientID);
+                    
+                Clients[ClientID].AddPlayer(Players.Count + 1, Packet.RequestedTeam);
                 if (Players.Count >= maxPlayers)
                 {
                     GameState = GameStates.Ready;
+                    break;
                 }
             }
         }
@@ -69,13 +73,11 @@ namespace PingPongServer
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
 
-
             while (GameState == GameStates.Running)
             {
                 PrepareNextFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
             }
-
             return 0;
         }
 
@@ -116,32 +118,34 @@ namespace PingPongServer
                 this.GameNetwork = GameNetwork;
             }
 
-            public void AddPlayer(int PlayerID)
+            public void AddPlayer(int PlayerID, Teams Team)
             {
-                Players.Add(new Player(this, PlayerID));
+                Players.Add(new Player(this, PlayerID, Team));
             }
 
             public ClientControls ReceiveLastPlayerControl(int PlayerID)
             {
-                throw new NotImplementedException();
+                return GameNetwork.GetLastPlayerControl(ClientID, PlayerID);
             }
 
             public ClientMovement ReceiveLastPlayerMovement(int PlayerID)
             {
-                throw new NotImplementedException();
+                return GameNetwork.GetLastPlayerMovement(ClientID, PlayerID);
             }
         }
         
         public class Player : ServerDataPackage.Player
         {
             public ClientMovement PlayerMovement { get; set; }
+            Teams Team;
             Client Client;
             public int PlayerID;
 
-            public Player(Client Client, int PlayerID)
+            public Player(Client Client, int PlayerID, Teams Team)
             {
                 this.Client = Client;
                 this.PlayerID = PlayerID;
+                this.Team = Team;
             }
 
             public ClientControls ReceiveLastPlayerControl()
