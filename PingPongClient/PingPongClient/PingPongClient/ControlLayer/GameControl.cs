@@ -30,25 +30,12 @@ namespace PingPongClient.ControlLayer
         {
             if (Network != null)
             {
-                //SendClientCommandos();
+                SendClientCommandos();
                 SendMovementInputs();
                 ApplyServerPositions();
             }
 
             Interpolation.Interpolate(gameTime);
-        }
-
-        protected void HandleControlInputs()
-        {
-            //if (ControlInput.GetControlInput() != ClientControls.NoInput)
-            //{
-            //    ClientControlPackage controlPackage = new ClientControlPackage();
-            //    controlPackage.ControlInput = ControlInput.GetControlInput();
-            //    Network.SendClientControl(controlPackage);
-            //}
-
-            if (Input.GetControlInput() == ControlInputs.Quit)
-                ParentControl.Exit();
         }
 
         protected void SendMovementInputs()
@@ -89,16 +76,14 @@ namespace PingPongClient.ControlLayer
             if (data == null)
                 return;
 
-            for (int i = 0; i < Structure.m_players.Count; i++)
+            for (int i = 0; i < data.PlayerList.Count; i++)
             {
+                if (i >= Structure.m_players.Count)
+                    break;
 
+                Structure.m_players[i].PosX = data.PlayerList[i].PositionX;
+                Structure.m_players[i].PosY = data.PlayerList[i].PositionY;
             }
-
-            //Structure.m_players[0].PosX = data.Player1PosX;
-            //Structure.m_players[0].PosY = data.Player1PosY;
-
-            //Structure.m_players[1].PosX = data.Player2PosX;
-            //Structure.m_players[1].PosY = data.Player2PosY;
 
             Structure.m_ball.PosX = data.BallPosX;
             Structure.m_ball.PosY = data.BallPosY;
