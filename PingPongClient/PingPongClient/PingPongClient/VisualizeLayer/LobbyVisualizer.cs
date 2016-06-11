@@ -1,8 +1,9 @@
-﻿using PingPongClient.ControlLayer;
+﻿using Microsoft.Xna.Framework;
+using PingPongClient.ControlLayer;
 
 namespace PingPongClient.VisualizeLayer
 {
-    abstract class LobbyVisualizer
+    abstract class LobbyVisualizer : VisualizerInterface
     {
         Lobby GameLobby;
 
@@ -11,7 +12,7 @@ namespace PingPongClient.VisualizeLayer
             GameLobby = lobby;
         }
 
-        public void DrawLobby()
+        public override void Draw(GameTime gameTime)
         {
             if (GameLobby == null || !CanDraw())
                 return;

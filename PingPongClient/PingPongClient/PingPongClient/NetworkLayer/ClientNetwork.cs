@@ -8,7 +8,7 @@ using System.Net;
 
 namespace PingPongClient.NetworkLayer
 {
-    class ClientNetwork : NetworkInterface
+    public class ClientNetwork : NetworkInterface
     {
         public ClientNetwork(Socket connectedSocket)
             : this(connectedSocket, null)

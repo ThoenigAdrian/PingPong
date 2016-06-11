@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace PingPongClient.VisualizeLayer.XNAVisualization
 {
-    class XNAStructureVisualizer : GameStructureVisualizer, XNAVisualizer
+    class XNAStructureVisualizer : GameStructureVisualizer
     {
         GraphicsDeviceManager GraphicManager { get; set; }
         SpriteBatch SpriteBatchMain { get; set; }
@@ -25,22 +25,18 @@ namespace PingPongClient.VisualizeLayer.XNAVisualization
             DrawingTranslation = new DrawingOffsetTranslation();
         }
 
-        void XNAVisualizer.Initialize(XNAInitializationData initData)
+        public override void Initialize(VisualizerInitializationData initData)
         {
-            GraphicManager = initData.GraphicManager;
-            Content = initData.Content;
-            SpriteBatchMain = initData.SpriteBatch;
+            XNAInitializationData xnaInitData = (XNAInitializationData)initData;
+            GraphicManager = xnaInitData.GraphicManager;
+            Content = xnaInitData.Content;
+            SpriteBatchMain = xnaInitData.SpriteBatch;
 
-            CreateObjectTextures();
-
-            m_initialized = true;
-        }
-
-        public override void LoadContent()
-        {
             CreateObjectTextures();
 
             ApplyResize();
+
+            m_initialized = true;
         }
 
         private void CreateObjectTextures()

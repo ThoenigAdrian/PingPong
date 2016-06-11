@@ -77,8 +77,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlLayer\Control.cs" />
+    <Compile Include="ControlLayer\GameControl.cs" />
     <Compile Include="ControlLayer\Interpolation.cs" />
     <Compile Include="ControlLayer\Lobby.cs" />
+    <Compile Include="ControlLayer\LobbyControl.cs" />
+    <Compile Include="ControlLayer\SubControlInterface.cs" />
     <Compile Include="InputLayer\KeyboardInputs\ControlInput.cs" />
     <Compile Include="InputLayer\InputInterface.cs" />
     <Compile Include="InputLayer\InputManager.cs" />
@@ -93,10 +96,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
     <Compile Include="VisualizeLayer\LobbyVisualizer.cs" />
-    <Compile Include="VisualizeLayer\VisualizeManager.cs" />
+    <Compile Include="VisualizeLayer\VisualizerInterface.cs" />
     <Compile Include="VisualizeLayer\XNAVisualization\XNALobbyViszualizer.cs" />
-    <Compile Include="VisualizeLayer\XNAVisualization\XNAVisualizeManager.cs" />
-    <Compile Include="VisualizeLayer\XNAVisualization\XNAVisualizer.cs" />
+    <Compile Include="VisualizeLayer\VisualizerInitializatonData.cs" />
     <Compile Include="VisualizeLayer\GameStructureVisualizer.cs" />
     <Compile Include="VisualizeLayer\XNAVisualization\TextureFactory.cs" />
     <Compile Include="VisualizeLayer\XNAVisualization\XNAGameVisualizer.cs" />

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace PingPongClient.InputLayer
 {
-    class PlayerInputs
+    public class PlayerInputs
     {
         public int ID { get; set; }
 
         public PlayerMovementInputs MovementInput = PlayerMovementInputs.NoInput;
     }
 
-    enum PlayerMovementInputs
+    public enum PlayerMovementInputs
     {
         StopMoving,
         Up,
@@ -19,7 +19,7 @@ namespace PingPongClient.InputLayer
         NoInput
     }
 
-    enum ControlInputs
+    public enum ControlInputs
     {
         Pause,
         Quit,
@@ -27,7 +27,7 @@ namespace PingPongClient.InputLayer
         NoInput
     }
 
-    enum TextEditInputs
+    public enum TextEditInputs
     {
         Number,
         Delete,
@@ -35,7 +35,7 @@ namespace PingPongClient.InputLayer
         NoInput
     }
 
-    class InputManager
+    public class InputManager
     {
         KeyboardAdvanced KeyboardAdapter = new KeyboardAdvanced();
 
