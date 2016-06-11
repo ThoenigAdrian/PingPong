@@ -4,7 +4,7 @@ using System.Net;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
-    class NetworkConnection : IDisposable
+    public class NetworkConnection : IDisposable
     {
         TCPConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
@@ -14,15 +14,22 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         IPEndPoint RemoteEndPoint { get { return TcpConnection.GetEndPoint; } }
 
-        public NetworkConnection(TCPConnection tcpConnection, UDPConnection udpConnection)
+        public bool Connected { get { return TcpConnection.Connected; } }
+
+        public NetworkConnection(TCPConnection tcpConnection)
         {
-            UdpData = new DoubleBuffer<byte[]>();
             TcpData = new SafeStack<byte[]>();
 
             TcpConnection = tcpConnection;
-            UdpConnection = udpConnection;
 
             TcpConnection.DataReceivedEvent += ReceiveTCP;
+        }
+
+        public void SetUDPConnection(UDPConnection udpConnection)
+        {
+            UdpData = new DoubleBuffer<byte[]>();
+
+            UdpConnection = udpConnection;
             UdpConnection.DataReceivedEvent += ReceiveUDP;
         }
 
