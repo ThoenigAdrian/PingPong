@@ -7,10 +7,12 @@ namespace NetworkLibrary.NetworkImplementations
 {
     public abstract class NetworkInterface
     {
+
         public delegate void SessionDeathHandler(int sessionID);
         public event SessionDeathHandler SessionDied;
 
-        List<NetworkConnection> ClientConnections { get; set; }
+        public List<NetworkConnection> ClientConnections { get; set; }
+
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
@@ -27,9 +29,7 @@ namespace NetworkLibrary.NetworkImplementations
             Logger = logger;
 
             ClientConnections = new List<NetworkConnection>();
-
             UdpConnection = udpConnection;
-            UdpConnection.InitializeConnection();
         }
 
         public bool AddClientConnection(NetworkConnection clientConnection)

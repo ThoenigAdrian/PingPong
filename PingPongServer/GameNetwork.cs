@@ -1,48 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NetworkLibrary.Utility;
 using GameLogicLibrary;
+using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using System.Net.Sockets;
 
 namespace PingPongServer
 {
     
-    class GameNetwork
+    public class GameNetwork : NetworkInterface
     {
-        
-        public GameNetwork()
+        // This Object is state dependent call GrabAllNetworkDataForNextFrame() , then work with the the methods (e.g GetLastPlayerMovement)
+        List<PackageInterface[]> packagesOfAllClients = new List<PackageInterface[]>();
+
+        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host) : this(UDPGameData, Host, null) { }
+
+        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
         {
-            
+            UpdateClientConnections();
+        }
+
+        public void AddClient(NetworkConnection connection)
+        {
+            AddClientConnection(connection); // from Inherited Class
+            UpdateClientConnections(); // so we can use this new connection for GrabAllDataForTheNExtFram
+        }
+
+        private void UpdateClientConnections()
+        {
+            for (int ClientID = 0; ClientID < ClientConnections.Count; ClientID++)
+            {
+                packagesOfAllClients.Add(GetAllDataTCP(ClientID));
+            }
+        }
+
+        public void GrabAllNetworkDataForNextFrame()
+        {
+            for(int ClientID=0; ClientID < ClientConnections.Count; ClientID++)
+            {
+                packagesOfAllClients[ClientID] = GetAllDataTCP(ClientID);
+            }
         }
 
         public void BroadcastFramesToClients(ServerDataPackage Frame)
         {
-            SendAllUDP();
+            BroadCastUDP(Frame);
         }
 
-        private void SendAllUDP()
+        public ClientControls GetLastPlayerControl(int ClientID, int playerID)
         {
 
-        }
-
-        public List<ClientControls> GetAllClientControls()
-        {
-
-            List<ClientControls> allClientControls = new List<ClientControls>();
-            foreach (PackageInterface package in allPackages)
-            {
-                if (package.PackageType == PackageType.ClientControl)
-                    allClientControls.Add(((ClientControlPackage)package).ControlInput);
-            }
-
-            return allClientControls;
-        }
-
-        public ClientControls GetLastClientControl(int ID)
-        {
             ClientControls lastControl = ClientControls.NoInput;
-            foreach (PackageInterface package in allPackages)
+            foreach (PackageInterface package in packagesOfAllClients[ClientID])
             {
                 if (package.PackageType == PackageType.ClientControl)
                     lastControl = ((ClientControlPackage)package).ControlInput;
@@ -51,11 +64,9 @@ namespace PingPongServer
             return lastControl;
         }
 
-        
-
-        public ClientMovement GetLastPlayerMovement(int session)
+        public ClientMovement GetLastPlayerMovement(int ClientID, int playerID)
         {
-            List<PackageInterface> allPackages = GetAllPackagesOfTCPSession(session);
+            PackageInterface[] allPackages = GetAllDataTCP(ClientID);
             ClientMovement lastMovement = ClientMovement.NoInput;
             foreach (PackageInterface package in allPackages)
             {
@@ -66,6 +77,28 @@ namespace PingPongServer
             return lastMovement;
         }
 
+        public ClientAddPlayerRequest GetLastAddPlayerRequest(int ClientID)
+        {
+            ClientAddPlayerRequest bla = null;
+            foreach(PackageInterface pack in packagesOfAllClients[ClientID])
+            {
+                if(pack.PackageType == PackageType.ClientAddPlayerRequest)
+                    bla = (ClientAddPlayerRequest)pack;
+            }
+            return bla;
+        }
+
+        public PackageInterface[] GetAllPackages(int ClientID)
+        {
+            return GetAllDataTCP(ClientID);
+        }
+
+        public PackageInterface GetLastPackage(int ClientID)
+        {
+            PackageInterface[] allPackages = GetAllDataTCP(ClientID);
+            return allPackages[allPackages.Length - 1];
+        }
+
         // Maybe for future use
         public void BroadcastGenericPackage(PackageInterface package, SocketType type)
         {
@@ -74,7 +107,6 @@ namespace PingPongServer
             if (type == SocketType.Stream)
                 BroadCastUDP(package);
         }
-
 
     }
 }

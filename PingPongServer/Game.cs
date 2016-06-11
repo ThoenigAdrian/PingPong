@@ -6,25 +6,32 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongServer
 {
-    class Game
+    public class Game
     {
         List<Player> Players = new List<Player>();
-        //private int PlayerCount;
-        GameNetwork Network;
+        List<Client> Clients = new List<Client>();
+        public GameNetwork Network;
+        public PingPongBall Ball;
+        private int maxPlayers;
+        public ServerDataPackage NextFrame;
+
         GameStates GameState;
+        public bool isReady { get; private set; }
 
         public enum GameStates
         {
             Initializing,
             Running,
             Aborted,
-            Finished
+            Finished,
+            Ready
         }
 
-        public Game(GameNetwork Network)
+        public Game(GameNetwork Network, int PlayerCount)
         {
             this.Network = Network;
             this.GameState = GameStates.Initializing;
@@ -32,9 +39,29 @@ namespace PingPongServer
 
         }
 
-        public void AddPlayer()
+        private void AcceptNewPlayersFromConnectedClients()
         {
+            for(int ClientID = 0; ClientID < Clients.Count; ClientID++)
+            {
+                ClientAddPlayerRequest Packet = Network.GetLastAddPlayerRequest(ClientID);
+                    
+                Clients[ClientID].AddPlayer(Players.Count + 1, Packet.RequestedTeam);
+                if (Players.Count >= maxPlayers)
+                {
+                    GameState = GameStates.Ready;
+                    break;
+                }
+            }
+        }
 
+        private void AddPlayer(int PlayerID)
+        {
+            
+        }
+
+        public void AddClient(NetworkConnection client)
+        {
+            Network.AddClientConnection(client);
         }
 
         private void InitGame()
@@ -46,59 +73,95 @@ namespace PingPongServer
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
 
-
             while (GameState == GameStates.Running)
             {
-                PrepareNextFrame(ServerPackage);
+                PrepareNextFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
             }
-
             return 0;
         }
 
-        public void PrepareNextFrame(ServerDataPackage serverData)
+        public void PrepareNextFrame()
         {
-            CalculateFrame(serverData);
+            CalculateFrame();
             this.GameState = GameStates.Running;
         }
 
-        public void CalculateFrame(ServerDataPackage serverData)
+        public void CalculateFrame()
         {
-            // Do Calculations
+            NextFrame = new ServerDataPackage();
 
-            serverData.BallDirX = (serverData.BallDirX + 3F) % 300 + 100;
-            serverData.BallDirY += (serverData.BallDirX + 3F) % 300 + 100;
-            foreach (ServerDataPackage.Player player in serverData.PlayerList)
+            Ball.PositionX = (Ball.PositionX + 3F) % 300 + 100;
+            NextFrame.Ball.PositionX = Ball.PositionX;
+
+            Ball.PositionY = (Ball.PositionX + 3F) % 300 + 100;
+            NextFrame.Ball.PositionY = Ball.PositionY;
+
+            foreach (Player player in Players)
             {
-
-                player.PositionX = player.PositionX + 0.5F;
-                player.PositionX = player.PositionX % GameInitializers.BORDER_WIDTH;
+                player.PositionX = (player.PositionX + 0.5F) % GameInitializers.BORDER_WIDTH;
+                player.PositionY = (player.PositionY + 0.5F) % GameInitializers.BORDER_HEIGHT;
             }
+
 
         }
+
+        public class Client
+        {
+            GameNetwork GameNetwork;
+            public int ClientID;
+            List<Player> Players = new List<Player>();
+
+            public Client(GameNetwork GameNetwork, int ClientID)
+            {
+                this.ClientID = ClientID;
+                this.GameNetwork = GameNetwork;
+            }
+
+            public void AddPlayer(int PlayerID, Teams Team)
+            {
+                Players.Add(new Player(this, PlayerID, Team));
+            }
+
+            public ClientControls ReceiveLastPlayerControl(int PlayerID)
+            {
+                return GameNetwork.GetLastPlayerControl(ClientID, PlayerID);
+            }
+
+            public ClientMovement ReceiveLastPlayerMovement(int PlayerID)
+            {
+                return GameNetwork.GetLastPlayerMovement(ClientID, PlayerID);
+            }
+        }
         
-        public class Player
+        public class Player : ServerDataPackage.Player
         {
             public ClientMovement PlayerMovement { get; set; }
-            ServerNetwork NetworkInterface;
+            Teams Team;
+            Client Client;
             public int PlayerID;
-            public int SessionID;
-            public Player(ServerNetwork network, int PlayerID, int SessionID)
+
+            public Player(Client Client, int PlayerID, Teams Team)
             {
-                this.NetworkInterface = network;
-                this.SessionID = SessionID;
+                this.Client = Client;
                 this.PlayerID = PlayerID;
+                this.Team = Team;
             }
 
-            public ClientControls ReceiveLastControl()
+            public ClientControls ReceiveLastPlayerControl()
             {
-                return NetworkInterface.GetLastClientControl(SessionID);
+                return Client.ReceiveLastPlayerControl(this.PlayerID);
             }
-            public ClientMovement ReceiveLastMovement()
+            public ClientMovement ReceiveLastPlayerMovement()
             {
-                return NetworkInterface.GetLastPlayerMovement(SessionID);
+                return Client.ReceiveLastPlayerMovement(this.PlayerID);
             }
 
+
+        }
+
+        public class PingPongBall : ServerDataPackage.PingPongBall
+        {
 
         }
     }

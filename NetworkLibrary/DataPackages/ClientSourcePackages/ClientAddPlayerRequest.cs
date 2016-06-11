@@ -2,9 +2,9 @@
 
 namespace NetworkLibrary.DataPackages
 {
-    class ClientAddPlayerRequest : ClientRegisteredPackage
+    public class ClientAddPlayerRequest : ClientRegisteredPackage
     {
-        public override PackageType PackageType { get { return PackageType.ClientAddRequest; } }
+        public override PackageType PackageType { get { return PackageType.ClientAddPlayerRequest; } }
 
         public Teams RequestedTeam { get; set; }
     }
