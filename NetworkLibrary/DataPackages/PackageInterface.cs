@@ -9,7 +9,7 @@
     {
         ClientControl,
         ClientPlayerMovement,
-        ClientAddRequest,
+        ClientAddPlayerRequest,
         ClientInitalizeGamePackage,
         ClientJoinGameRequest,
 
