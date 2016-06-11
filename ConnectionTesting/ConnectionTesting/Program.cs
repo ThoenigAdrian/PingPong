@@ -8,16 +8,27 @@ namespace ConnectionTesting
         static void Main(string[] args)
         {
             Server server = new Server();
-            Thread serverThread = new Thread(server.StartServer);
-            serverThread.Start();
+            new Thread(server.StartServer).Start();
 
             string cmd;
             while((cmd = Console.In.ReadLine()) != "exit")
             {
-                server.m_commandStack.Write(cmd);
+                if (cmd == "start" && server == null)
+                {
+                    server = new Server();
+                    new Thread(server.StartServer).Start();
+                }
+                if (cmd == "disconnect" && server != null)
+                {
+                    server.Shutdown();
+                    server = null;
+                }
+                else
+                    server.m_commandStack.Write(cmd);
             }
 
-            server.Shutdown();
+            if(server != null)
+                server.Shutdown();
 
             Console.In.ReadLine();
         }
