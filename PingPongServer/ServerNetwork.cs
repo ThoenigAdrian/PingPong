@@ -25,11 +25,18 @@ namespace PingPongServer
         {
             return new PackageAdapter();
         }
-
-        public void SendObjectPositions(ServerDataPackage serverData)
+        
+        public void BroadcastFramesToClients(ServerDataPackage serverData)
         {
-            SendDataUDP(serverData, 0);
+            BroadCastUDP(serverData);
         }
+
+        public void SendGameControlToClient()
+        {
+
+        }
+
+        public 
 
         public PlayerMovementPackage GetPlayerMovement()
         {

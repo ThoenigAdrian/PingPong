@@ -10,6 +10,8 @@
         ClientControl,
         ClientPlayerMovement,
         ClientAddRequest,
-        ServerData
+        ServerData,
+        ServerGameControl,
+        ClientInitalizeGamePackage
     }
 }
