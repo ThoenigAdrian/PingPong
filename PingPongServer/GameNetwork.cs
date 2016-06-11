@@ -7,13 +7,16 @@ using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using System.Net.Sockets;
 
 namespace PingPongServer
 {
     
     public class GameNetwork : NetworkInterface
     {
-        
+        public Dictionary<int, PackageInterface []> allClients = new Dictionary<int, PackageInterface[]>();
+        List<PackageInterface[]> packagesOfAllClients = new List<PackageInterface[]>();
+
         public GameNetwork(UDPConnection UDPGameData, TCPConnection Host) : this(UDPGameData, Host, null)
         {
             
@@ -21,8 +24,25 @@ namespace PingPongServer
 
         public GameNetwork(UDPConnection UDPGameData, TCPConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
         {
-
+            UpdateClientConnections();
         }
+
+        public void UpdateClientConnections()
+        {
+            for (int ClientID = 0; ClientID < ClientConnections.Count; ClientID++)
+            {
+                packagesOfAllClients.Add(GetAllDataTCP(ClientID));
+            }
+        }
+
+        public void GrabAllNetworkDataForTheNextFrame()
+        {
+            for(int ClientID=0; ClientID < ClientConnections.Count; ClientID++)
+            {
+                packagesOfAllClients[ClientID] = GetAllDataTCP(ClientID);
+            }
+        }
+
         public void BroadcastFramesToClients(ServerDataPackage Frame)
         {
             SendAllUDP();
@@ -30,7 +50,8 @@ namespace PingPongServer
 
         public void AddClient(NetworkConnection connection)
         {
-            AddClientConnection(connection);
+            AddClientConnection(connection); // from Inherited Class
+            UpdateClientConnections(); // so we can use this new connection for GrabAllDataForTheNExtFram
         }
 
         private void SendAllUDP()
@@ -38,23 +59,12 @@ namespace PingPongServer
 
         }
 
-        public List<ClientControls> GetAllClientControls()
+
+        public ClientControls GetLastPlayerControl(int ClientID, int playerID)
         {
 
-            List<ClientControls> allClientControls = new List<ClientControls>();
-            foreach (PackageInterface package in allPackages)
-            {
-                if (package.PackageType == PackageType.ClientControl)
-                    allClientControls.Add(((ClientControlPackage)package).ControlInput);
-            }
-
-            return allClientControls;
-        }
-
-        public ClientControls GetLastClientControl(int ID)
-        {
             ClientControls lastControl = ClientControls.NoInput;
-            foreach (PackageInterface package in allPackages)
+            foreach (PackageInterface package in packagesOfAllClients[ClientID])
             {
                 if (package.PackageType == PackageType.ClientControl)
                     lastControl = ((ClientControlPackage)package).ControlInput;
@@ -63,9 +73,9 @@ namespace PingPongServer
             return lastControl;
         }
 
-        public ClientMovement GetLastPlayerMovement(int session)
+        public ClientMovement GetLastPlayerMovement(int ClientID, int playerID)
         {
-            List<PackageInterface> allPackages = GetAllPackagesOfTCPSession(session);
+            PackageInterface[] allPackages = GetAllDataTCP(ClientID);
             ClientMovement lastMovement = ClientMovement.NoInput;
             foreach (PackageInterface package in allPackages)
             {
@@ -76,6 +86,12 @@ namespace PingPongServer
             return lastMovement;
         }
 
+        public PackageInterface GetLastPackage(int ClientID)
+        {
+            PackageInterface[] allPackages = GetAllDataTCP(ClientID);
+            return allPackages[allPackages.Length - 1];
+        }
+
         // Maybe for future use
         public void BroadcastGenericPackage(PackageInterface package, SocketType type)
         {
@@ -84,7 +100,6 @@ namespace PingPongServer
             if (type == SocketType.Stream)
                 BroadCastUDP(package);
         }
-
 
     }
 }
