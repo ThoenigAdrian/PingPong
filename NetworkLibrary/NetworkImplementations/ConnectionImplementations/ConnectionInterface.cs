@@ -21,7 +21,14 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     {
         LogWriter Logger { get; set; }
 
-        public bool Connected { get { return ConnectionSocket.Connected; } }
+        public bool Connected
+        {
+            get
+            {
+                return ConnectionSocket.Connected && 
+                    !(ConnectionSocket.Poll(1000, SelectMode.SelectRead) && ConnectionSocket.Available == 0);
+            }
+        }
 
         protected Socket ConnectionSocket { get; set; }
 

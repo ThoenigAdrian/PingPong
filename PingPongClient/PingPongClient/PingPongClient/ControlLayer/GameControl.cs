@@ -29,6 +29,9 @@ namespace PingPongClient.ControlLayer
         public override void Update(GameTime gameTime)
         {
             if (Network != null)
+                Network.UpdateConnections();
+
+            if (Network != null)
             {
                 SendClientCommandos();
                 SendMovementInputs();

@@ -28,6 +28,11 @@ namespace PingPongClient.ControlLayer
             (Visualizer as LobbyVisualizer).SetLobby(GameLobby);
         }
 
+        public void SetStatus(string status)
+        {
+            GameLobby.Status = status;
+        }
+
         public override void Update(GameTime gameTime)
         {
             HandleTextInput();
@@ -80,6 +85,7 @@ namespace PingPongClient.ControlLayer
 
                 connectionSocket.Connect(server);
                 Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
+                Network.SessionDied += ParentControl.NetworkDeathHandler;
                 ParentControl.Mode = GameMode.Game; 
                 return;
             }

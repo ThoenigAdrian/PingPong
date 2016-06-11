@@ -96,6 +96,15 @@ namespace PingPongClient
             base.Draw(gameTime);
         }
 
+        public void NetworkDeathHandler(int sessionID)
+        {
+            Network.SessionDied -= NetworkDeathHandler;
+            Network.Disconnect();
+            Network = null;
+            LobbyControl.SetStatus("Connection died.");
+            Mode = GameMode.Lobby;
+        }
+
         protected void HandleControlInputs()
         {
             if (InputManager.GetControlInput() == ControlInputs.Quit)

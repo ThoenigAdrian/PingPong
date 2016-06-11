@@ -8,6 +8,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class NetworkConnection : IDisposable
     {
+        public Session ClientSession { get; set; }
+
         TCPConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
 
@@ -25,6 +27,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             Adapter = new PackageAdapter();
 
             TcpData = new SafeStack<byte[]>();
+
+            ClientSession = new Session(-1);
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
