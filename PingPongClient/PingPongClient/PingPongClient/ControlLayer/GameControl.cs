@@ -88,8 +88,8 @@ namespace PingPongClient.ControlLayer
                 Structure.m_players[i].PosY = data.PlayerList[i].PositionY;
             }
 
-            Structure.m_ball.PosX = data.BallPosX;
-            Structure.m_ball.PosY = data.BallPosY;
+            Structure.m_ball.PosX = data.Ball.PositionX;
+            Structure.m_ball.PosY = data.Ball.PositionY;
         }
 
         protected void SendClientCommandos()
