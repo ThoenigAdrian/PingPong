@@ -18,7 +18,7 @@ namespace ConnectionTesting
                     server = new Server();
                     new Thread(server.StartServer).Start();
                 }
-                if (cmd == "disconnect" && server != null)
+                if (cmd == "stop" && server != null)
                 {
                     server.Shutdown();
                     server = null;
