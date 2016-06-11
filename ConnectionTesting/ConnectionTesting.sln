@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectionTesting", "ConnectionTesting\ConnectionTesting.csproj", "{A270F74F-A4DD-49D8-9816-378096E7C937}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicLibrary", "..\GameLogicLibrary\GameLogicLibrary.csproj", "{212421D7-F509-4477-A78D-BA638AB63EB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A270F74F-A4DD-49D8-9816-378096E7C937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A270F74F-A4DD-49D8-9816-378096E7C937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A270F74F-A4DD-49D8-9816-378096E7C937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A270F74F-A4DD-49D8-9816-378096E7C937}.Release|Any CPU.Build.0 = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
