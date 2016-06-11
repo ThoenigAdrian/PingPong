@@ -9,9 +9,16 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     {
         public string ErrorMessage { get; private set; }
 
-        public ConnectionException(string exceptionMessage)
+        Exception BaseException { get; set; }
+
+        public ConnectionException(string exceptionMessage) : this (exceptionMessage, null)
+        {
+        }
+
+        public ConnectionException(string exceptionMessage, Exception innerException)
         {
             ErrorMessage = exceptionMessage;
+            BaseException = innerException;
         }
     }
 
@@ -77,8 +84,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 }
                 catch (Exception ex)
                 {
-                    Log("Receive loop threw exception: " + ex.Message);
-                    return;
+                    throw new ConnectionException("Receive loop threw exception: " + ex.Message, ex);
                 }
             }
         }
@@ -104,9 +110,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                     ConnectionSocket.Close();
                 Log("Disconnected.");
             }
-            catch
+            catch (Exception ex)
             {
-                Log("Disconnecting error!");
+                throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);   
             }
         }
 

@@ -1,7 +1,6 @@
-﻿using NetworkLibrary.Utility;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System;
+using NetworkLibrary.Utility;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
