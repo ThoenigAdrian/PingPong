@@ -24,9 +24,7 @@ namespace NetworkLibrary.NetworkImplementations
             Logger = logger;
 
             ClientConnections = new List<NetworkConnection>();
-
             UdpConnection = udpConnection;
-            UdpConnection.InitializeConnection();
         }
 
         public bool AddClientConnection(NetworkConnection clientConnection)

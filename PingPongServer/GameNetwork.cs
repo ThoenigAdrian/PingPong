@@ -4,14 +4,18 @@ using System.Linq;
 using GameLogicLibrary;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 namespace PingPongServer
 {
     
-    class GameNetwork
+    class GameNetwork : NetworkInterface
     {
         
-        public GameNetwork()
+        
+        new IPEndpoint(Ip.Address.any, server_port_game_constatns);
+        
+        public GameNetwork(UDPConnection UDPGameData)
         {
             
         }
@@ -50,8 +54,6 @@ namespace PingPongServer
 
             return lastControl;
         }
-
-        
 
         public ClientMovement GetLastPlayerMovement(int session)
         {

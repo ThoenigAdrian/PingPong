@@ -4,8 +4,11 @@ using System.Net;
 using NetworkLibrary.Utility;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.DataPackages;
+using NetworkLibrary.DataPackages.ClientSourcePackages;
 using System.Threading;
 using System.Collections.Generic;
+using NetworkLibrary.NetworkImplementations;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 namespace PingPongServer
 {
@@ -16,6 +19,8 @@ namespace PingPongServer
 
         public Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         public ServerNetwork ServerNetwork = new ServerNetwork();
+
+        public object ClientInitializeGamePackage { get; private set; }
 
         public Servers()
         {
@@ -38,7 +43,20 @@ namespace PingPongServer
                 {
                     connectionList.Add(newSocket);
                     InitializeClient(newSocket);
+                    TCPConnection tcp = new TCPConnection(newSocket, null);
+                    NetworkConnection news = new NetworkConnection(tcp);
+                    PackageInterface packet = news.ReadTCP();
+                    if(packet.PackageType==PackageType.ClientInitalizeGamePackage)
+                    {
+                        ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)news.ReadTCP();
+                        GameNetwork newGameNetwork = new GameNetwork();
+                        Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
+                    }
                     newSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    
+                    
+                    GameNetwork asdf()
+                    GameNetwork(news);
                     ThreadPool.QueueUserWorkItem(AcceptNewConnection, newSocket);
                 }
             }
@@ -46,16 +64,11 @@ namespace PingPongServer
 
         private void InitializeClient(Socket socket)
         {
-            
-
             ServerNetwork.
             if (genericPackage.PackageType == PackageType.ClientInitalizeGamePackage)
             {
                 GameNetwork newGameNetwork = new GameNetwork();
             }
-                
-                
-
         }
 
         public void AcceptNewConnection(object socket)

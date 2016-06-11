@@ -24,7 +24,7 @@ namespace PingPongServer
             Finished
         }
 
-        public Game(GameNetwork Network)
+        public Game(GameNetwork Network, int PlayerCount)
         {
             this.Network = Network;
             this.GameState = GameStates.Initializing;
