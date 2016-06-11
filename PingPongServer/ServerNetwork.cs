@@ -3,22 +3,25 @@ using NetworkLibrary.Utility;
 using System.Net.Sockets;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.DataPackages;
+using GameLogicLibrary;
+using System.Collections.Generic;
 
 namespace PingPongServer
 {
-    class ServerNetwork : NetworkInterface
+    public class ServerNetwork : NetworkInterface
     {
-        public ServerNetwork(Socket acceptedSocket)
-            : this(acceptedSocket, null)
+
+        List<PackageInterface> allPackages;
+
+        public ServerNetwork() : this(null)
         {
-            
+
         }
 
-        public ServerNetwork(Socket acceptedSocket, LogWriter logger)
+        public ServerNetwork(LogWriter logger)
             : base(NetworkLibrary.NetworkConstants.SERVER_PORT, logger)
         {
-            Log("Built up network.");
-            AddTCPConnection(acceptedSocket);
+            
         }
 
         protected override PackageAdapter InitializeAdapter()
@@ -26,21 +29,27 @@ namespace PingPongServer
             return new PackageAdapter();
         }
         
-        public void BroadcastFramesToClients(ServerDataPackage serverData)
+        public void BroadcastFramesToClients(ServerDataPackage serverData, int GameID)
         {
             BroadCastUDP(serverData);
         }
 
-        public void SendGameControlToClient()
+        public void BroadcastGameControlsToClients(ServerGameControlPackage serverControls)
         {
-
+            BroadCastTCP(serverControls);
         }
 
-        public 
-
-        public PlayerMovementPackage GetPlayerMovement()
+        private SendTCP()
         {
-            return GetDataTCP(0) as PlayerMovementPackage;
+            this.SendDataTCP()
         }
+                
+        // Execute once per Frame then access the GetAllClientControls , GetLastPlayerMovement etc.
+        public void ReceivePlayerTraffic(int session)
+        {
+            allPackages = GetAllPackagesOfTCPSession(session);
+        }
+
+        
     }
 }
