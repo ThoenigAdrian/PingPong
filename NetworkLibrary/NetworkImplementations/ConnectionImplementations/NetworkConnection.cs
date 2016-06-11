@@ -53,6 +53,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void SendUDP(PackageInterface package)
         {
+            if (UdpConnection == null)
+                throw new ConnectionException("Network connection does not have an UDP connection!");
+
             UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint);
         }
 
@@ -63,6 +66,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public PackageInterface ReadUDP()
         {
+            if (UdpConnection == null)
+                throw new ConnectionException("Network connection does not have an UDP connection!");
+
             return Adapter.CreatePackageFromNetworkData(UdpData.Read());
         }
 

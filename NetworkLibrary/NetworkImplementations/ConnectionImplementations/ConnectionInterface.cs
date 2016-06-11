@@ -7,7 +7,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class ConnectionException : Exception
     {
+        public string ErrorMessage { get; private set; }
 
+        public ConnectionException(string exceptionMessage)
+        {
+            ErrorMessage = exceptionMessage;
+        }
     }
 
 
