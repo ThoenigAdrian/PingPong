@@ -47,7 +47,6 @@
     <Compile Include="GameNetwork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="ServerNetwork.cs" />
     <Compile Include="Servers.cs" />
   </ItemGroup>
   <ItemGroup>

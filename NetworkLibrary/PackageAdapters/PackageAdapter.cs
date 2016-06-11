@@ -1,8 +1,8 @@
 ﻿using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.DataPackages;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System;
+using NetworkLibrary.DataPackages.ClientSourcePackages;
 
 namespace NetworkLibrary.PackageAdapters
 {
@@ -25,8 +25,18 @@ namespace NetworkLibrary.PackageAdapters
                     return JsonConvert.DeserializeObject<ServerDataPackage>(networkDataString);
                 case PackageType.ClientControl:
                     return JsonConvert.DeserializeObject<ClientControlPackage>(networkDataString);
-                case PackageType.ClientAddRequest:
+                case PackageType.ClientAddPlayerRequest:
                     return JsonConvert.DeserializeObject<ClientAddPlayerRequest>(networkDataString);
+                case PackageType.ClientInitalizeGamePackage:
+                    return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(networkDataString);
+                case PackageType.ClientJoinGameRequest:
+                    return JsonConvert.DeserializeObject<ClientJoinGameRequest>(networkDataString);
+                case PackageType.ServerAddPlayerResponsePackage:
+                    return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(networkDataString);
+                case PackageType.ServerGameControl:
+                    return JsonConvert.DeserializeObject<ServerGameControlPackage>(networkDataString);
+                case PackageType.ServerJoinGameResponsePackage:
+                    return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(networkDataString);
                 case PackageType.ClientPlayerMovement:
                     return JsonConvert.DeserializeObject<PlayerMovementPackage>(networkDataString);
             }

@@ -9,6 +9,9 @@ namespace NetworkLibrary.DataPackages.ServerSourcePackages
             get { return PackageType.ServerData; }
         }
 
+        public List<Player> PlayerList = new List<Player>();
+        public PingPongBall Ball = new PingPongBall();
+
         public class Player
         {
             public float PositionX { get; set; }
@@ -17,12 +20,15 @@ namespace NetworkLibrary.DataPackages.ServerSourcePackages
             public float DirectionY { get; set; }
 
         }
+              
 
-        public List<Player> PlayerList = new List<Player>();        
-
-        public float BallPosX { get; set; }
-        public float BallPosY { get; set; }
-        public float BallDirX { get; set; }
-        public float BallDirY { get; set; }
+        public class PingPongBall
+        {
+            public float PositionX { get; set; }
+            public float PositionY { get; set; }
+            public float DirectionX { get; set; }
+            public float DirectionY { get; set; }
+        }
+        
     }
 }
