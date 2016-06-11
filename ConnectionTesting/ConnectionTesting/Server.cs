@@ -29,12 +29,16 @@ namespace ConnectionTesting
 
         public void StartServer()
         {
+            Console.Out.WriteLine("Initializing server...");
+
             m_udpConnection = new UDPConnection(new IPEndPoint(IPAddress.Any, 4200));
 
             m_network = new ServerNetwork(m_udpConnection);
 
             m_acceptThread = new Thread(Listen.AcceptLoop);
             m_acceptThread.Start();
+
+            Console.Out.WriteLine("Server started.");
 
             ServerCylce();
         }
@@ -73,6 +77,9 @@ namespace ConnectionTesting
                     case "send":
                         Broadcast();
                         break;
+                    case "disconnect":
+                        Disconnect();
+                        break;
                 }
             }
         }
@@ -87,6 +94,11 @@ namespace ConnectionTesting
             m_network.SendPositionData(package);
 
             Console.Out.WriteLine("Sent position data.");
+        }
+
+        private void Disconnect()
+        {
+
         }
 
         public void Shutdown()
