@@ -14,20 +14,23 @@ namespace PingPongServer
     
     public class GameNetwork : NetworkInterface
     {
-        public Dictionary<int, PackageInterface []> allClients = new Dictionary<int, PackageInterface[]>();
+        // This Object is state dependent call GrabAllNetworkDataForNextFrame() , then work with the the methods (e.g GetLastPlayerMovement)
         List<PackageInterface[]> packagesOfAllClients = new List<PackageInterface[]>();
 
-        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host) : this(UDPGameData, Host, null)
-        {
-            
-        }
+        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host) : this(UDPGameData, Host, null) { }
 
         public GameNetwork(UDPConnection UDPGameData, TCPConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
         {
             UpdateClientConnections();
         }
 
-        public void UpdateClientConnections()
+        public void AddClient(NetworkConnection connection)
+        {
+            AddClientConnection(connection); // from Inherited Class
+            UpdateClientConnections(); // so we can use this new connection for GrabAllDataForTheNExtFram
+        }
+
+        private void UpdateClientConnections()
         {
             for (int ClientID = 0; ClientID < ClientConnections.Count; ClientID++)
             {
@@ -35,7 +38,7 @@ namespace PingPongServer
             }
         }
 
-        public void GrabAllNetworkDataForTheNextFrame()
+        public void GrabAllNetworkDataForNextFrame()
         {
             for(int ClientID=0; ClientID < ClientConnections.Count; ClientID++)
             {
@@ -45,20 +48,8 @@ namespace PingPongServer
 
         public void BroadcastFramesToClients(ServerDataPackage Frame)
         {
-            SendAllUDP();
+            BroadCastUDP(Frame);
         }
-
-        public void AddClient(NetworkConnection connection)
-        {
-            AddClientConnection(connection); // from Inherited Class
-            UpdateClientConnections(); // so we can use this new connection for GrabAllDataForTheNExtFram
-        }
-
-        private void SendAllUDP()
-        {
-
-        }
-
 
         public ClientControls GetLastPlayerControl(int ClientID, int playerID)
         {
@@ -84,6 +75,22 @@ namespace PingPongServer
             }
 
             return lastMovement;
+        }
+
+        public ClientAddPlayerRequest GetLastAddPlayerRequest(int ClientID)
+        {
+            ClientAddPlayerRequest bla = null;
+            foreach(PackageInterface pack in packagesOfAllClients[ClientID])
+            {
+                if(pack.PackageType == PackageType.ClientAddPlayerRequest)
+                    bla = (ClientAddPlayerRequest)pack;
+            }
+            return bla;
+        }
+
+        public PackageInterface[] GetAllPackages(int ClientID)
+        {
+            return GetAllDataTCP(ClientID);
         }
 
         public PackageInterface GetLastPackage(int ClientID)
