@@ -13,6 +13,7 @@ namespace NetworkLibrary.NetworkImplementations
         List<NetworkConnection> ClientConnections { get; set; }
         UDPConnection UdpConnection { get; set; }
 
+
         LogWriter Logger { get; set; }
 
         protected PackageAdapter NetworkPackageAdapter { get; private set; }
@@ -71,6 +72,20 @@ namespace NetworkLibrary.NetworkImplementations
 
             UdpConnection.Disconnect();
         }
+
+        protected List<PackageInterface> GetAllPackagesOfTCPSession(int session)
+        {
+            List <PackageInterface> allPackages = new List<PackageInterface>();
+            byte[] data = ClientConnections[session].ReadTCP();
+            while(data != null)
+            {
+                allPackages.Add(NetworkPackageAdapter.CreatePackageFromNetworkData(data));
+                data = ClientConnections[session].ReadTCP();                                   
+            }
+            return allPackages;
+
+        }
+
 
         protected PackageInterface GetDataTCP(int session)
         {

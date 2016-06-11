@@ -1,4 +1,6 @@
-﻿namespace NetworkLibrary.DataPackages
+﻿using System.Collections.Generic;
+
+namespace NetworkLibrary.DataPackages.ServerSourcePackages
 {
     public class ServerDataPackage : PackageInterface
     {
@@ -7,15 +9,16 @@
             get { return PackageType.ServerData; }
         }
 
-        public float Player1PosX { get; set; }
-        public float Player1PosY { get; set; }
-        public float Player1DirX { get; set; }
-        public float Player1DirY { get; set; }
+        public class Player
+        {
+            public float PositionX { get; set; }
+            public float PositionY { get; set; }
+            public float DirectionX { get; set; }
+            public float DirectionY { get; set; }
 
-        public float Player2PosX { get; set; }
-        public float Player2PosY { get; set; }
-        public float Player2DirX { get; set; }
-        public float Player2DirY { get; set; }
+        }
+
+        public List<Player> PlayerList = new List<Player>();        
 
         public float BallPosX { get; set; }
         public float BallPosY { get; set; }

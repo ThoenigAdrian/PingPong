@@ -1,6 +1,7 @@
 ﻿using NetworkLibrary;
 using System.Net.Sockets;
 using System.Net;
+using System.Collections.Generic;
 using NetworkLibrary.Utility;
 using System.Threading;
 using GameLogicLibrary;
@@ -17,16 +18,16 @@ namespace PingPongServer
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterListeningSocket.Listen(1); // Allow two Clients for now
             LogWriter Logger = new LogWriterConsole();
-
             PackageAdapter adapter = new PackageAdapter();
-
             Socket acceptSocket = MasterListeningSocket.Accept();
-
-            ServerNetwork serverNetwork = new ServerNetwork(acceptSocket, Logger);
-
-            //Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
             Logger.Log("Client connected");
+            ServerNetwork serverNetwork = new ServerNetwork(acceptSocket, Logger);
+            Logger.Log("Client connected");
+            Socket acceptSocket2 = MasterListeningSocket.Accept();
+            ServerNetwork serverNetwork2 = new ServerNetwork(acceptSocket, Logger);
+            
+            Logger.Log("Client connected");
+
 
             SpamUDPPositionData(serverNetwork);
         }
