@@ -94,7 +94,6 @@ namespace ConnectionTesting
             Console.Out.WriteLine("Shutting down server...");
             m_stopServer = true;
             Listen.Disconnect();
-            m_network.Disconnect();
 
             Console.Out.WriteLine("Server shut down. Good night Mister Bond.");
         }
@@ -135,24 +134,24 @@ namespace ConnectionTesting
 
             while(!m_abortAccepting)
             {
-                Socket acceptedSocket;
-                try
-                {
-                    acceptedSocket = m_listeningSocket.Accept();
-                    m_socketQueue.Write(acceptedSocket);
-                }
-                catch (SocketException)
-                {
-                    //nothing to see here, its supposed to work like this
-                }
-
+                Socket acceptedSocket = m_listeningSocket.Accept();
+                m_socketQueue.Write(acceptedSocket);
             }
         }
 
         public void Disconnect()
         {
             m_abortAccepting = true;
-            m_listeningSocket.Close();
+
+            try
+            {
+                m_listeningSocket.Shutdown(SocketShutdown.Receive);
+                m_listeningSocket.Close();
+            }
+            catch (SocketException ex)
+            {
+                //nothing to see here, its supposed to work like this
+            }
         }
     }
 }
