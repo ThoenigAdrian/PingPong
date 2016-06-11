@@ -20,7 +20,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected Socket ConnectionSocket { get; set; }
 
-        //protected DataContainer<byte[]> ReceivedData { get; set; }
         protected Thread ReceiveThread { get; set; }
         protected bool AbortReceive { get; set; }
 
@@ -28,9 +27,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
         }
 
-        public ConnectionInterface(Socket connectionSocket)
+        public ConnectionInterface(Socket connectionSocket, LogWriter logger)
         {
-            Logger = null;
+            Logger = logger;
 
             InitializeSocket(connectionSocket);
         }

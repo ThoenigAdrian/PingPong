@@ -13,8 +13,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public IPEndPoint GetEndPoint { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } }
 
-        public TCPConnection(Socket socket) 
-            : base(socket)
+        public TCPConnection(Socket socket, LogWriter logger = null) 
+            : base(socket, logger)
         {
         }
 

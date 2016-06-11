@@ -78,17 +78,18 @@ namespace NetworkLibrary.NetworkImplementations
             return NetworkPackageAdapter.CreatePackageFromNetworkData(data);
         }
 
-        protected PackageInterface[] GetAllDataTCP()
+        protected PackageInterface[] GetAllDataTCP(int session)
         {
-            PackageInterface[] packages = new PackageInterface[ClientCount];
-            
-            for(int session = 0; session < ClientCount; session++)
+            List<PackageInterface> packages = new List<PackageInterface>();
+
+            PackageInterface package = GetDataTCP(session);
+            while (package != null)
             {
-                packages[0] = GetDataTCP(session);
-                session++;
+                packages.Add(package);
+                package = GetDataTCP(session);
             }
 
-            return packages;
+            return packages.ToArray();
         }
 
         protected PackageInterface GetDataUDP(int session)
