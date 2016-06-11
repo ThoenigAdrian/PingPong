@@ -1,17 +1,10 @@
 using Microsoft.Xna.Framework;
-using System.Net;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using NetworkLibrary.Utility;
-using NetworkLibrary;
-using GameLogicLibrary;
 using PingPongClient.ControlLayer;
-using GameLogicLibrary.GameObjects;
 using System;
-using System.Net.Sockets;
-using NetworkLibrary.DataPackages;
 using Microsoft.Xna.Framework.Graphics;
-using PingPongClient.VisualizeLayer.XNAVisualization;
 using PingPongClient.VisualizeLayer;
 
 namespace PingPongClient
@@ -51,7 +44,7 @@ namespace PingPongClient
 
         GraphicsDeviceManager GraphicsManager { get; set; }
 
-        LogWriter Logger = new LogWriterConsole();
+        public LogWriter Logger = new LogWriterConsole();
 
         public Control()
         {

@@ -6,7 +6,6 @@ using PingPongClient.VisualizeLayer;
 using PingPongClient.VisualizeLayer.XNAVisualization;
 using System.Net;
 using System.Net.Sockets;
-using System;
 
 namespace PingPongClient.ControlLayer
 {
@@ -81,7 +80,7 @@ namespace PingPongClient.ControlLayer
                     Network.Disconnect();
 
                 connectionSocket.Connect(server);
-                Network = new ClientNetwork(connectionSocket);
+                Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
                 ParentControl.Mode = GameMode.Game; 
                 return;
             }

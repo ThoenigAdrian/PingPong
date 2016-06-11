@@ -82,6 +82,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 {
                     ReceiveFromSocket();
                 }
+                catch (SocketException ex)
+                {
+                    Log(ex.Message);
+                }
                 catch (Exception ex)
                 {
                     throw new ConnectionException("Receive loop threw exception: " + ex.Message, ex);
@@ -110,9 +114,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                     ConnectionSocket.Close();
                 Log("Disconnected.");
             }
+            catch (SocketException ex)
+            {
+                Log(ex.Message);
+            }
             catch (Exception ex)
             {
-                throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);   
+                throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
             }
         }
 
