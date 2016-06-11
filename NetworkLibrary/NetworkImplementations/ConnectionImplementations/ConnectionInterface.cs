@@ -14,7 +14,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
     public abstract class ConnectionInterface
     {
-        public LogWriter Logger { get; set; }
+        LogWriter Logger { get; set; }
 
         public bool Connected { get { return ConnectionSocket.Connected; } }
 

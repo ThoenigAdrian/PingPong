@@ -13,7 +13,6 @@ namespace NetworkLibrary.NetworkImplementations
         List<NetworkConnection> ClientConnections { get; set; }
         UDPConnection UdpConnection { get; set; }
 
-
         LogWriter Logger { get; set; }
 
         protected PackageAdapter NetworkPackageAdapter { get; private set; }
@@ -25,7 +24,7 @@ namespace NetworkLibrary.NetworkImplementations
             return ClientCount > 0;
         }
 
-        protected NetworkInterface(int udpListeningPort, LogWriter logger)
+        protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
             Logger = logger;
 
@@ -33,32 +32,20 @@ namespace NetworkLibrary.NetworkImplementations
 
             ClientConnections = new List<NetworkConnection>();
 
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, udpListeningPort);
-            UdpConnection = new UDPConnection(localEndPoint);
-            UdpConnection.Logger = Logger;
+            UdpConnection = udpConnection;
             UdpConnection.InitializeConnection();
         }
 
-        public bool AddClientConnection(Socket connectionSocket)
+        public bool AddClientConnection(NetworkConnection clientConnection)
         {
-            try
+            if (clientConnection.Connected)
             {
-                TCPConnection TcpConnection = new TCPConnection(connectionSocket);
-                TcpConnection.Logger = Logger;
-                TcpConnection.InitializeConnection();
-
-                if(TcpConnection.Connected)
-                {
-                    ClientConnections.Add(new NetworkConnection(TcpConnection, UdpConnection));
-                    return true;
-                }
-
-                Log("Could not add connection!\nNot connected after initialiazation.");
+                clientConnection.SetUDPConnection(UdpConnection);
+                ClientConnections.Add(clientConnection);
+                return true;
             }
-            catch (ConnectionException ex)
-            {
-                Log("Could not add connection!\nException message: " + ex.Message);
-            }
+
+            Log("Could not add connection!\nNot connected!");
 
             return false;
         }
