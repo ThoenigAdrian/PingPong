@@ -1,10 +1,7 @@
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -14,8 +11,6 @@ namespace NetworkLibrary.NetworkImplementations
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
-
-        protected PackageAdapter NetworkPackageAdapter { get; private set; }
 
         public int ClientCount { get { return ClientConnections.Count; } }
 
@@ -27,8 +22,6 @@ namespace NetworkLibrary.NetworkImplementations
         protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
             Logger = logger;
-
-            NetworkPackageAdapter = InitializeAdapter();
 
             ClientConnections = new List<NetworkConnection>();
 
@@ -50,8 +43,6 @@ namespace NetworkLibrary.NetworkImplementations
             return false;
         }
 
-        protected abstract PackageAdapter InitializeAdapter();
-
         public void Disconnect()
         {
             foreach (NetworkConnection clientCon in ClientConnections)
@@ -60,24 +51,9 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection.Disconnect();
         }
 
-        protected List<PackageInterface> GetAllPackagesOfTCPSession(int session)
-        {
-            List <PackageInterface> allPackages = new List<PackageInterface>();
-            byte[] data = ClientConnections[session].ReadTCP();
-            while(data != null)
-            {
-                allPackages.Add(NetworkPackageAdapter.CreatePackageFromNetworkData(data));
-                data = ClientConnections[session].ReadTCP();                                   
-            }
-            return allPackages;
-
-        }
-
-
         protected PackageInterface GetDataTCP(int session)
         {
-            byte[] data = ClientConnections[session].ReadTCP();
-            return NetworkPackageAdapter.CreatePackageFromNetworkData(data);
+            return ClientConnections[session].ReadTCP();
         }
 
         protected PackageInterface[] GetAllDataTCP(int session)
@@ -96,8 +72,7 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected PackageInterface GetDataUDP(int session)
         {
-            byte[] data = ClientConnections[session].ReadUDP();
-            return NetworkPackageAdapter.CreatePackageFromNetworkData(data);
+            return ClientConnections[session].ReadUDP();
         }
 
         protected void SendDataTCP(PackageInterface package, int session)
@@ -105,8 +80,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
-            ClientConnections[session].SendTCP(data);
+            ClientConnections[session].SendTCP(package);
         }
 
         protected void SendDataUDP(PackageInterface package, int session)
@@ -114,8 +88,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
-            ClientConnections[session].SendUDP(data);
+            ClientConnections[session].SendUDP(package);
         }
 
         protected void BroadCastTCP(PackageInterface package)
@@ -123,10 +96,9 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
             foreach(NetworkConnection clientCon in ClientConnections)
             {
-                clientCon.SendTCP(data);
+                clientCon.SendTCP(package);
             }
         }
 
@@ -135,10 +107,9 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
             foreach (NetworkConnection clientCon in ClientConnections)
             {
-                clientCon.SendUDP(data);
+                clientCon.SendUDP(package);
             }
         }
 

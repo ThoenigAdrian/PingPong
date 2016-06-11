@@ -1,5 +1,3 @@
-
-using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
 using System.Net.Sockets;
@@ -23,11 +21,6 @@ namespace PingPongClient.NetworkLayer
             TCPConnection tcpConnection = new TCPConnection(connectedSocket, logger);
             tcpConnection.InitializeConnection();
             AddClientConnection(new NetworkConnection(tcpConnection));
-        }
-
-        protected override PackageAdapter InitializeAdapter()
-        {
-            return new PackageAdapter();
         }
 
         public void SendClientControl(ClientControlPackage package)

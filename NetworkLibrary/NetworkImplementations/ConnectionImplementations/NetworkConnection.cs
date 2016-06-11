@@ -1,4 +1,6 @@
-﻿using NetworkLibrary.Utility;
+﻿using NetworkLibrary.DataPackages;
+using NetworkLibrary.PackageAdapters;
+using NetworkLibrary.Utility;
 using System;
 using System.Net;
 
@@ -12,16 +14,19 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         DataContainer<byte[]> TcpData { get; set; }
         DataContainer<byte[]> UdpData { get; set; }
 
+        PackageAdapter Adapter { get; set; }
+
         IPEndPoint RemoteEndPoint { get { return TcpConnection.GetEndPoint; } }
 
         public bool Connected { get { return TcpConnection.Connected; } }
 
         public NetworkConnection(TCPConnection tcpConnection)
         {
+            Adapter = new PackageAdapter();
+
             TcpData = new SafeStack<byte[]>();
 
             TcpConnection = tcpConnection;
-
             TcpConnection.DataReceivedEvent += ReceiveTCP;
         }
 
@@ -41,24 +46,24 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             TcpConnection.Disconnect();
         }
 
-        public void SendTCP(byte[] data)
+        public void SendTCP(PackageInterface package)
         {
-            TcpConnection.Send(data);
+            TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package));
         }
 
-        public void SendUDP(byte[] data)
+        public void SendUDP(PackageInterface package)
         {
-            UdpConnection.Send(data, RemoteEndPoint);
+            UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint);
         }
 
-        public byte[] ReadTCP()
+        public PackageInterface ReadTCP()
         {
-            return TcpData.Read();
+            return Adapter.CreatePackageFromNetworkData(TcpData.Read());
         }
 
-        public byte[] ReadUDP()
+        public PackageInterface ReadUDP()
         {
-            return UdpData.Read();
+            return Adapter.CreatePackageFromNetworkData(UdpData.Read());
         }
 
         private void ReceiveUDP(byte[] data, IPEndPoint source)
