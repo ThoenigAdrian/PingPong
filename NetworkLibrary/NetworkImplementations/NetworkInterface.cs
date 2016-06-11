@@ -7,7 +7,7 @@ namespace NetworkLibrary.NetworkImplementations
 {
     public abstract class NetworkInterface
     {
-        List<NetworkConnection> ClientConnections { get; set; }
+        public List<NetworkConnection> ClientConnections { get; set; }
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
