@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NetworkLibrary.Utility;
 using GameLogicLibrary;
+using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
@@ -9,20 +11,26 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 namespace PingPongServer
 {
     
-    class GameNetwork : NetworkInterface
+    public class GameNetwork : NetworkInterface
     {
         
-        
-        new IPEndpoint(Ip.Address.any, server_port_game_constatns);
-        
-        public GameNetwork(UDPConnection UDPGameData)
+        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host) : this(UDPGameData, Host, null)
         {
             
         }
 
+        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
+        {
+
+        }
         public void BroadcastFramesToClients(ServerDataPackage Frame)
         {
             SendAllUDP();
+        }
+
+        public void AddClient(NetworkConnection connection)
+        {
+            AddClientConnection(connection);
         }
 
         private void SendAllUDP()
