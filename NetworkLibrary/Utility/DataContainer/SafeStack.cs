@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace NetworkLibrary.Utility
 {
-    class SafeStack<T> : DataContainer<T>
+    public class SafeStack<T> : DataContainer<T>
     {
         Semaphore m_dataLock;
 
