@@ -16,7 +16,7 @@ namespace PingPongClient.NetworkLayer
         }
 
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
-            : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint), logger)
+            : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
             TCPConnection tcpConnection = new TCPConnection(connectedSocket, logger);
             tcpConnection.InitializeConnection();

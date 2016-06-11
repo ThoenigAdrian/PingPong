@@ -7,18 +7,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class ConnectionException : Exception
     {
-        public string ErrorMessage { get; private set; }
-
-        Exception BaseException { get; set; }
-
         public ConnectionException(string exceptionMessage) : this (exceptionMessage, null)
         {
         }
 
-        public ConnectionException(string exceptionMessage, Exception innerException)
+        public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException)
         {
-            ErrorMessage = exceptionMessage;
-            BaseException = innerException;
         }
     }
 
