@@ -48,11 +48,11 @@ namespace PingPongClient
 
         public Control()
         {
-            LobbyControl = new LobbyControl(this);
-            GameControl = new GameControl(this);
-
             InputManager = new InputManager();
             GraphicsManager = new GraphicsDeviceManager(this);
+
+            LobbyControl = new LobbyControl(this);
+            GameControl = new GameControl(this);
 
             ActiveControl = LobbyControl;
         }
@@ -82,6 +82,8 @@ namespace PingPongClient
         {
             InputManager.Update();
 
+            HandleControlInputs();
+
             ActiveControl.Update(gameTime);
 
             base.Update(gameTime);
@@ -92,6 +94,21 @@ namespace PingPongClient
             ActiveControl.Draw(gameTime);
 
             base.Draw(gameTime);
+        }
+
+        public void NetworkDeathHandler(int sessionID)
+        {
+            Network.SessionDied -= NetworkDeathHandler;
+            Network.Disconnect();
+            Network = null;
+            LobbyControl.SetStatus("Connection died.");
+            Mode = GameMode.Lobby;
+        }
+
+        protected void HandleControlInputs()
+        {
+            if (InputManager.GetControlInput() == ControlInputs.Quit)
+                Exit();
         }
 
         protected override void OnExiting(object sender, EventArgs args)

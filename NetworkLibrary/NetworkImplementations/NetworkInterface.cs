@@ -7,7 +7,12 @@ namespace NetworkLibrary.NetworkImplementations
 {
     public abstract class NetworkInterface
     {
+
+        public delegate void SessionDeathHandler(int sessionID);
+        public event SessionDeathHandler SessionDied;
+
         public List<NetworkConnection> ClientConnections { get; set; }
+
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
@@ -39,6 +44,29 @@ namespace NetworkLibrary.NetworkImplementations
             Log("Could not add connection!\nNot connected!");
 
             return false;
+        }
+
+        public void UpdateConnections()
+        {
+            List<NetworkConnection> deadConnections = new List<NetworkConnection>();
+
+            foreach (NetworkConnection clientCon in ClientConnections)
+            {
+                if (!clientCon.Connected)
+                {
+                    clientCon.CloseConnection();
+                    deadConnections.Add(clientCon);
+                }
+            }
+
+            foreach (NetworkConnection deadCon in deadConnections)
+            {
+                ClientConnections.Remove(deadCon);
+
+                if (SessionDied != null)
+                    SessionDied.Invoke(deadCon.ClientSession.SessionID);
+
+            }
         }
 
         public void Disconnect()

@@ -15,18 +15,22 @@ namespace PingPongClient.ControlLayer
 
         LobbyVisualizer LobbyVisualizer { get { return base.Visualizer as LobbyVisualizer; } }
 
-
         public override GameMode GetMode { get { return GameMode.Lobby; } }
-
-        
 
         public LobbyControl(Control parent) : base(parent)
         {
             GameLobby = new Lobby();
             GameLobby.ServerIP = "127.0.0.1";
 
+            Input.AddPlayerInput(0, 0);
+
             Visualizer = new XNALobbyVisualizer();
             (Visualizer as LobbyVisualizer).SetLobby(GameLobby);
+        }
+
+        public void SetStatus(string status)
+        {
+            GameLobby.Status = status;
         }
 
         public override void Update(GameTime gameTime)
@@ -81,6 +85,7 @@ namespace PingPongClient.ControlLayer
 
                 connectionSocket.Connect(server);
                 Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
+                Network.SessionDied += ParentControl.NetworkDeathHandler;
                 ParentControl.Mode = GameMode.Game; 
                 return;
             }

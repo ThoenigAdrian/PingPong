@@ -21,7 +21,14 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     {
         LogWriter Logger { get; set; }
 
-        public bool Connected { get { return ConnectionSocket.Connected; } }
+        public bool Connected
+        {
+            get
+            {
+                return ConnectionSocket.Connected && 
+                    !(ConnectionSocket.Poll(1000, SelectMode.SelectRead) && ConnectionSocket.Available == 0);
+            }
+        }
 
         protected Socket ConnectionSocket { get; set; }
 
@@ -105,7 +112,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             try
             {
                 if (ConnectionSocket != null)
+                {
+                    ConnectionSocket.Shutdown(SocketShutdown.Both);
                     ConnectionSocket.Close();
+                }
+
+                WaitForDisconnect();
                 Log("Disconnected.");
             }
             catch (SocketException ex)
@@ -120,7 +132,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected virtual void WaitForDisconnect()
         {
-            ReceiveThread.Join();
+            if (ReceiveThread != null)
+                ReceiveThread.Join();
         }
 
         protected void Log(string text)
