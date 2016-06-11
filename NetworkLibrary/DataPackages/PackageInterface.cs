@@ -10,7 +10,8 @@
         ClientControl,
         ClientPlayerMovement,
         ClientAddRequest,
-        ServerData
+        ServerData,
+        ServerGameControl,
+        ClientInitalizeGamePackage
     }
-    public enum 
 }

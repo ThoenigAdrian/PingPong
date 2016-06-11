@@ -2,7 +2,7 @@
 {
     public enum ClientControls
     {
-        Pause,
+        TogglePause,
         Quit,
         Restart,
         NoInput

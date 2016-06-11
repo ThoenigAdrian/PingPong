@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataPackages\ClientSourcePackages\ClientAddPlayerRequest.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\ClientInitializeGame.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientRegisteredPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\PlayerMovementPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientControlPackage.cs" />

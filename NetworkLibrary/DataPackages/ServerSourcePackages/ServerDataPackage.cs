@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NetworkLibrary.DataPackages
+namespace NetworkLibrary.DataPackages.ServerSourcePackages
 {
     public class ServerDataPackage : PackageInterface
     {

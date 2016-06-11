@@ -9,6 +9,6 @@ namespace GameLogicLibrary
     {
         StartGame,
         RestartGame,
-        QuitGame
+        GameFinished
     }
 }
