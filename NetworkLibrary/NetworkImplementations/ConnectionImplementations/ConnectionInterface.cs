@@ -105,7 +105,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             try
             {
                 if (ConnectionSocket != null)
+                {
+                    ConnectionSocket.Shutdown(SocketShutdown.Both);
                     ConnectionSocket.Close();
+                }
+
+                WaitForDisconnect();
                 Log("Disconnected.");
             }
             catch (SocketException ex)
@@ -120,7 +125,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected virtual void WaitForDisconnect()
         {
-            ReceiveThread.Join();
+            if (ReceiveThread != null)
+                ReceiveThread.Join();
         }
 
         protected void Log(string text)
