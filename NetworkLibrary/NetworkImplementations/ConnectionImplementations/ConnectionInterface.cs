@@ -37,6 +37,16 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
         }
 
+        bool m_receiving = false;
+        public bool Receiving
+        {
+            get { return m_receiving && !Disconnecting; }
+            protected set
+            {
+                m_receiving = value;
+            }
+        }
+
         protected Socket ConnectionSocket { get; set; }
 
         protected Thread ReceiveThread { get; set; }
@@ -69,10 +79,18 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             SocketLock.WaitOne();
 
             if (Disconnecting)
+            {
+                SocketLock.Release();
                 throw new ConnectionException("Can not receive from a disconnected connection!");
+            }
 
-            PreReceiveSettings();
-            StartReceiving();
+            if (!Receiving)
+            {
+
+                Receiving = true;
+                PreReceiveSettings();
+                StartReceiving();
+            }
 
             SocketLock.Release();
         }
@@ -110,12 +128,16 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 }
                 catch (Exception ex)
                 {
+                    Receiving = false;
+
                     if (Disconnecting)
                         return;
 
                     throw new ConnectionException("Receive loop threw exception: " + ex.Message, ex);
                 }
             }
+
+            Receiving = false;
         }
 
         protected byte[] TrimData(byte[] data, int size)

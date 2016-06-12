@@ -32,6 +32,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
+            TcpConnection.InitializeReceiving();
         }
 
         public void SetUDPConnection(UDPConnection udpConnection)
