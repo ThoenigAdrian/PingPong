@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using GameLogicLibrary;
 using System.Collections.Generic;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
@@ -18,9 +19,9 @@ namespace PingPongServer
         public PingPongBall Ball;
         public int maxPlayers;        
         public ServerDataPackage NextFrame;
+        public List<GameTeam> ListOfTeams = new List<GameTeam>();
 
         public GameStates GameState { get; private set; }
-        public bool isReady { get; private set; }
 
         public enum GameStates
         {
@@ -33,20 +34,21 @@ namespace PingPongServer
 
         public Game(GameNetwork Network, int PlayerCount)
         {
-            this.Network = Network;
+            this.Network = Network;            
             this.GameState = GameStates.Initializing;
+            AddClient(Network.ClientConnections[0]);
             maxPlayers = PlayerCount;
-            InitGame();
 
         }
 
+        
         private void AcceptNewPlayersFromConnectedClients()
         {
             for(int ClientID = 0; ClientID < Clients.Count; ClientID++)
             {
                 ClientAddPlayerRequest Packet = Network.GetLastAddPlayerRequest(ClientID);
                     
-                Clients[ClientID].AddPlayer(Players.Count + 1, Packet.RequestedTeam);
+                Clients[ClientID].AddPlayer(Players.Count, Packet.RequestedTeam);
                 if (Players.Count >= maxPlayers)
                 {
                     GameState = GameStates.Ready;
@@ -54,41 +56,42 @@ namespace PingPongServer
                 }
             }
         }
-
-        private void AddPlayer(int PlayerID)
-        {
-            
-        }
-
+        
         public void AddClient(NetworkConnection client)
         {
             Network.AddClientConnection(client);
+            Client newClient = new Client(Network, Clients.Count - 1, Players.Count - 1, GetFreeTeam());
         }
 
-        private void InitGame()
+        public Teams GetFreeTeam()
         {
-            
+            if (maxPlayers/2 == ListOfTeams[0].PlayerCount)
+                return Teams.Team1;
+            return Teams.Team2;           
+                
         }
+
 
         public void StartGame(object justToMatchSignature)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
             while (GameState == GameStates.Running)
             {
-                PrepareNextFrame();
+                ServerPackage = PrepareNextFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
+                Thread.Sleep(20);
             }
             GameState = GameStates.Finished;
             
         }
 
-        public void PrepareNextFrame()
+        public ServerDataPackage PrepareNextFrame()
         {
-            CalculateFrame();
             this.GameState = GameStates.Running;
+            return CalculateFrame();
         }
 
-        public void CalculateFrame()
+        public ServerDataPackage CalculateFrame()
         {
             NextFrame = new ServerDataPackage();
 
@@ -104,7 +107,7 @@ namespace PingPongServer
                 player.PositionY = (player.PositionY + 0.5F) % GameInitializers.BORDER_HEIGHT;
             }
 
-
+            return NextFrame;
         }
 
         public class Client
@@ -113,10 +116,12 @@ namespace PingPongServer
             public int ClientID;
             List<Player> Players = new List<Player>();
 
-            public Client(GameNetwork GameNetwork, int ClientID)
+            public Client(GameNetwork GameNetwork, int ClientID, int FirstPlayerID, Teams FirstPlayerTeam)
             {
                 this.ClientID = ClientID;
                 this.GameNetwork = GameNetwork;
+                AddPlayer(FirstPlayerID, FirstPlayerTeam);
+
             }
 
             public void AddPlayer(int PlayerID, Teams Team)
@@ -159,6 +164,18 @@ namespace PingPongServer
             }
 
 
+        }
+
+        public class GameTeam
+        {
+            Teams Team;
+            public List<Player> PlayersOfTeam = new List<Player>();
+            public int PlayerCount { get { return PlayersOfTeam.Count; }  set { } }
+
+            public void AddPlayer(Player playerToAdd)
+            {
+                PlayersOfTeam.Add(playerToAdd);
+            }
         }
 
         public class PingPongBall : ServerDataPackage.PingPongBall
