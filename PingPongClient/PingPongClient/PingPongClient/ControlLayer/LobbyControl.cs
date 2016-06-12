@@ -1,42 +1,35 @@
 ﻿using Microsoft.Xna.Framework;
-using NetworkLibrary;
 using PingPongClient.InputLayer;
-using PingPongClient.NetworkLayer;
-using PingPongClient.VisualizeLayer;
-using PingPongClient.VisualizeLayer.XNAVisualization;
-using System.Net;
-using System.Net.Sockets;
-using System;
+using PingPongClient.VisualizeLayer.Lobbies;
+using PingPongClient.VisualizeLayer.Visualizers;
 
 namespace PingPongClient.ControlLayer
 {
-    class LobbyControl : SubControlInterface
+    public class LobbyControl : SubControlInterface
     {
-        Lobby GameLobby { get; set; }
+        RequestLobby RequestLobby { get; set; }
 
-        LobbyVisualizer LobbyVisualizer { get { return base.Visualizer as LobbyVisualizer; } }
+        LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
 
         public override GameMode GetMode { get { return GameMode.Lobby; } }
 
         public LobbyControl(Control parent) : base(parent)
         {
-            GameLobby = new Lobby();
-            GameLobby.ServerIP = "127.0.0.1";
+            RequestLobby = new RequestLobby();
 
             Input.AddPlayerInput(0, 0);
 
-            Visualizer = new XNALobbyVisualizer();
-            (Visualizer as LobbyVisualizer).SetLobby(GameLobby);
+            Visualizer = new LobbyVisualizer(RequestLobby);
         }
 
-        public void SetStatus(string status)
+        public void SetServerIP(string serverIP)
         {
-            GameLobby.Status = status;
+            RequestLobby.Status = "Connected to " + serverIP;
         }
 
         public override void HandleInput()
         {
-            HandleTextInput();
+            HandleRequestInput();
         }
 
         public override void Update(GameTime gameTime)
@@ -44,63 +37,24 @@ namespace PingPongClient.ControlLayer
             
         }
 
-        protected void HandleTextInput()
+        protected void HandleRequestInput()
         {
-            TextEditInputs editControl = Input.GetTextEditInput();
-
-            if (editControl != TextEditInputs.NoInput)
+            ControlInputs controlInput = Input.GetControlInput();
+            switch (controlInput)
             {
-                switch (editControl)
-                {
-                    case TextEditInputs.Enter:
-                        InitializeNetwork();
-                        return;
+                case ControlInputs.Restart:
+                    Network.SendClientStart();
+                    ParentControl.Mode = GameMode.Game;
+                    break;
 
-                    case TextEditInputs.Delete:
-                        if (GameLobby.ServerIP.Length > 0)
-                            GameLobby.ServerIP = GameLobby.ServerIP.Substring(0, GameLobby.ServerIP.Length - 1);
-                        return;
-                }
+                case ControlInputs.Pause:
+                    Network.SendClientJoin();
+                    ParentControl.Mode = GameMode.Game;
+                    break;
+
+                default:
+                    break;
             }
-            else
-            {
-                GameLobby.ServerIP += Input.GetNumberInput();
-            }
-        }
-
-        protected void InitializeNetwork()
-        {
-            GameLobby.Status = "";
-
-            IPAddress serverIP;
-            if (!IPAddress.TryParse(GameLobby.ServerIP, out serverIP))
-            {
-                GameLobby.Status = "Invalid IP!";
-                return;
-            }
-
-            Log("Initializing network...");
-
-            IPEndPoint server = new IPEndPoint(serverIP, NetworkConstants.SERVER_PORT);
-            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            try
-            {
-                if (Network != null)
-                    Network.Disconnect();
-
-                connectionSocket.Connect(server);
-                Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
-                Network.SessionDied += ParentControl.NetworkDeathHandler;
-                ParentControl.Mode = GameMode.Game; 
-                return;
-            }
-            catch
-            {
-                Log("Could not establish connection!");
-            }
-
-            GameLobby.Status = "Could not establish connection!";
         }
     }
 }
