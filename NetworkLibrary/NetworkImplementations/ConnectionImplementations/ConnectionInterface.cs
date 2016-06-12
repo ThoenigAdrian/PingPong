@@ -35,12 +35,16 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         protected Thread ReceiveThread { get; set; }
         protected bool AbortReceive { get; set; }
 
+        Semaphore DisconnectLock;
+
         private ConnectionInterface()
         {
         }
 
         public ConnectionInterface(Socket connectionSocket, LogWriter logger)
         {
+            DisconnectLock = new Semaphore(1, 1);
+
             Logger = logger;
 
             InitializeSocket(connectionSocket);
@@ -108,6 +112,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void Disconnect()
         {
+            DisconnectLock.WaitOne();
+
             AbortReceive = true;
             try
             {
@@ -115,10 +121,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 {
                     ConnectionSocket.Shutdown(SocketShutdown.Both);
                     ConnectionSocket.Close();
+                    ConnectionSocket = null;
+                    WaitForDisconnect();
+                    Log("Disconnected.");
                 }
-
-                WaitForDisconnect();
-                Log("Disconnected.");
             }
             catch (SocketException ex)
             {
@@ -127,6 +133,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             catch (Exception ex)
             {
                 throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
+            }
+            finally
+            {
+                DisconnectLock.Release();
             }
         }
 

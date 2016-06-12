@@ -28,6 +28,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             int size = ConnectionSocket.Receive(data);
 
+            if (size <= 0)
+            {
+                ReceiveThread = null;
+                Disconnect();
+                return;
+            }
+
             RaiseReceivedEvent(TrimData(data, size));
         }
 
