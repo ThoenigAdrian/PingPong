@@ -156,29 +156,33 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             SocketLock.WaitOne();
 
-            try
+            if (!Disconnecting)
             {
-                if (!Disconnecting)
+                Disconnecting = true;
+
+                try
                 {
-                    Disconnecting = true;
                     ConnectionSocket.Shutdown(SocketShutdown.Both);
                     ConnectionSocket.Close();
-                    WaitForDisconnect();
-                    Log("Disconnected.");
                 }
+                catch (SocketException ex)
+                {
+                    Log(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
+                }
+                finally
+                {
+                    SocketLock.Release();
+                }
+
+                WaitForDisconnect();
+                Log("Disconnected.");
             }
-            catch (SocketException ex)
-            {
-                Log(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
-            }
-            finally
-            {
+            else
                 SocketLock.Release();
-            }
         }
 
         protected virtual void WaitForDisconnect()
