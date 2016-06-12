@@ -16,6 +16,7 @@ namespace ConnectionTesting
         Listening Listen;
 
         bool m_stopServer = false;
+        bool m_spammingActive = false;
 
         Thread m_acceptThread;
 
@@ -51,6 +52,9 @@ namespace ConnectionTesting
                 m_network.UpdateConnections();
                 AddAcceptedSocketsToNetwork();
                 ExecuteCommand();
+
+                if (m_spammingActive)
+                    Broadcast();
             }
         }
 
@@ -59,10 +63,7 @@ namespace ConnectionTesting
             Socket acceptedSocket;
             while ((acceptedSocket = Listen.m_socketQueue.Read()) != null)
             {
-                TCPConnection tcpConnection = new TCPConnection(acceptedSocket);
-                tcpConnection.InitializeConnection();
-
-                NetworkConnection clientConnection = new NetworkConnection(tcpConnection);
+                NetworkConnection clientConnection = new NetworkConnection(new TCPConnection(acceptedSocket));
                 m_network.AddClientConnection(clientConnection);
 
                 Console.Out.WriteLine("Client connected.");
@@ -78,6 +79,9 @@ namespace ConnectionTesting
                 {
                     case "send":
                         Broadcast();
+                        break;
+                    case "spam":
+                        m_spammingActive = !m_spammingActive;
                         break;
                 }
             }
