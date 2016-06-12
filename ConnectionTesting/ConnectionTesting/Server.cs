@@ -79,6 +79,12 @@ namespace ConnectionTesting
                     case "send":
                         Broadcast();
                         break;
+<<<<<<< HEAD
+=======
+                    case "disconnect":
+                        Disconnect();
+                        break;
+>>>>>>> ConnectionTesting
                 }
             }
         }
@@ -87,8 +93,13 @@ namespace ConnectionTesting
         {
             ServerDataPackage package = new ServerDataPackage();
 
+<<<<<<< HEAD
             package.Ball.PositionX = 100;
             package.Ball.PositionY = 200;
+=======
+            package.BallPosX = 100;
+            package.BallPosY = 200;
+>>>>>>> ConnectionTesting
 
             m_network.SendPositionData(package);
 
@@ -100,6 +111,14 @@ namespace ConnectionTesting
             Console.Out.WriteLine("Client disconnected.");
         }
 
+<<<<<<< HEAD
+=======
+        private void Disconnect()
+        {
+
+        }
+
+>>>>>>> ConnectionTesting
         public void Shutdown()
         {
             Console.Out.WriteLine("Shutting down server...");
