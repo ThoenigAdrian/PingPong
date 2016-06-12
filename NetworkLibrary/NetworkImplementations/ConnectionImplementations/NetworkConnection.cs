@@ -13,7 +13,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         TCPConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
 
-        DataContainer<byte[]> TcpData { get; set; }
+        DataContainer<PackageInterface> TcpPackages { get; set; }
         DataContainer<byte[]> UdpData { get; set; }
 
         PackageAdapter Adapter { get; set; }
@@ -26,7 +26,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Adapter = new PackageAdapter();
 
-            TcpData = new SafeStack<byte[]>();
+            TcpPackages = new SafeStack<PackageInterface>();
 
             ClientSession = new Session(-1);
 
@@ -66,7 +66,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public PackageInterface ReadTCP()
         {
-            return Adapter.CreatePackageFromNetworkData(TcpData.Read());
+            return TcpPackages.Read();
         }
 
         public PackageInterface ReadUDP()
@@ -74,7 +74,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
-            return Adapter.CreatePackageFromNetworkData(UdpData.Read());
+            return Adapter.GetLastPackageFromStream(UdpData.Read());
         }
 
         private void ReceiveUDP(byte[] data, IPEndPoint source)
@@ -85,7 +85,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void ReceiveTCP(byte[] data)
         {
-            TcpData.Write(data);
+            PackageInterface[] packages = Adapter.CreatePackagesFromStream(data);
+            foreach (PackageInterface package in packages)
+            {
+                TcpPackages.Write(package);
+            }
         }
 
         void IDisposable.Dispose()
