@@ -42,6 +42,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                     connected = ConnectionSocket.Receive(data, SocketFlags.Peek) != 0;
                 }
 
+                SocketLock.Release();
                 return connected;
             }
         }
