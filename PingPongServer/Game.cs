@@ -4,9 +4,6 @@ using GameLogicLibrary;
 using System.Collections.Generic;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NetworkLibrary.DataPackages;
 
 namespace PingPongServer
@@ -36,11 +33,23 @@ namespace PingPongServer
         {
             this.Network = Network;            
             this.GameState = GameStates.Initializing;
+
+            GameTeam g = new GameTeam(Teams.Team1);
+            ListOfTeams.Add(g);
+            g = new GameTeam(Teams.Team2);
+            ListOfTeams.Add(g);
+
             AddClient(Network.ClientConnections[0]);
             maxPlayers = PlayerCount;
 
         }
 
+        private void Update()
+        {
+            foreach(Client c in Clients)
+                Players.AddRange(c.Players);
+
+        }
         
         private void AcceptNewPlayersFromConnectedClients()
         {
@@ -55,12 +64,17 @@ namespace PingPongServer
                     break;
                 }
             }
+            Update();
         }
         
         public void AddClient(NetworkConnection client)
         {
             Network.AddClientConnection(client);
             Client newClient = new Client(Network, Clients.Count - 1, Players.Count - 1, GetFreeTeam());
+            if (Players.Count == maxPlayers)
+                GameState = GameStates.Ready;
+            Update();
+
         }
 
         public Teams GetFreeTeam()
@@ -114,7 +128,7 @@ namespace PingPongServer
         {
             GameNetwork GameNetwork;
             public int ClientID;
-            List<Player> Players = new List<Player>();
+            public List<Player> Players = new List<Player>();
 
             public Client(GameNetwork GameNetwork, int ClientID, int FirstPlayerID, Teams FirstPlayerTeam)
             {
@@ -168,9 +182,15 @@ namespace PingPongServer
 
         public class GameTeam
         {
-            Teams Team;
+            public Teams Team;
             public List<Player> PlayersOfTeam = new List<Player>();
             public int PlayerCount { get { return PlayersOfTeam.Count; }  set { } }
+
+            public GameTeam(Teams Team)
+            {
+
+                this.Team = Team;
+            }
 
             public void AddPlayer(Player playerToAdd)
             {
