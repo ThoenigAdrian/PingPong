@@ -93,6 +93,41 @@ namespace NetworkLibrary.PackageAdapters
             return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
         }
 
+        private string[] ConvertStreamToValidJsonStrings(string json)
+        {
+            int curlyBracketsCount = 0;
+            int squareBracketsCount = 0;
+            int startIndex = 0;
+            int endIndex = 0;
+
+            if (json.Length == 0)
+                return null;
+
+            List<string> jsonStrings = new List<string>();
+
+            foreach (char character in json)
+            {
+                if (character == '[')
+                    squareBracketsCount++;
+                if (character == ']')
+                    squareBracketsCount--;
+                if (character == '{')
+                    curlyBracketsCount++;
+                if (character == '}')
+                    curlyBracketsCount--;
+
+                endIndex++;
+
+                if (curlyBracketsCount == 0 && squareBracketsCount == 0)
+                {
+                    jsonStrings.Add(json.Substring(startIndex, endIndex - startIndex));
+                    startIndex = endIndex;
+                }
+            }
+
+            return jsonStrings.ToArray();
+        }
+
         private string ConvertNetworkDataToString(byte[] array)
         {
             return System.Text.Encoding.Default.GetString(array);
