@@ -7,6 +7,6 @@ namespace NetworkLibrary.DataPackages.ClientSourcePackages
 {
     public class ClientJoinGameRequest : ClientRegisteredPackage
     {
-        public override PackageType PackageType { get { return PackageType.ClientPlayerMovement; } }
+        public override PackageType PackageType { get { return PackageType.ClientJoinGameRequest; } }
     }
 }
