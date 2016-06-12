@@ -25,8 +25,14 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             get
             {
-                return ConnectionSocket.Connected && 
-                    !(ConnectionSocket.Poll(1000, SelectMode.SelectRead) && ConnectionSocket.Available == 0);
+                DisconnectLock.WaitOne();
+                bool connected = ConnectionSocket != null &&
+                        ConnectionSocket.Connected &&
+                        !(ConnectionSocket.Poll(1000, SelectMode.SelectRead) && ConnectionSocket.Available == 0);
+
+                DisconnectLock.Release();
+
+                return connected;
             }
         }
 
