@@ -5,23 +5,22 @@ namespace ConnectionTesting
 {
     class Program
     {
+        static Server server;
         static void Main(string[] args)
         {
-            Server server = new Server();
-            new Thread(server.StartServer).Start();
+            CreateServer();
 
             string cmd;
             while((cmd = Console.In.ReadLine()) != "exit")
             {
                 // server offline commands
-                if (server == null && cmd == "start")
+                if (cmd == "start")
                 {
-                    server = new Server();
-                    new Thread(server.StartServer).Start();
+                    CreateServer();
                 }
 
                 // server online commands
-                else
+                else if(server != null)
                 {
                     if (cmd == "stop")
                     {
@@ -37,6 +36,22 @@ namespace ConnectionTesting
                 server.Shutdown();
 
             Console.In.ReadLine();
+        }
+
+        static void CreateServer()
+        {
+            if (server == null)
+            {
+                server = new Server();
+                server.ServerInitError += InitErrorHandler;
+                new Thread(server.StartServer).Start();
+            }
+        }
+
+        static void InitErrorHandler()
+        {
+            server.ServerInitError -= InitErrorHandler;
+            server = null;
         }
     }
 }

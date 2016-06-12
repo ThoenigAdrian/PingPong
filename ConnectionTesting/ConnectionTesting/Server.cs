@@ -18,9 +18,10 @@ namespace ConnectionTesting
         bool m_stopServer = false;
         bool m_spammingActive = false;
 
-        Thread m_acceptThread;
-
         public SafeStack<string> m_commandStack;
+
+        public delegate void ServerInitErrorHandle();
+        public event ServerInitErrorHandle ServerInitError;
 
         public Server()
         {
@@ -32,11 +33,18 @@ namespace ConnectionTesting
         {
             Console.Out.WriteLine("Initializing server...");
 
+            if (!Listen.InitialiseListening())
+            {
+                Console.Out.WriteLine("Initializing error!\nServer shut down.");
+                if (ServerInitError != null)
+                    ServerInitError.Invoke();
+
+                return;
+            }
+
+
             m_network = new ServerNetwork(new UDPConnection(new IPEndPoint(IPAddress.Any, 4200)));
             m_network.SessionDied += ClientDisconnectHandler;
-
-            m_acceptThread = new Thread(Listen.AcceptLoop);
-            m_acceptThread.Start();
 
             Console.Out.WriteLine("Server started.");
 
@@ -135,7 +143,6 @@ namespace ConnectionTesting
         int m_listeningPort;
         Socket m_listeningSocket;
 
-        bool m_initialized = false;
         bool m_abortAccepting = false;
 
         public Listening(int listeningPort)
@@ -143,24 +150,28 @@ namespace ConnectionTesting
             m_socketQueue = new SafeStack<Socket>();
 
             m_listeningPort = listeningPort;
-
-            InitialiseListening();
         }
 
-        void InitialiseListening()
+        public bool InitialiseListening()
         {
-            m_listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            m_listeningSocket.Bind(new IPEndPoint(IPAddress.Any, m_listeningPort));
-            m_listeningSocket.Listen(3);
+            try
+            {
+                m_listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                m_listeningSocket.Bind(new IPEndPoint(IPAddress.Any, m_listeningPort));
+                m_listeningSocket.Listen(3);
+            }
+            catch
+            {
+                return false;
+            }
 
-            m_initialized = true;
+            new Thread(AcceptLoop).Start();
+
+            return true;
         }
 
-        public void AcceptLoop()
+       void AcceptLoop()
         {
-            if (!m_initialized)
-                return;
-
             while(!m_abortAccepting)
             {
                 Socket acceptedSocket;
