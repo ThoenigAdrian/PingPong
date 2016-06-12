@@ -21,11 +21,12 @@ namespace PingPongServer
         public Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private UDPConnection MasterUDPSocket;
         private LogWriterConsole Logger = new LogWriterConsole();
-        // private List<Game> Games = new List<Game>();
         private List<Game> PendingGames = new List<Game>();
         private List<Game> RunningGames = new List<Game>();
         private static List<bool> StateOfRunningGames = new List<bool>();
-        public static Socket newSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        public Socket newSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        public List<NetworkConnection> IncomingConnections = new List<NetworkConnection>();
+        Semaphore newConnectionAccepted = new Semaphore(0, 1);
 
 
         public Server()
@@ -38,82 +39,97 @@ namespace PingPongServer
 
         public void Run()
         {
-            
-            newSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            ThreadPool.QueueUserWorkItem(AcceptNewConnection, newSocket);
+            Thread ConnectionAcceptorThread = new Thread(new ThreadStart(AcceptConnections) );
+            ConnectionAcceptorThread.Start();
+
+            Thread ClientToGameDistributor = new Thread(new ThreadStart(AcceptClients) );
+            ClientToGameDistributor.Start();
 
             while(true)
             {
-                
-                if (newSocket.Connected)
-                {
-                    TCPConnection tcp = new TCPConnection(newSocket, null);
-                    NetworkConnection news = new NetworkConnection(tcp);
-                    PackageInterface packet = news.ReadTCP();
-                    switch (packet.PackageType)
-                    {
-                        case PackageType.ClientInitalizeGamePackage:
-                            {
-                                ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)news.ReadTCP();
-                                GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, tcp);
-                                Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
-                                break;
-                            }
-
-                        case PackageType.ClientJoinGameRequest:
-                            {
-                                foreach (Game game in PendingGames)
-                                {
-                                    game.Network.AddClient(news);
-                                }
-                                break;
-                            }                        
-                    }
-
-                    newSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    ThreadPool.QueueUserWorkItem(AcceptNewConnection, newSocket);
-
-                }
-                Thread.Sleep(50); // Sleep a little in order to save resources might need to be decreases if we need to handle more than 20 Client Requests per Second
+                Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
 
-        // Start each game which is ready in a new Thread. Communication will be done via the "StateOfRunningGames" which indicates if the Game is finished
-        private void StartGamesWhichAreReady()
-        {
-            for(int index=PendingGames.Count -1; index <= 0; index--)
-            {
-                if (PendingGames[index].isReady)
-                {
-                    RunningGames.Add(PendingGames[index]);
-                    StateOfRunningGames.Add(new bool());
-                    ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, StateOfRunningGames[StateOfRunningGames.Count -1]);
-                    PendingGames.RemoveAt(index);
-                }
-                    
-            }
-        }
 
+        // We need to do cleanups otherwise the server will run for a few days and be out of memory
         private void RemoveFinishedGames()
         {
-            // We need to do cleanups otherwise the server will run for a few days and be out of memory
-            throw new NotImplementedException();
-        }
-
-        private void InitializeClient(Socket socket)
-        {
-            /*
-            if (genericPackage.PackageType == PackageType.ClientInitalizeGamePackage)
+            lock (RunningGames)
             {
-                GameNetwork newGameNetwork = new GameNetwork();
-            }*/
+                for (int index = RunningGames.Count; index >= 0; index--)
+                {
+                    if (RunningGames[index].GameState == Game.GameStates.Finished)
+                        RunningGames.RemoveAt(index);
+                }
+            }
         }
 
-        public void AcceptNewConnection(object socket)
+        
+        public void AcceptConnections()
         {
-            Socket sock = (Socket)socket;
-            socket = MasterListeningSocket.Accept();
-            Logger.Log("Client connected " + sock.ToString());
+
+            while (true)
+            {
+                newSocket = MasterListeningSocket.Accept();
+                Logger.Log("Client connected " + newSocket.RemoteEndPoint.ToString());
+                TCPConnection tcp = new TCPConnection(newSocket, null);
+                NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
+
+                lock (IncomingConnections)
+                    IncomingConnections.Add(newNetworkConnection);
+                
+                Thread.Sleep(20);
+            }
+
+        }
+
+        public void AcceptClients()
+        {
+            while(true)
+            {
+                lock(IncomingConnections)
+                {
+                    foreach (NetworkConnection conn in IncomingConnections)
+                    {
+                        PackageInterface packet = conn.ReadTCP();
+                        if (packet != null)
+                        {
+                            switch (packet.PackageType)
+                            {
+                                case PackageType.ClientInitalizeGamePackage:
+                                    {
+                                        ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
+                                        GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, conn);
+                                        Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
+                                        PendingGames.Add(newGame);
+                                        break;
+                                    }
+
+                                case PackageType.ClientJoinGameRequest:
+                                    {
+                                        PendingGames[0].Network.AddClient(conn);
+                                        if (PendingGames[0].isReady)
+                                        {
+                                            RunningGames.Add(PendingGames[0]);
+                                            PendingGames.RemoveAt(0);
+
+                                            // Start each game which is ready in a new Thread. Communication will be done via the "StateOfRunningGames" which indicates if the Game is finished
+                                            ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
+                                        }
+                                            
+                                        break;
+                                        
+                                    }
+                            }
+                        }
+                    }
+
+                    Thread.Sleep(10);
+                
+                }
+            
+            }
         }
     }
 }
