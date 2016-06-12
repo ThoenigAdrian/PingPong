@@ -5,12 +5,13 @@ using NetworkLibrary.Utility;
 using PingPongClient.ControlLayer;
 using System;
 using Microsoft.Xna.Framework.Graphics;
-using PingPongClient.VisualizeLayer;
+using PingPongClient.VisualizeLayer.Visualizers;
 
 namespace PingPongClient
 {
     public enum GameMode
     {
+        Connect,
         Lobby,
         Game
     }
@@ -24,6 +25,9 @@ namespace PingPongClient
             {
                 switch(value)
                 {
+                    case GameMode.Connect:
+                        ActiveControl = ConnectionControl;
+                        break;
                     case GameMode.Lobby:
                         ActiveControl = LobbyControl;
                         break;
@@ -36,8 +40,9 @@ namespace PingPongClient
 
         SubControlInterface ActiveControl { get; set; }
 
-        LobbyControl LobbyControl { get; set; }
-        GameControl GameControl { get; set; }
+        public ConnectionControl ConnectionControl { get; set; }
+        public LobbyControl LobbyControl { get; set; }
+        public GameControl GameControl { get; set; }
 
         public ClientNetwork Network { get; set; }
         public InputManager InputManager { get; set; }
@@ -51,10 +56,11 @@ namespace PingPongClient
             InputManager = new InputManager();
             GraphicsManager = new GraphicsDeviceManager(this);
 
+            ConnectionControl = new ConnectionControl(this);
             LobbyControl = new LobbyControl(this);
             GameControl = new GameControl(this);
 
-            ActiveControl = LobbyControl;
+            ActiveControl = ConnectionControl;
         }
 
         protected override void Initialize()
@@ -72,6 +78,7 @@ namespace PingPongClient
             initData.GraphicManager = GraphicsManager;
             initData.SpriteBatch = new SpriteBatch(GraphicsManager.GraphicsDevice);
 
+            ConnectionControl.InitializeVisualizer(initData);
             LobbyControl.InitializeVisualizer(initData);
             GameControl.InitializeVisualizer(initData);
 
@@ -80,7 +87,6 @@ namespace PingPongClient
 
         protected override void Update(GameTime gameTime)
         {
-
             InputManager.Update();
 
             ActiveControl.Update(gameTime);
@@ -90,8 +96,6 @@ namespace PingPongClient
                 HandleControlInputs();
                 ActiveControl.HandleInput();
             }
-
-            
 
             base.Update(gameTime);
         }
@@ -108,8 +112,8 @@ namespace PingPongClient
             Network.SessionDied -= NetworkDeathHandler;
             Network.Disconnect();
             Network = null;
-            LobbyControl.SetStatus("Connection died.");
-            Mode = GameMode.Lobby;
+            ConnectionControl.SetStatus("Connection died.");
+            Mode = GameMode.Connect;
         }
 
         protected void HandleControlInputs()

@@ -17,10 +17,11 @@ namespace PingPongServer
         // This Object is state dependent call GrabAllNetworkDataForNextFrame() , then work with the the methods (e.g GetLastPlayerMovement)
         List<PackageInterface[]> packagesOfAllClients = new List<PackageInterface[]>();
 
-        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host) : this(UDPGameData, Host, null) { }
+        public GameNetwork(UDPConnection UDPGameData,  NetworkConnection Host) : this(UDPGameData, Host, null) { }
 
-        public GameNetwork(UDPConnection UDPGameData, TCPConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
+        public GameNetwork(UDPConnection UDPGameData, NetworkConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
         {
+            AddClient(Host);
             UpdateClientConnections();
         }
 

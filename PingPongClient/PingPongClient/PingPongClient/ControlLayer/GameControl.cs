@@ -1,16 +1,14 @@
-﻿using System;
-using GameLogicLibrary;
+﻿using GameLogicLibrary;
 using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using PingPongClient.InputLayer;
-using PingPongClient.VisualizeLayer;
-using PingPongClient.VisualizeLayer.XNAVisualization;
+using PingPongClient.VisualizeLayer.Visualizers;
 
 namespace PingPongClient.ControlLayer
 {
-    class GameControl : SubControlInterface
+    public class GameControl : SubControlInterface
     {
         GameStructure Structure { get; set; }
 
@@ -20,7 +18,7 @@ namespace PingPongClient.ControlLayer
 
         public GameControl(Control parent) : base(parent)
         {
-            Visualizer = new XNAStructureVisualizer();
+            Visualizer = new GameStructureVisualizer();
             Structure = new GameStructure();
             Interpolation = new Interpolation(Structure);
 
