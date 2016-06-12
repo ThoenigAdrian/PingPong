@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace PingPongClient.VisualizeLayer.XNAVisualization
+namespace PingPongClient.VisualizeLayer
 {
     class TextureFactory
     {
