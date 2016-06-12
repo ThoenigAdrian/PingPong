@@ -24,6 +24,8 @@ namespace PingPongClient.ControlLayer
         }
 
         public abstract GameMode GetMode { get; }
+
+        public abstract void HandleInput();
         
         public abstract void Update(GameTime gameTime);
 

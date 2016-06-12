@@ -80,11 +80,18 @@ namespace PingPongClient
 
         protected override void Update(GameTime gameTime)
         {
+
             InputManager.Update();
 
-            HandleControlInputs();
-
             ActiveControl.Update(gameTime);
+
+            if (IsActive)
+            {
+                HandleControlInputs();
+                ActiveControl.HandleInput();
+            }
+
+            
 
             base.Update(gameTime);
         }

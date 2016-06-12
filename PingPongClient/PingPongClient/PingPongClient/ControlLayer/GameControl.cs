@@ -1,4 +1,5 @@
-﻿using GameLogicLibrary;
+﻿using System;
+using GameLogicLibrary;
 using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
@@ -26,17 +27,20 @@ namespace PingPongClient.ControlLayer
             (Visualizer as GameStructureVisualizer).SetGameStructure(Structure);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void HandleInput()
         {
-            if (Network != null)
-                Network.UpdateConnections();
-
             if (Network != null)
             {
                 SendClientCommandos();
                 SendMovementInputs();
                 ApplyServerPositions();
             }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            if (Network != null)
+                Network.UpdateConnections();
 
             Interpolation.Interpolate(gameTime);
         }

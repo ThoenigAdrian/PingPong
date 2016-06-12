@@ -6,6 +6,7 @@ using PingPongClient.VisualizeLayer;
 using PingPongClient.VisualizeLayer.XNAVisualization;
 using System.Net;
 using System.Net.Sockets;
+using System;
 
 namespace PingPongClient.ControlLayer
 {
@@ -33,9 +34,14 @@ namespace PingPongClient.ControlLayer
             GameLobby.Status = status;
         }
 
-        public override void Update(GameTime gameTime)
+        public override void HandleInput()
         {
             HandleTextInput();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            
         }
 
         protected void HandleTextInput()
