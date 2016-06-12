@@ -1,4 +1,6 @@
-﻿namespace NetworkLibrary.Utility
+﻿using System.Threading;
+
+namespace NetworkLibrary.Utility
 {
     public class DoubleBuffer<T> : DataContainer<T>
     {
@@ -6,6 +8,7 @@
         T Buffer2 { get; set; }
 
         bool Switch { get; set; }
+        bool DataRead { get; set; }
 
         public DoubleBuffer()
         {
@@ -14,6 +17,7 @@
 
         private void Initialize()
         {
+            DataRead = true;
             Switch = false;
             Buffer1 = default(T);
             Buffer2 = default(T);
@@ -21,6 +25,11 @@
 
         public override T Read()
         {
+            if (DataRead)
+                return default(T);
+            else
+                DataRead = true;
+
             if (Switch)
                 return Buffer1;
             else
@@ -35,6 +44,8 @@
                 Buffer2 = buffer;
 
             Switch = !Switch;
+
+            DataRead = false;
         }
     }
 }
