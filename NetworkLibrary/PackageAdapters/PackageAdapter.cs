@@ -3,6 +3,7 @@ using NetworkLibrary.DataPackages;
 using Newtonsoft.Json;
 using System;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
+using System.Collections.Generic;
 
 namespace NetworkLibrary.PackageAdapters
 {
@@ -54,6 +55,41 @@ namespace NetworkLibrary.PackageAdapters
         {
             string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
             return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
+        }
+
+        private string[] ConvertStreamToValidJsonStrings(string json)
+        {
+            int curlyBracketsCount = 0;
+            int squareBracketsCount = 0;
+            int startIndex = 0;
+            int endIndex = 0;
+
+            if (json.Length == 0)
+                return null;
+
+            List<string> jsonStrings = new List<string>();
+
+            foreach (char character in json)
+            {
+                if (character == '[')
+                    squareBracketsCount++;
+                if (character == ']')
+                    squareBracketsCount--;
+                if (character == '{')
+                    curlyBracketsCount++;
+                if (character == '}')
+                    curlyBracketsCount--;
+
+                endIndex++;
+
+                if (curlyBracketsCount == 0 && squareBracketsCount == 0)
+                {
+                    jsonStrings.Add(json.Substring(startIndex, endIndex - startIndex));
+                    startIndex = endIndex;
+                }
+            }
+
+            return jsonStrings.ToArray();
         }
 
         private string ConvertNetworkDataToString(byte[] array)
