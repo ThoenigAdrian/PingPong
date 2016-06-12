@@ -35,16 +35,6 @@ namespace NetworkLibrary.PackageAdapters
             return null;
         }
 
-        public PackageInterface GetLastPackageFromStream(byte[] stream)
-        {
-            PackageInterface[] packages = CreatePackagesFromStream(stream);
-
-            if (packages == null)
-                return null;
-
-            return packages[packages.Length - 1];
-        }
-
         private byte[][] SplitStreamIntoData(byte[] stream)
         {
             if (stream == null)

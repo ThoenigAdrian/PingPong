@@ -74,7 +74,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
-            return Adapter.GetLastPackageFromStream(UdpData.Read());
+            return Adapter.CreatePackageFromNetworkData(UdpData.Read());
         }
 
         private void ReceiveUDP(byte[] data, IPEndPoint source)
