@@ -187,8 +187,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected virtual void WaitForDisconnect()
         {
-            if (ReceiveThread != null)
-                ReceiveThread.Join();
+            try { ReceiveThread.Join(); }
+            catch (NullReferenceException) { }
         }
 
         protected void Log(string text)
