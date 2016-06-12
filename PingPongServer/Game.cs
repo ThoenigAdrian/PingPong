@@ -16,10 +16,10 @@ namespace PingPongServer
         List<Client> Clients = new List<Client>();
         public GameNetwork Network;
         public PingPongBall Ball;
-        private int maxPlayers;
+        public int maxPlayers;        
         public ServerDataPackage NextFrame;
 
-        GameStates GameState;
+        public GameStates GameState { get; private set; }
         public bool isReady { get; private set; }
 
         public enum GameStates
@@ -35,6 +35,7 @@ namespace PingPongServer
         {
             this.Network = Network;
             this.GameState = GameStates.Initializing;
+            maxPlayers = PlayerCount;
             InitGame();
 
         }
@@ -69,16 +70,16 @@ namespace PingPongServer
             
         }
 
-        public int StartGame()
+        public void StartGame(object justToMatchSignature)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
-
             while (GameState == GameStates.Running)
             {
                 PrepareNextFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
             }
-            return 0;
+            GameState = GameStates.Finished;
+            
         }
 
         public void PrepareNextFrame()
