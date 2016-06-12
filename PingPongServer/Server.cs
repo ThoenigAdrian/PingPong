@@ -79,7 +79,6 @@ namespace PingPongServer
                 lock (IncomingConnections)
                     IncomingConnections.Add(newNetworkConnection);
                 
-                Thread.Sleep(20);
             }
 
         }
@@ -108,8 +107,9 @@ namespace PingPongServer
 
                                 case PackageType.ClientJoinGameRequest:
                                     {
-                                        PendingGames[0].Network.AddClient(conn);
-                                        if (PendingGames[0].isReady)
+                                        ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
+                                        PendingGames[0].AddClient(conn);
+                                        if (PendingGames[0].GameState == Game.GameStates.Ready)
                                         {
                                             RunningGames.Add(PendingGames[0]);
                                             PendingGames.RemoveAt(0);
