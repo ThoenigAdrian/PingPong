@@ -1,7 +1,7 @@
-﻿using NetworkLibrary.Utility;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System;
+using NetworkLibrary.Utility;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
@@ -13,14 +13,24 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public IPEndPoint GetEndPoint { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } }
 
-        public TCPConnection(Socket socket) 
-            : base(socket)
+        public TCPConnection(Socket socket, LogWriter logger = null) 
+            : base(socket, logger)
         {
         }
 
         public virtual void Send(byte[] data)
         {
-            ConnectionSocket.Send(data);
+            SocketLock.WaitOne();
+
+            if(!Disconnecting)
+                ConnectionSocket.Send(data);
+
+            SocketLock.Release();
+        }
+
+        protected override void PreReceiveSettings()
+        {
+            return;
         }
 
         protected override void ReceiveFromSocket()
@@ -28,6 +38,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             byte[] data = new byte[NetworkConstants.MAX_PACKAGE_SIZE];
 
             int size = ConnectionSocket.Receive(data);
+
+            if (size <= 0)
+            {
+                ReceiveThread = null;
+                Disconnect();
+                return;
+            }
 
             RaiseReceivedEvent(TrimData(data, size));
         }

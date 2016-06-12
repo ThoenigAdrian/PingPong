@@ -9,7 +9,20 @@
     {
         ClientControl,
         ClientPlayerMovement,
-        ClientAddRequest,
-        ServerData
+        ClientAddPlayerRequest,
+        ClientInitalizeGamePackage,
+        ClientJoinGameRequest,
+
+        ServerData,
+        ServerGameControl,
+        ServerAddPlayerResponsePackage,
+        ServerJoinGameResponsePackage
+        
+    }
+
+    public enum Result
+    {
+        Success,
+        Fail
     }
 }

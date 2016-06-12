@@ -1,14 +1,15 @@
-
-using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
 using System.Net.Sockets;
 using NetworkLibrary.DataPackages;
 using System.Net;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using NetworkLibrary.DataPackages.ClientSourcePackages;
 
 namespace PingPongClient.NetworkLayer
 {
-    class ClientNetwork : NetworkInterface
+    public class ClientNetwork : NetworkInterface
     {
         public ClientNetwork(Socket connectedSocket)
             : this(connectedSocket, null)
@@ -16,14 +17,26 @@ namespace PingPongClient.NetworkLayer
         }
 
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
-            : base ((connectedSocket.LocalEndPoint as IPEndPoint).Port, logger)
+            : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
-            AddClientConnection(connectedSocket);
+            TCPConnection tcpConnection = new TCPConnection(connectedSocket, logger);
+            tcpConnection.InitializeReceiving();
+            AddClientConnection(new NetworkConnection(tcpConnection));
         }
 
-        protected override PackageAdapter InitializeAdapter()
+        public void SendClientStart()
         {
-            return new PackageAdapter();
+            ClientInitializeGamePackage package = new ClientInitializeGamePackage();
+            package.PlayerCount = 2;
+            package.SessionID = 0;
+
+            SendDataTCP(package, 0);
+        }
+
+        public void SendClientJoin()
+        {
+            ClientJoinGameRequest package = new ClientJoinGameRequest();
+            SendDataTCP(package, 0);
         }
 
         public void SendClientControl(ClientControlPackage package)

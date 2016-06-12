@@ -1,6 +1,5 @@
 ﻿using NetworkLibrary.Utility;
 using System;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -8,29 +7,60 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class ConnectionException : Exception
     {
+        public ConnectionException(string exceptionMessage) : this (exceptionMessage, null)
+        {
+        }
 
+        public ConnectionException(string exceptionMessage, Exception innerException) : base(exceptionMessage, innerException)
+        {
+        }
     }
 
 
     public abstract class ConnectionInterface
     {
-        public LogWriter Logger { get; set; }
+        LogWriter Logger { get; set; }
 
-        public bool Connected { get { return ConnectionSocket.Connected; } }
+        protected Semaphore SocketLock;
+
+        public bool Connected
+        {
+            get
+            {
+                SocketLock.WaitOne();
+                bool connected = !Disconnecting && ConnectionSocket.Connected &&
+                        !(ConnectionSocket.Poll(1000, SelectMode.SelectRead) && ConnectionSocket.Available == 0);
+
+                SocketLock.Release();
+
+                return connected;
+            }
+        }
+
+        bool m_receiving = false;
+        public bool Receiving
+        {
+            get { return m_receiving && !Disconnecting; }
+            protected set
+            {
+                m_receiving = value;
+            }
+        }
 
         protected Socket ConnectionSocket { get; set; }
 
-        //protected DataContainer<byte[]> ReceivedData { get; set; }
         protected Thread ReceiveThread { get; set; }
-        protected bool AbortReceive { get; set; }
+        protected bool Disconnecting { get; set; }
 
         private ConnectionInterface()
         {
         }
 
-        public ConnectionInterface(Socket connectionSocket)
+        public ConnectionInterface(Socket connectionSocket, LogWriter logger)
         {
-            Logger = null;
+            SocketLock = new Semaphore(1, 1);
+
+            Logger = logger;
 
             InitializeSocket(connectionSocket);
         }
@@ -41,19 +71,41 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             WaitForDisconnect();
 
             InitializeSocket(socket);
-        }
-
-        public virtual void InitializeConnection()
-        {
             InitializeReceiving();
         }
 
-        private void InitializeSocket(Socket socket)
+        public void InitializeReceiving()
         {
-            ConnectionSocket = socket;
+            SocketLock.WaitOne();
+
+            if (Disconnecting)
+            {
+                SocketLock.Release();
+                throw new ConnectionException("Can not receive from a disconnected connection!");
+            }
+
+            if (!Receiving)
+            {
+
+                Receiving = true;
+                PreReceiveSettings();
+                StartReceiving();
+            }
+
+            SocketLock.Release();
         }
 
-        private void InitializeReceiving()
+        protected abstract void PreReceiveSettings();
+
+        private void InitializeSocket(Socket socket)
+        {
+            SocketLock.WaitOne();
+            Disconnecting = false;
+            ConnectionSocket = socket;
+            SocketLock.Release();
+        }
+
+        private void StartReceiving()
         {
             if (ReceiveThread != null && ReceiveThread.ThreadState != ThreadState.Unstarted)
                 return;
@@ -64,20 +116,28 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void ReceiveLoop()
         {
-            AbortReceive = false;
-
-            while (!AbortReceive)
+            while (!Disconnecting)
             {
                 try
                 {
                     ReceiveFromSocket();
                 }
+                catch (SocketException ex)
+                {
+                    Log(ex.Message);
+                }
                 catch (Exception ex)
                 {
-                    Log("Receive loop threw exception: " + ex.Message);
-                    return;
+                    Receiving = false;
+
+                    if (Disconnecting)
+                        return;
+
+                    throw new ConnectionException("Receive loop threw exception: " + ex.Message, ex);
                 }
             }
+
+            Receiving = false;
         }
 
         protected byte[] TrimData(byte[] data, int size)
@@ -94,22 +154,41 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void Disconnect()
         {
-            AbortReceive = true;
-            try
+            SocketLock.WaitOne();
+
+            if (!Disconnecting)
             {
-                if (ConnectionSocket != null)
+                Disconnecting = true;
+
+                try
+                {
+                    ConnectionSocket.Shutdown(SocketShutdown.Both);
                     ConnectionSocket.Close();
+                }
+                catch (SocketException ex)
+                {
+                    Log(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConnectionException("Exception while disconnecting! Exception message: " + ex.Message, ex);
+                }
+                finally
+                {
+                    SocketLock.Release();
+                }
+
+                WaitForDisconnect();
                 Log("Disconnected.");
             }
-            catch
-            {
-                Log("Disconnecting error!");
-            }
+            else
+                SocketLock.Release();
         }
 
         protected virtual void WaitForDisconnect()
         {
-            ReceiveThread.Join();
+            try { ReceiveThread.Join(); }
+            catch (NullReferenceException) { }
         }
 
         protected void Log(string text)

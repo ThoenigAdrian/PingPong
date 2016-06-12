@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System;
+using NetworkLibrary.Utility;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
@@ -12,21 +12,24 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected IPEndPoint connectionLocal;
 
-        public UDPConnection(IPEndPoint local) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp))
+        public UDPConnection(IPEndPoint local, LogWriter logger = null) : base(new Socket(local.AddressFamily, SocketType.Dgram, ProtocolType.Udp), logger)
         {
             connectionLocal = local;
         }
 
         public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
         {
-            ConnectionSocket.SendTo(data, remoteEndPoint);
+            SocketLock.WaitOne();
+
+            if(!Disconnecting)
+                ConnectionSocket.SendTo(data, remoteEndPoint);
+
+            SocketLock.Release();
         }
 
-        public override void InitializeConnection()
+        protected override void PreReceiveSettings()
         {
             ConnectionSocket.Bind(connectionLocal);
-
-            base.InitializeConnection();
         }
 
         protected override void ReceiveFromSocket()

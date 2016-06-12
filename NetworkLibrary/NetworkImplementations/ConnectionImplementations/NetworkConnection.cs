@@ -1,28 +1,45 @@
-﻿using NetworkLibrary.Utility;
+﻿using NetworkLibrary.DataPackages;
+using NetworkLibrary.PackageAdapters;
+using NetworkLibrary.Utility;
 using System;
 using System.Net;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
-    class NetworkConnection : IDisposable
+    public class NetworkConnection : IDisposable
     {
+        public Session ClientSession { get; set; }
+
         TCPConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
 
         DataContainer<byte[]> TcpData { get; set; }
         DataContainer<byte[]> UdpData { get; set; }
 
+        PackageAdapter Adapter { get; set; }
+
         IPEndPoint RemoteEndPoint { get { return TcpConnection.GetEndPoint; } }
 
-        public NetworkConnection(TCPConnection tcpConnection, UDPConnection udpConnection)
+        public bool Connected { get { return TcpConnection.Connected; } }
+
+        public NetworkConnection(TCPConnection tcpConnection)
         {
-            UdpData = new DoubleBuffer<byte[]>();
+            Adapter = new PackageAdapter();
+
             TcpData = new SafeStack<byte[]>();
 
-            TcpConnection = tcpConnection;
-            UdpConnection = udpConnection;
+            ClientSession = new Session(-1);
 
+            TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
+            TcpConnection.InitializeReceiving();
+        }
+
+        public void SetUDPConnection(UDPConnection udpConnection)
+        {
+            UdpData = new DoubleBuffer<byte[]>();
+
+            UdpConnection = udpConnection;
             UdpConnection.DataReceivedEvent += ReceiveUDP;
         }
 
@@ -34,24 +51,30 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             TcpConnection.Disconnect();
         }
 
-        public void SendTCP(byte[] data)
+        public void SendTCP(PackageInterface package)
         {
-            TcpConnection.Send(data);
+            TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package));
         }
 
-        public void SendUDP(byte[] data)
+        public void SendUDP(PackageInterface package)
         {
-            UdpConnection.Send(data, RemoteEndPoint);
+            if (UdpConnection == null)
+                throw new ConnectionException("Network connection does not have an UDP connection!");
+
+            UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint);
         }
 
-        public byte[] ReadTCP()
+        public PackageInterface ReadTCP()
         {
-            return TcpData.Read();
+            return Adapter.CreatePackageFromNetworkData(TcpData.Read());
         }
 
-        public byte[] ReadUDP()
+        public PackageInterface ReadUDP()
         {
-            return UdpData.Read();
+            if (UdpConnection == null)
+                throw new ConnectionException("Network connection does not have an UDP connection!");
+
+            return Adapter.CreatePackageFromNetworkData(UdpData.Read());
         }
 
         private void ReceiveUDP(byte[] data, IPEndPoint source)

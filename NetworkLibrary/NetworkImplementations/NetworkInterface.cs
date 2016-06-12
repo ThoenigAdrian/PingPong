@@ -1,21 +1,21 @@
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 
 namespace NetworkLibrary.NetworkImplementations
 {
     public abstract class NetworkInterface
     {
-        List<NetworkConnection> ClientConnections { get; set; }
+
+        public delegate void SessionDeathHandler(int sessionID);
+        public event SessionDeathHandler SessionDied;
+
+        public List<NetworkConnection> ClientConnections { get; set; }
+
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
-
-        protected PackageAdapter NetworkPackageAdapter { get; private set; }
 
         public int ClientCount { get { return ClientConnections.Count; } }
 
@@ -24,45 +24,51 @@ namespace NetworkLibrary.NetworkImplementations
             return ClientCount > 0;
         }
 
-        protected NetworkInterface(int udpListeningPort, LogWriter logger)
+        protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
             Logger = logger;
 
-            NetworkPackageAdapter = InitializeAdapter();
-
             ClientConnections = new List<NetworkConnection>();
-
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, udpListeningPort);
-            UdpConnection = new UDPConnection(localEndPoint);
-            UdpConnection.Logger = Logger;
-            UdpConnection.InitializeConnection();
+            UdpConnection = udpConnection;
+            UdpConnection.InitializeReceiving();
         }
 
-        public bool AddClientConnection(Socket connectionSocket)
+        public bool AddClientConnection(NetworkConnection clientConnection)
         {
-            try
+            if (clientConnection.Connected)
             {
-                TCPConnection TcpConnection = new TCPConnection(connectionSocket);
-                TcpConnection.Logger = Logger;
-                TcpConnection.InitializeConnection();
-
-                if(TcpConnection.Connected)
-                {
-                    ClientConnections.Add(new NetworkConnection(TcpConnection, UdpConnection));
-                    return true;
-                }
-
-                Log("Could not add connection!\nNot connected after initialiazation.");
+                clientConnection.SetUDPConnection(UdpConnection);
+                ClientConnections.Add(clientConnection);
+                return true;
             }
-            catch (ConnectionException ex)
-            {
-                Log("Could not add connection!\nException message: " + ex.Message);
-            }
+
+            Log("Could not add connection!\nNot connected!");
 
             return false;
         }
 
-        protected abstract PackageAdapter InitializeAdapter();
+        public void UpdateConnections()
+        {
+            List<NetworkConnection> deadConnections = new List<NetworkConnection>();
+
+            foreach (NetworkConnection clientCon in ClientConnections)
+            {
+                if (!clientCon.Connected)
+                {
+                    clientCon.CloseConnection();
+                    deadConnections.Add(clientCon);
+                }
+            }
+
+            foreach (NetworkConnection deadCon in deadConnections)
+            {
+                ClientConnections.Remove(deadCon);
+
+                if (SessionDied != null)
+                    SessionDied.Invoke(deadCon.ClientSession.SessionID);
+
+            }
+        }
 
         public void Disconnect()
         {
@@ -74,27 +80,26 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected PackageInterface GetDataTCP(int session)
         {
-            byte[] data = ClientConnections[session].ReadTCP();
-            return NetworkPackageAdapter.CreatePackageFromNetworkData(data);
+            return ClientConnections[session].ReadTCP();
         }
 
-        protected PackageInterface[] GetAllDataTCP()
+        protected PackageInterface[] GetAllDataTCP(int session)
         {
-            PackageInterface[] packages = new PackageInterface[ClientCount];
-            
-            for(int session = 0; session < ClientCount; session++)
+            List<PackageInterface> packages = new List<PackageInterface>();
+
+            PackageInterface package = GetDataTCP(session);
+            while (package != null)
             {
-                packages[0] = GetDataTCP(session);
-                session++;
+                packages.Add(package);
+                package = GetDataTCP(session);
             }
 
-            return packages;
+            return packages.ToArray();
         }
 
         protected PackageInterface GetDataUDP(int session)
         {
-            byte[] data = ClientConnections[session].ReadUDP();
-            return NetworkPackageAdapter.CreatePackageFromNetworkData(data);
+            return ClientConnections[session].ReadUDP();
         }
 
         protected void SendDataTCP(PackageInterface package, int session)
@@ -102,8 +107,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
-            ClientConnections[session].SendTCP(data);
+            ClientConnections[session].SendTCP(package);
         }
 
         protected void SendDataUDP(PackageInterface package, int session)
@@ -111,8 +115,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
-            ClientConnections[session].SendUDP(data);
+            ClientConnections[session].SendUDP(package);
         }
 
         protected void BroadCastTCP(PackageInterface package)
@@ -120,10 +123,9 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
             foreach(NetworkConnection clientCon in ClientConnections)
             {
-                clientCon.SendTCP(data);
+                clientCon.SendTCP(package);
             }
         }
 
@@ -132,10 +134,9 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            byte[] data = NetworkPackageAdapter.CreateNetworkDataFromPackage(package);
             foreach (NetworkConnection clientCon in ClientConnections)
             {
-                clientCon.SendUDP(data);
+                clientCon.SendUDP(package);
             }
         }
 
