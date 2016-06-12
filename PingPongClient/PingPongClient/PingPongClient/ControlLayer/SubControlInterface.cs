@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
-using PingPongClient.VisualizeLayer;
+using PingPongClient.VisualizeLayer.Visualizers;
 
 namespace PingPongClient.ControlLayer
 {

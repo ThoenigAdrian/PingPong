@@ -2,14 +2,9 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace PingPongClient.VisualizeLayer
+namespace PingPongClient.VisualizeLayer.Visualizers
 {
-    public interface VisualizerInitializationData
-    {
-
-    }
-
-    public struct XNAInitializationData : VisualizerInitializationData
+    public struct XNAInitializationData
     {
         public GraphicsDeviceManager GraphicManager { get; set; }
         public ContentManager Content { get; set; }
