@@ -34,6 +34,7 @@ namespace ConnectionTesting
             m_udpConnection = new UDPConnection(new IPEndPoint(IPAddress.Any, 4200));
 
             m_network = new ServerNetwork(m_udpConnection);
+            m_network.SessionDied += ClientDisconnectHandler;
 
             m_acceptThread = new Thread(Listen.AcceptLoop);
             m_acceptThread.Start();
@@ -47,6 +48,7 @@ namespace ConnectionTesting
         {
             while (!m_stopServer)
             {
+                m_network.UpdateConnections();
                 AddAcceptedSocketsToNetwork();
                 ExecuteCommand();
             }
@@ -94,6 +96,11 @@ namespace ConnectionTesting
             m_network.SendPositionData(package);
 
             Console.Out.WriteLine("Sent position data.");
+        }
+
+        private void ClientDisconnectHandler(int sessionID)
+        {
+            Console.Out.WriteLine("Client disconnected.");
         }
 
         private void Disconnect()
