@@ -1,4 +1,5 @@
-﻿using NetworkLibrary.DataPackages.ServerSourcePackages;
+﻿using NetworkLibrary.DataPackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using System;
@@ -10,7 +11,6 @@ namespace ConnectionTesting
 {
     class Server
     {
-        UDPConnection m_udpConnection;
         ServerNetwork m_network;
 
         Listening Listen;
@@ -32,9 +32,7 @@ namespace ConnectionTesting
         {
             Console.Out.WriteLine("Initializing server...");
 
-            m_udpConnection = new UDPConnection(new IPEndPoint(IPAddress.Any, 4200));
-
-            m_network = new ServerNetwork(m_udpConnection);
+            m_network = new ServerNetwork(new UDPConnection(new IPEndPoint(IPAddress.Any, 4200)));
             m_network.SessionDied += ClientDisconnectHandler;
 
             m_acceptThread = new Thread(Listen.AcceptLoop);
@@ -51,6 +49,7 @@ namespace ConnectionTesting
             {
                 m_network.UpdateConnections();
                 AddAcceptedSocketsToNetwork();
+                ReceiveData();
                 ExecuteCommand();
 
                 if (m_spammingActive)
@@ -67,6 +66,20 @@ namespace ConnectionTesting
                 m_network.AddClientConnection(clientConnection);
 
                 Console.Out.WriteLine("Client connected.");
+            }
+        }
+
+        private void ReceiveData()
+        {
+            for (int i = 0; i < m_network.ClientCount; i++)
+            {
+                if(m_network.ReceivePackageUDP(i) != null)
+                    Console.Out.WriteLine("Received UDP package from session " + i + ".");
+
+                PackageInterface[] tcpPackages = m_network.ReceivePackageTCP(i);
+
+                if(tcpPackages.Length > 0)
+                    Console.Out.WriteLine("Received " + tcpPackages.Length + " TCP packages from session " + i + ".");
             }
         }
 

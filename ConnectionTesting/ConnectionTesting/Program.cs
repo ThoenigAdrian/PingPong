@@ -14,13 +14,10 @@ namespace ConnectionTesting
             while((cmd = Console.In.ReadLine()) != "exit")
             {
                 // server offline commands
-                if (server == null)
+                if (server == null && cmd == "start")
                 {
-                    if (cmd == "start")
-                    {
-                        server = new Server();
-                        new Thread(server.StartServer).Start();
-                    }
+                    server = new Server();
+                    new Thread(server.StartServer).Start();
                 }
 
                 // server online commands
