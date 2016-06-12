@@ -19,14 +19,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
         {
-            ConnectionSocket.SendTo(data, remoteEndPoint);
+            SocketLock.WaitOne();
+
+            if(Disconnecting)
+                ConnectionSocket.SendTo(data, remoteEndPoint);
+
+            SocketLock.Release();
         }
 
-        public override void InitializeConnection()
+        protected override void PreReceiveSettings()
         {
             ConnectionSocket.Bind(connectionLocal);
-
-            base.InitializeConnection();
         }
 
         protected override void ReceiveFromSocket()

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using NetworkLibrary.Utility;
 
@@ -19,7 +20,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public virtual void Send(byte[] data)
         {
-            ConnectionSocket.Send(data);
+            SocketLock.WaitOne();
+
+            if(!Disconnecting)
+                ConnectionSocket.Send(data);
+
+            SocketLock.Release();
+        }
+
+        protected override void PreReceiveSettings()
+        {
+            return;
         }
 
         protected override void ReceiveFromSocket()
