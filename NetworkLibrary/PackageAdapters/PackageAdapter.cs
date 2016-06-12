@@ -3,6 +3,7 @@ using NetworkLibrary.DataPackages;
 using Newtonsoft.Json;
 using System;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
+using System.Collections.Generic;
 
 namespace NetworkLibrary.PackageAdapters
 {
@@ -10,6 +11,52 @@ namespace NetworkLibrary.PackageAdapters
 
     public class PackageAdapter
     {
+        public PackageInterface[] CreatePackagesFromStream(byte[] stream)
+        {
+            if (stream == null)
+                return null;
+
+            byte[][] dataSets = SplitStreamIntoData(stream);
+
+            if (dataSets == null)
+                return null;
+
+            List<PackageInterface> packages = new List<PackageInterface>();
+            foreach (byte[] data in dataSets)
+            {
+                PackageInterface package = CreatePackageFromNetworkData(data);
+                if (package != null)
+                    packages.Add(package);
+            }
+
+            if (packages.Count > 0)
+                return packages.ToArray();
+
+            return null;
+        }
+
+        public PackageInterface GetLastPackageFromStream(byte[] stream)
+        {
+            PackageInterface[] packages = CreatePackagesFromStream(stream);
+
+            if (packages == null)
+                return null;
+
+            return packages[packages.Length - 1];
+        }
+
+        private byte[][] SplitStreamIntoData(byte[] stream)
+        {
+            if (stream == null)
+                return null;
+
+            List<byte[]> dataSets = new List<byte[]>();
+
+            dataSets.Add(stream);
+
+            return dataSets.ToArray();
+        }
+
         public PackageInterface CreatePackageFromNetworkData(byte[] data)
         {
             if (data == null)
@@ -59,10 +106,7 @@ namespace NetworkLibrary.PackageAdapters
         private string ConvertNetworkDataToString(byte[] array)
         {
             return System.Text.Encoding.Default.GetString(array);
-        }
-
-        
-    
+        }    
     }
 
 }
