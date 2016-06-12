@@ -21,16 +21,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     {
         LogWriter Logger { get; set; }
 
+        protected Semaphore SocketLock;
+
         public bool Connected
         {
             get
             {
-                DisconnectLock.WaitOne();
-                bool connected = ConnectionSocket != null &&
-                        ConnectionSocket.Connected &&
+                SocketLock.WaitOne();
+                bool connected = !Disconnecting && ConnectionSocket.Connected &&
                         !(ConnectionSocket.Poll(1000, SelectMode.SelectRead) && ConnectionSocket.Available == 0);
 
-                DisconnectLock.Release();
+                SocketLock.Release();
 
                 return connected;
             }
@@ -39,9 +40,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         protected Socket ConnectionSocket { get; set; }
 
         protected Thread ReceiveThread { get; set; }
-        protected bool AbortReceive { get; set; }
-
-        Semaphore DisconnectLock;
+        protected bool Disconnecting { get; set; }
 
         private ConnectionInterface()
         {
@@ -49,7 +48,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public ConnectionInterface(Socket connectionSocket, LogWriter logger)
         {
-            DisconnectLock = new Semaphore(1, 1);
+            SocketLock = new Semaphore(1, 1);
 
             Logger = logger;
 
@@ -62,19 +61,33 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             WaitForDisconnect();
 
             InitializeSocket(socket);
-        }
-
-        public virtual void InitializeConnection()
-        {
             InitializeReceiving();
         }
 
-        private void InitializeSocket(Socket socket)
+        public void InitializeReceiving()
         {
-            ConnectionSocket = socket;
+            SocketLock.WaitOne();
+
+            if (Disconnecting)
+                throw new ConnectionException("Can not receive from a disconnected connection!");
+
+            PreReceiveSettings();
+            StartReceiving();
+
+            SocketLock.Release();
         }
 
-        private void InitializeReceiving()
+        protected abstract void PreReceiveSettings();
+
+        private void InitializeSocket(Socket socket)
+        {
+            SocketLock.WaitOne();
+            Disconnecting = false;
+            ConnectionSocket = socket;
+            SocketLock.Release();
+        }
+
+        private void StartReceiving()
         {
             if (ReceiveThread != null && ReceiveThread.ThreadState != ThreadState.Unstarted)
                 return;
@@ -85,9 +98,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void ReceiveLoop()
         {
-            AbortReceive = false;
-
-            while (!AbortReceive)
+            while (!Disconnecting)
             {
                 try
                 {
@@ -99,6 +110,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 }
                 catch (Exception ex)
                 {
+                    if (Disconnecting)
+                        return;
+
                     throw new ConnectionException("Receive loop threw exception: " + ex.Message, ex);
                 }
             }
@@ -118,16 +132,15 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void Disconnect()
         {
-            DisconnectLock.WaitOne();
+            SocketLock.WaitOne();
 
-            AbortReceive = true;
             try
             {
-                if (ConnectionSocket != null)
+                if (!Disconnecting)
                 {
+                    Disconnecting = true;
                     ConnectionSocket.Shutdown(SocketShutdown.Both);
                     ConnectionSocket.Close();
-                    ConnectionSocket = null;
                     WaitForDisconnect();
                     Log("Disconnected.");
                 }
@@ -142,7 +155,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
             finally
             {
-                DisconnectLock.Release();
+                SocketLock.Release();
             }
         }
 

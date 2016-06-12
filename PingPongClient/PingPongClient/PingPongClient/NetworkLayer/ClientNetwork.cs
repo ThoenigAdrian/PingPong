@@ -19,7 +19,7 @@ namespace PingPongClient.NetworkLayer
             : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
             TCPConnection tcpConnection = new TCPConnection(connectedSocket, logger);
-            tcpConnection.InitializeConnection();
+            tcpConnection.InitializeReceiving();
             AddClientConnection(new NetworkConnection(tcpConnection));
         }
 
