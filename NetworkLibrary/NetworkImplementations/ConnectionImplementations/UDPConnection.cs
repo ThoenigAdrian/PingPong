@@ -21,7 +21,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             SocketLock.WaitOne();
 
-            if(Disconnecting)
+            if(!Disconnecting)
                 ConnectionSocket.SendTo(data, remoteEndPoint);
 
             SocketLock.Release();

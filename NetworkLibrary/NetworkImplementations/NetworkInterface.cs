@@ -30,6 +30,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             ClientConnections = new List<NetworkConnection>();
             UdpConnection = udpConnection;
+            UdpConnection.InitializeReceiving();
         }
 
         public bool AddClientConnection(NetworkConnection clientConnection)
