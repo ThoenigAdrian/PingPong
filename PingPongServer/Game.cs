@@ -39,7 +39,6 @@ namespace PingPongServer
             g = new GameTeam(Teams.Team2);
             ListOfTeams.Add(g);
 
-            AddClient(Network.ClientConnections[0]);
             maxPlayers = PlayerCount;
 
         }
@@ -128,6 +127,7 @@ namespace PingPongServer
         {
             GameNetwork GameNetwork;
             public int ClientID;
+            public int session;
             public List<Player> Players = new List<Player>();
 
             public Client(GameNetwork GameNetwork, int ClientID, int FirstPlayerID, Teams FirstPlayerTeam)
