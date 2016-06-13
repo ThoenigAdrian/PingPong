@@ -58,6 +58,7 @@ namespace NetworkLibrary.NetworkImplementations
                 clientConnection.SetUDPConnection(UdpConnection);
                 clientConnection.ClientSession.SessionID = sessionID;
                 ClientConnections.Add(clientConnection);
+                return;
             }
 
             throw new ConnectionException("Could not add client connection because it is disconnected!");
