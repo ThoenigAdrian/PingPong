@@ -22,7 +22,7 @@ namespace PingPongServer
         public GameNetwork(UDPConnection UDPGameData, NetworkConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
         {
             AddClient(Host);
-            //UpdateClientConnections();
+            UpdateClientConnections();
         }
 
         public void AddClient(NetworkConnection connection)
