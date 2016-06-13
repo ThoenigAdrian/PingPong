@@ -30,6 +30,14 @@ namespace PingPongClient.NetworkLayer
 
         public void InitializeNetwork()
         {
+            Connect();
+
+            if (NetworkInitializingFinished != null)
+                NetworkInitializingFinished.Invoke(this);
+        }
+
+        private void Connect()
+        {
             IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
             Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -43,32 +51,23 @@ namespace PingPongClient.NetworkLayer
                     connectionSocket.Close();
                     Error = true;
                     Message = "Connect timeout!";
-                    if (NetworkInitializingFinished != null)
-                        NetworkInitializingFinished.Invoke(this);
                     return;
                 }
 
                 Network = new ClientNetwork(connectionSocket, Logger);
                 Error = !Network.GetServerSessionResponse();
 
-                if(Error)
+                if (Error)
                     Message = "Server session response error!";
-
-                if (NetworkInitializingFinished != null)
-                    NetworkInitializingFinished.Invoke(this);
                 return;
             }
             catch (Exception ex)
             {
-                Error = true;
                 Message = "Connection failed!\n" + ex.Message;
             }
 
             Error = true;
             Message = "Connection failed!";
-
-            if (NetworkInitializingFinished != null)
-                NetworkInitializingFinished.Invoke(this);
         }
     }
 }
