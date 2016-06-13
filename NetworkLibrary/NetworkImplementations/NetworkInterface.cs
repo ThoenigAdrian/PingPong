@@ -17,6 +17,20 @@ namespace NetworkLibrary.NetworkImplementations
 
         LogWriter Logger { get; set; }
 
+        protected int[] GetSessionIDs
+        {
+            get
+            {
+                List<int> sessionIDs = new List<int>(ClientConnections.Count);
+                foreach (NetworkConnection clientCon in ClientConnections)
+                {
+                    sessionIDs.Add(clientCon.ClientSession.SessionID);
+                }
+
+                return sessionIDs.ToArray();
+            }
+        }
+
         public int ClientCount { get { return ClientConnections.Count; } }
 
         private bool CanSend()
