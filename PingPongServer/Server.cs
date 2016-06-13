@@ -105,9 +105,10 @@ namespace PingPongServer
                             case PackageType.ClientInitalizeGamePackage:
                                 {
                                     ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
-                                    GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, conn);
+                                    GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
                                     Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
                                     PendingGames.Add(newGame);
+                                    PendingGames[0].AddClient(conn);
                                     break;
                                 }
 
