@@ -22,13 +22,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public bool Connected { get { return TcpConnection.Connected; } }
 
-        public NetworkConnection(TCPConnection tcpConnection)
+        public NetworkConnection(TCPConnection tcpConnection, int sessionID)
         {
             Adapter = new PackageAdapter();
 
             TcpPackages = new SafeStack<PackageInterface>();
 
-            ClientSession = new Session(-1);
+            ClientSession = new Session(sessionID);
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;

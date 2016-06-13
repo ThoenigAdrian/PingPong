@@ -33,8 +33,9 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection.InitializeReceiving();
         }
 
-        public int AddClientConnection(NetworkConnection clientConnection, int sessionID)
+        public void AddClientConnection(NetworkConnection clientConnection)
         {
+            int sessionID = clientConnection.ClientSession.SessionID;
             if (GetConnection(sessionID) != null)
                 throw new ConnectionException("Connection with this session ID is already in the network!");
 
@@ -43,7 +44,6 @@ namespace NetworkLibrary.NetworkImplementations
                 clientConnection.SetUDPConnection(UdpConnection);
                 clientConnection.ClientSession.SessionID = sessionID;
                 ClientConnections.Add(clientConnection);
-                return clientConnection.ClientSession.SessionID;
             }
 
             throw new ConnectionException("Could not add client connection because it is disconnected!");
