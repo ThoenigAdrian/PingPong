@@ -14,12 +14,11 @@ namespace PingPongServer
     
     public class GameNetwork : NetworkInterface
     {
-        
-        public GameNetwork(UDPConnection UDPGameData,  NetworkConnection Host) : this(UDPGameData, Host, null) { }
+        public GameNetwork(UDPConnection UDPGameData) : this(UDPGameData, null) { }
 
-        public GameNetwork(UDPConnection UDPGameData, NetworkConnection Host, LogWriter Logger) : base (UDPGameData, Logger)
+        public GameNetwork(UDPConnection UDPGameData, LogWriter Logger) : base (UDPGameData, Logger)
         {
-            AddClient(Host);
+            
         }
 
         public void AddClient(NetworkConnection connection)
