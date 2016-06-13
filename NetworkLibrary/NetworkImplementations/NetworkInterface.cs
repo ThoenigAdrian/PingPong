@@ -11,13 +11,19 @@ namespace NetworkLibrary.NetworkImplementations
         public delegate void SessionDeathHandler(int sessionID);
         public event SessionDeathHandler SessionDied;
 
-        public List<NetworkConnection> ClientConnections { get; set; }
+        List<NetworkConnection> ClientConnections { get; set; }
 
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
 
         public int ClientCount { get { return ClientConnections.Count; } }
+
+        int m_nextID;
+        int NextSessionID
+        {
+            get { return m_nextID++; }
+        }
 
         private bool CanSend()
         {
@@ -26,6 +32,8 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
+            m_nextID = 0;
+
             Logger = logger;
 
             ClientConnections = new List<NetworkConnection>();
@@ -33,18 +41,25 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection.InitializeReceiving();
         }
 
-        public bool AddClientConnection(NetworkConnection clientConnection)
+        public int AddClientConnection(NetworkConnection clientConnection)
         {
+            return AddClientConnection(clientConnection, NextSessionID);
+        }
+
+        public int AddClientConnection(NetworkConnection clientConnection, int sessionID)
+        {
+            if (GetConnection(sessionID) != null)
+                throw new ConnectionException("Connection with this session ID is already in the network!");
+
             if (clientConnection.Connected)
             {
                 clientConnection.SetUDPConnection(UdpConnection);
+                clientConnection.ClientSession.SessionID = sessionID;
                 ClientConnections.Add(clientConnection);
-                return true;
+                return clientConnection.ClientSession.SessionID;
             }
 
-            Log("Could not add connection!\nNot connected!");
-
-            return false;
+            throw new ConnectionException("Could not add client connection because it is disconnected!");
         }
 
         public void UpdateConnections()
@@ -78,28 +93,51 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection.Disconnect();
         }
 
+        private NetworkConnection GetConnection(int session)
+        {
+            foreach (NetworkConnection clientCon in ClientConnections)
+            {
+                if (clientCon.ClientSession.SessionID == session)
+                    return clientCon;
+            }
+
+            return null;
+        }
+
         protected PackageInterface GetDataTCP(int session)
         {
-            return ClientConnections[session].ReadTCP();
+            NetworkConnection sessionConnection = GetConnection(session);
+
+            if (sessionConnection != null)
+                return sessionConnection.ReadTCP();
+
+            return null;
         }
 
         protected PackageInterface[] GetAllDataTCP(int session)
         {
             List<PackageInterface> packages = new List<PackageInterface>();
 
-            PackageInterface package = GetDataTCP(session);
-            while (package != null)
+            PackageInterface package;
+            while ((package = GetDataTCP(session)) != null)
             {
                 packages.Add(package);
-                package = GetDataTCP(session);
             }
 
-            return packages.ToArray();
+            if(packages.Count > 0)
+                return packages.ToArray();
+
+            return null;
         }
 
         protected PackageInterface GetDataUDP(int session)
         {
-            return ClientConnections[session].ReadUDP();
+            NetworkConnection sessionConnection = GetConnection(session);
+
+            if (sessionConnection != null)
+                return sessionConnection.ReadUDP();
+
+            return null;
         }
 
         protected void SendDataTCP(PackageInterface package, int session)
@@ -107,7 +145,10 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            ClientConnections[session].SendTCP(package);
+            NetworkConnection sessionConnection = GetConnection(session);
+
+            if (sessionConnection != null)
+                sessionConnection.SendTCP(package);
         }
 
         protected void SendDataUDP(PackageInterface package, int session)
@@ -115,7 +156,10 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            ClientConnections[session].SendUDP(package);
+            NetworkConnection sessionConnection = GetConnection(session);
+
+            if (sessionConnection != null)
+                sessionConnection.SendUDP(package);
         }
 
         protected void BroadCastTCP(PackageInterface package)

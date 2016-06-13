@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 namespace PingPongClient.ControlLayer
 {
@@ -105,12 +106,10 @@ namespace PingPongClient.ControlLayer
                 ParentControl.Mode = GameMode.Lobby;
                 return;
             }
-            catch
+            catch (Exception ex)
             {
-                Log("Could not establish connection!");
+                ConnectionLobby.Status = "Connection failed!\n" + ex.Message;
             }
-
-            ConnectionLobby.Status = "Could not establish connection!";
         }
     }
 }
