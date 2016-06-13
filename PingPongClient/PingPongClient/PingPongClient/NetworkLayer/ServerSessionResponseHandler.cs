@@ -11,6 +11,8 @@ namespace PingPongClient.NetworkLayer
     {
         public Socket AcceptedSocket { get; private set; }
 
+        public NetworkConnection ServerConnection { get; private set; }
+
         public delegate void ServerResponseHandler(ServerSessionResponseHandler handler);
         public event ServerResponseHandler ServerResponded;
 
@@ -53,7 +55,7 @@ namespace PingPongClient.NetworkLayer
 
                 if (ReceivedEvent.WaitOne(5000) && !Error)
                 {
-                    NetworkConnection serverConnection = new NetworkConnection(tcpConnection, SessionID);
+                    ServerConnection = new NetworkConnection(tcpConnection, SessionID);
                     Connected = true;
                     return;
                 }

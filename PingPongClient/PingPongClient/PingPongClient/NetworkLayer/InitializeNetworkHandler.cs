@@ -35,7 +35,6 @@ namespace PingPongClient.NetworkLayer
 
             try
             {
-
                 IAsyncResult result = connectionSocket.BeginConnect(server, null, null);
                 result.AsyncWaitHandle.WaitOne(5000, true);
 
@@ -50,7 +49,6 @@ namespace PingPongClient.NetworkLayer
                 }
 
                 Network = new ClientNetwork(connectionSocket, Logger);
-                Network.NetworkBuildProcessFinished += Network_NetworkBuildProcessFinished;
                 Error = !Network.GetServerSessionResponse();
 
                 if(Error)
@@ -71,13 +69,6 @@ namespace PingPongClient.NetworkLayer
 
             if (NetworkInitializingFinished != null)
                 NetworkInitializingFinished.Invoke(this);
-
-
-        }
-
-        private void Network_NetworkBuildProcessFinished(bool connected, string errorMessage)
-        {
-            
         }
     }
 }

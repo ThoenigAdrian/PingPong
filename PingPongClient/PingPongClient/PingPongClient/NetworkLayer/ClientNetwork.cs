@@ -11,9 +11,6 @@ namespace PingPongClient.NetworkLayer
 {
     public class ClientNetwork : NetworkInterface
     {
-        public delegate void NetworkBuildCallback(bool connected, string errorMessage);
-        public event NetworkBuildCallback NetworkBuildProcessFinished;
-
         public int ClientSession { get; set; }
 
         ServerSessionResponseHandler ResponseHandler { get; set; }
@@ -21,12 +18,15 @@ namespace PingPongClient.NetworkLayer
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
             : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
-            ServerSessionResponseHandler responseHandler = new ServerSessionResponseHandler(connectedSocket);
+            ResponseHandler = new ServerSessionResponseHandler(connectedSocket);
         }
 
         public bool GetServerSessionResponse()
         {
-             return ResponseHandler.GetResponse();
+            bool response = ResponseHandler.GetResponse();
+            if (response)
+                AddClientConnection(ResponseHandler.ServerConnection);
+            return response;
         }
                       
 
