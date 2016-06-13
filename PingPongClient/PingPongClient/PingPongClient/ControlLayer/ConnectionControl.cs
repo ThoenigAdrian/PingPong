@@ -1,13 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using NetworkLibrary;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using System.Net;
-using System.Net.Sockets;
-using System;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using System.Threading;
 
 namespace PingPongClient.ControlLayer
 {
@@ -15,18 +12,22 @@ namespace PingPongClient.ControlLayer
     {
         ConnectLobby ConnectionLobby { get; set; }
 
-        LobbyVisualizer LobbyVisualizer { get { return base.Visualizer as LobbyVisualizer; } }
+        LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
+
+        bool Connecting { get; set; }
 
         public override GameMode GetMode { get { return GameMode.Lobby; } }
 
         public ConnectionControl(Control parent) : base(parent)
         {
             ConnectionLobby = new ConnectLobby();
-            ConnectionLobby.ServerIP = "213.47.183.165";
+            ConnectionLobby.ServerIP = "127.0.0.1";
 
             Input.AddPlayerInput(0, 0);
 
             Visualizer = new LobbyVisualizer(ConnectionLobby);
+
+            Connecting = false;
         }
 
         public void SetStatus(string status)
@@ -70,7 +71,13 @@ namespace PingPongClient.ControlLayer
 
         protected void InitializeNetwork()
         {
-            ConnectionLobby.Status = "";
+            if (Connecting)
+                return;
+
+            ConnectionLobby.Status = "Connecting...";
+
+            if (Network != null)
+                return;
 
             IPAddress serverIP;
             if (!IPAddress.TryParse(ConnectionLobby.ServerIP, out serverIP))
@@ -79,36 +86,38 @@ namespace PingPongClient.ControlLayer
                 return;
             }
 
-            Log("Initializing network...");
+            InitializeNetworkHandler networkHandler = new InitializeNetworkHandler(serverIP, ParentControl.Logger);
+            networkHandler.NetworkInitializingFinished += NetworkHandler_NetworkInitializingFinished;
 
-            IPEndPoint server = new IPEndPoint(serverIP, NetworkConstants.SERVER_PORT);
-            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            Connecting = true;
 
+            new Thread(networkHandler.InitializeNetwork).Start();
+        }
+
+        private void NetworkHandler_NetworkInitializingFinished(InitializeNetworkHandler handler)
+        {
             try
             {
-                if (Network != null)
-                    Network.Disconnect();
+                handler.NetworkInitializingFinished -= NetworkHandler_NetworkInitializingFinished;
 
-                IAsyncResult result = connectionSocket.BeginConnect(server, null, null);
-                result.AsyncWaitHandle.WaitOne(5000, true);
+                ConnectionLobby.Status = handler.Message;
 
-                if (!connectionSocket.Connected)
+                if (handler.Error)
                 {
-                    connectionSocket.Close();
-                    ConnectionLobby.Status = "Connect timeout!";
-                    return;
+                    if (handler.Network != null)
+                        handler.Network.Disconnect();
                 }
-
-                Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
-                Network.SessionDied += ParentControl.NetworkDeathHandler;
-                ConnectionLobby.Status = "Connected.";
-                ParentControl.LobbyControl.SetServerIP(ConnectionLobby.ServerIP);
-                ParentControl.Mode = GameMode.Lobby;
-                return;
+                else
+                {
+                    Network = handler.Network;
+                    Network.SessionDied += ParentControl.NetworkDeathHandler;
+                    ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
+                    ParentControl.Mode = GameMode.Lobby;
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                ConnectionLobby.Status = "Connection failed!\n" + ex.Message;
+                Connecting = false;
             }
         }
     }
