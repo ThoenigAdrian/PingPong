@@ -14,7 +14,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         UDPConnection UdpConnection { get; set; }
 
         DataContainer<PackageInterface> TcpPackages { get; set; }
-        DataContainer<byte[]> UdpData { get; set; }
+        DataContainer<DataWrapper<byte[]>> UdpData { get; set; }
 
         PackageAdapter Adapter { get; set; }
 
@@ -37,7 +37,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void SetUDPConnection(UDPConnection udpConnection)
         {
-            UdpData = new DoubleBuffer<byte[]>();
+            UdpData = new SingleBuffer<DataWrapper<byte[]>>();
 
             UdpConnection = udpConnection;
             UdpConnection.DataReceivedEvent += ReceiveUDP;
@@ -74,13 +74,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
-            return Adapter.CreatePackageFromNetworkData(UdpData.Read());
+            DataWrapper<byte[]> dataWrapper;
+            if(!(dataWrapper = UdpData.Read()).Read)
+                return Adapter.CreatePackageFromNetworkData(dataWrapper.Data);
+
+            return null;
         }
 
         private void ReceiveUDP(byte[] data, IPEndPoint source)
         {
             if (RemoteEndPoint.Port == source.Port)
-                UdpData.Write(data);
+                UdpData.Write(new DataWrapper<byte[]>(data));
         }
 
         private void ReceiveTCP(byte[] data)
