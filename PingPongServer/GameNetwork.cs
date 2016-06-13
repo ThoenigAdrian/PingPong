@@ -31,19 +31,20 @@ namespace PingPongServer
             UpdateClientConnections(); // so we can use this new connection for GrabAllDataForTheNExtFram
         }
 
+        
         private void UpdateClientConnections()
         {
-            for (int ClientID = 0; ClientID < ClientConnections.Count; ClientID++)
+            foreach (int sessionID in GetSessionIDs)
             {
-                packagesOfAllClients.Add(GetAllDataTCP(ClientID));
+                packagesOfAllClients.Add(GetAllDataTCP(sessionID));
             }
         }
 
         public void GrabAllNetworkDataForNextFrame()
         {
-            for(int ClientID=0; ClientID < ClientConnections.Count; ClientID++)
+            foreach(int sessionID in GetSessionIDs)
             {
-                packagesOfAllClients[ClientID] = GetAllDataTCP(ClientID);
+                packagesOfAllClients[sessionID] = GetAllDataTCP(sessionID);
             }
         }
 

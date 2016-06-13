@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 
 namespace PingPongServer
 {
@@ -74,7 +75,10 @@ namespace PingPongServer
                 newSocket = MasterListeningSocket.Accept();
                 Logger.Log("Client connected " + newSocket.RemoteEndPoint.ToString());
                 TCPConnection tcp = new TCPConnection(newSocket, null);
-                NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
+                NetworkConnection newNetworkConnection = new NetworkConnection(tcp, new Random().Next());
+                ServerSessionResponse a = new ServerSessionResponse();
+                a.ClientSessionID = newNetworkConnection.ClientSession.SessionID;
+                newNetworkConnection.SendTCP(a);
 
                 lock (IncomingConnections)
                     IncomingConnections.Add(newNetworkConnection);
