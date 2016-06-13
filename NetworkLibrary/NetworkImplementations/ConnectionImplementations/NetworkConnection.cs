@@ -74,8 +74,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
-            DataWrapper<byte[]> dataWrapper;
-            if(!(dataWrapper = UdpData.Read()).Read)
+            DataWrapper<byte[]> dataWrapper = dataWrapper = UdpData.Read();
+            if (dataWrapper != null && !dataWrapper.Read)
                 return Adapter.CreatePackageFromNetworkData(dataWrapper.Data);
 
             return null;
