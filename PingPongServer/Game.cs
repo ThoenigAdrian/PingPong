@@ -29,20 +29,24 @@ namespace PingPongServer
             this.Network = Network;            
             GameState = GameStates.Initializing;
             InitializeTeams();
-            
+            Ball = new PingPongBall();
+            Ball.PositionX = 50;
+            Ball.PositionY = 50;
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;            
 
         }
 
+        
         public void StartGame(object justToMatchSignatureForThreadPool)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
+            GameState = GameStates.Running;
             while (GameState == GameStates.Running)
             {
                 ServerPackage = PrepareNextFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(20);
+                Thread.Sleep(10);
             }
             GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
@@ -50,11 +54,30 @@ namespace PingPongServer
         public void AddClient(NetworkConnection client)
         {
             Network.AddClientConnection(client);
-            Client newClient = new Client(this, Clients.Count - 1, Players.Count - 1, GetFreeTeam());
+            Client newClient = new Client(client.ClientSession.SessionID, Players.Count, GetFreeTeam());
+            newClient.Players.Add(new Player(Players.Count, GetFreeTeam()));
+            Clients.Add(newClient);
+            packagesForNextFrame.Add(newClient.session, new PackageInterface[0]);
+            
+            AcceptNewPlayersFromConnectedClients();
+            UpdatePlayersFromClients();
+
             if (Players.Count == maxPlayers)
                 GameState = GameStates.Ready;
+        }
 
-            AcceptNewPlayersFromConnectedClients();
+        public void UpdatePlayersFromClients()
+        {
+            Players = new List<Player>();
+            foreach(Client c in Clients)
+                Players.AddRange(c.Players);
+            foreach(Player p in Players)
+            {
+                p.DirectionX = 10;
+                p.DirectionY = 10;
+                p.PositionX = 10;
+                p.PositionY = 10;
+            }
         }
 
         private void GetAllThe()
@@ -84,13 +107,16 @@ namespace PingPongServer
                     }
                 }
 
-                Players.AddRange(c.Players);
-            }                
+                
+            }
+            UpdatePlayersFromClients();             
         }
 
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
             List<PackageInterface> ps = new List<PackageInterface>();
+            if (packagesForNextFrame[sessionID] == null)
+                return new PackageInterface[0];
             foreach (PackageInterface p in packagesForNextFrame[sessionID])
             {
                 ps.Add(p);
@@ -115,16 +141,16 @@ namespace PingPongServer
         {
             NextFrame = new ServerDataPackage();
 
-            Ball.PositionX = (Ball.PositionX + 3F) % 300 + 100;
+            Ball.PositionX = (Ball.PositionX + 0.5F) % 300 + 100;
             NextFrame.Ball.PositionX = Ball.PositionX;
 
-            Ball.PositionY = (Ball.PositionX + 3F) % 300 + 100;
+            Ball.PositionY = (Ball.PositionX + 0.5F) % 300 + 100;
             NextFrame.Ball.PositionY = Ball.PositionY;
 
             foreach (Player player in Players)
             {
-                player.PositionX = (player.PositionX + 0.5F) % GameInitializers.BORDER_WIDTH;
-                player.PositionY = (player.PositionY + 0.5F) % GameInitializers.BORDER_HEIGHT;
+                player.PositionX = (player.PositionX + 0.2F) % GameInitializers.BORDER_WIDTH;
+                player.PositionY = (player.PositionY + 0.2F) % GameInitializers.BORDER_HEIGHT;
             }
 
             return NextFrame;
@@ -179,15 +205,12 @@ namespace PingPongServer
             public int session;
             public List<Player> Players = new List<Player>();
 
-            public Client(Game Game, int ClientID, int FirstPlayerID, Teams FirstPlayerTeam)
+            public Client(int sessionID, int FirstPlayerID, Teams FirstPlayerTeam)
             {
-                this.ClientID = ClientID;
-                this.Game = Game;
+                this.session = sessionID;
                 Players.Add(new Player(FirstPlayerID, FirstPlayerTeam));
 
-            }
-
-            
+            }         
 
             
         }
