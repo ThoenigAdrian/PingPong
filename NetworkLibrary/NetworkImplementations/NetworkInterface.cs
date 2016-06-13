@@ -8,7 +8,7 @@ namespace NetworkLibrary.NetworkImplementations
     public abstract class NetworkInterface
     {
 
-        public delegate void SessionDeathHandler(int sessionID);
+        public delegate void SessionDeathHandler(NetworkInterface sender, int sessionID);
         public event SessionDeathHandler SessionDied;
 
         List<NetworkConnection> ClientConnections { get; set; }
@@ -19,12 +19,6 @@ namespace NetworkLibrary.NetworkImplementations
 
         public int ClientCount { get { return ClientConnections.Count; } }
 
-        int m_nextID;
-        int NextSessionID
-        {
-            get { return m_nextID++; }
-        }
-
         private bool CanSend()
         {
             return ClientCount > 0;
@@ -32,18 +26,11 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
-            m_nextID = 0;
-
             Logger = logger;
 
             ClientConnections = new List<NetworkConnection>();
             UdpConnection = udpConnection;
             UdpConnection.InitializeReceiving();
-        }
-
-        public int AddClientConnection(NetworkConnection clientConnection)
-        {
-            return AddClientConnection(clientConnection, NextSessionID);
         }
 
         public int AddClientConnection(NetworkConnection clientConnection, int sessionID)
@@ -80,7 +67,7 @@ namespace NetworkLibrary.NetworkImplementations
                 ClientConnections.Remove(deadCon);
 
                 if (SessionDied != null)
-                    SessionDied.Invoke(deadCon.ClientSession.SessionID);
+                    SessionDied.Invoke(this, deadCon.ClientSession.SessionID);
 
             }
         }
