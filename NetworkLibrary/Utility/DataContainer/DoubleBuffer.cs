@@ -4,11 +4,10 @@ namespace NetworkLibrary.Utility
 {
     public class DoubleBuffer<T> : DataContainer<T>
     {
-        T Buffer1 { get; set; }
-        T Buffer2 { get; set; }
+        T m_buffer1;
+        T m_buffer2;
 
-        bool Switch { get; set; }
-        bool DataRead { get; set; }
+        volatile bool m_switch;
 
         public DoubleBuffer()
         {
@@ -17,35 +16,28 @@ namespace NetworkLibrary.Utility
 
         private void Initialize()
         {
-            DataRead = true;
-            Switch = false;
-            Buffer1 = default(T);
-            Buffer2 = default(T);
+            m_switch = false;
+
+            m_buffer1 = default(T);
+            m_buffer2 = default(T);
         }
 
         public override T Read()
         {
-            if (DataRead)
-                return default(T);
+            if(m_switch)
+                return m_buffer1;
             else
-                DataRead = true;
-
-            if (Switch)
-                return Buffer1;
-            else
-                return Buffer2;
+                return m_buffer2;
         }
 
         public override void Write(T buffer)
         {
-            if (!Switch)
-                Buffer1 = buffer;
+            if (!m_switch)
+                m_buffer1 = buffer;
             else
-                Buffer2 = buffer;
+                m_buffer2 = buffer;
 
-            Switch = !Switch;
-
-            DataRead = false;
+            m_switch = !m_switch;
         }
     }
 }

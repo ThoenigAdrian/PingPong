@@ -56,6 +56,7 @@
     <Compile Include="DataPackages\ServerSourcePackages\ServerGameControlPackage.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\Session.cs" />
     <Compile Include="Utility\DataContainer\DataContainer.cs" />
+    <Compile Include="Utility\DataContainer\DataWrapper.cs" />
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="NetworkImplementations\NetworkInterface.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\ConnectionInterface.cs" />
