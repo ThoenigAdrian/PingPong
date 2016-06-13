@@ -35,6 +35,7 @@ namespace PingPongClient.NetworkLayer
             {
                 NetworkConnection serverConnection = new NetworkConnection(tcpConnection, ClientSession);
                 AddClientConnection(serverConnection);
+                return;
             }
 
             tcpConnection.Disconnect();
@@ -55,35 +56,40 @@ namespace PingPongClient.NetworkLayer
         {
             ClientInitializeGamePackage package = new ClientInitializeGamePackage();
             package.PlayerCount = 2;
-            package.SessionID = 0;
-
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
         }
 
         public void SendClientJoin()
         {
             ClientJoinGameRequest package = new ClientJoinGameRequest();
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
         }
 
         public void SendClientControl(ClientControlPackage package)
         {
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
         }
 
         public void SendPlayerMovement(PlayerMovementPackage package)
         {
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
+        }
+
+        private void SendIDPackageTCP(ClientRegisteredPackage package)
+        {
+            package.SessionID = ClientSession;
+            SendDataTCP(package, ClientSession);
         }
 
         public void SendUDPTestData(PlayerMovementPackage package)
         {
-            SendDataUDP(package, 0);
+            package.SessionID = ClientSession;
+            SendDataUDP(package, ClientSession);
         }
 
         public ServerDataPackage GetServerData()
         {
-            return GetDataUDP(0) as ServerDataPackage;
+            return GetDataUDP(ClientSession) as ServerDataPackage;
         }
     }
 }
