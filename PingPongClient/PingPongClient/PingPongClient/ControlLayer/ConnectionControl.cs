@@ -71,25 +71,30 @@ namespace PingPongClient.ControlLayer
 
         protected void InitializeNetwork()
         {
-            if (Connecting)
-                return;
+            InitializeNetworkHandler networkHandler;
 
-            ConnectionLobby.Status = "Connecting...";
-
-            if (Network != null)
-                return;
-
-            IPAddress serverIP;
-            if (!IPAddress.TryParse(ConnectionLobby.ServerIP, out serverIP))
+            lock (ConnectionLobby)
             {
-                ConnectionLobby.Status = "Invalid IP!";
-                return;
+                if (Connecting)
+                    return;
+
+                ConnectionLobby.Status = "Connecting...";
+
+                if (Network != null)
+                    return;
+
+                IPAddress serverIP;
+                if (!IPAddress.TryParse(ConnectionLobby.ServerIP, out serverIP))
+                {
+                    ConnectionLobby.Status = "Invalid IP!";
+                    return;
+                }
+
+                networkHandler = new InitializeNetworkHandler(serverIP, ParentControl.Logger);
+                networkHandler.NetworkInitializingFinished += NetworkHandler_NetworkInitializingFinished;
+
+                Connecting = true;
             }
-
-            InitializeNetworkHandler networkHandler = new InitializeNetworkHandler(serverIP, ParentControl.Logger);
-            networkHandler.NetworkInitializingFinished += NetworkHandler_NetworkInitializingFinished;
-
-            Connecting = true;
 
             new Thread(networkHandler.InitializeNetwork).Start();
         }
