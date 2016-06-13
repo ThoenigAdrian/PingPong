@@ -18,13 +18,10 @@ namespace NetworkLibrary.Utility
 
         public override T Read()
         {
-            m_dataLock.WaitOne();
-
             if (m_data.Count <= 0)
-            {
-                m_dataLock.Release();
                 return default(T);
-            }
+
+            m_dataLock.WaitOne();
 
             T data = m_data[0];
             m_data.RemoveAt(0);
