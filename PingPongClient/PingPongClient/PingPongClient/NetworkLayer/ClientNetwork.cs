@@ -33,9 +33,11 @@ namespace PingPongClient.NetworkLayer
 
             if (ReceivedEvent.WaitOne(5000))
             {
-                NetworkConnection serverConnection = new NetworkConnection(tcpConnection);
-                ClientSession = AddClientConnection(serverConnection, ClientSession);
+                NetworkConnection serverConnection = new NetworkConnection(tcpConnection, ClientSession);
+                AddClientConnection(serverConnection);
             }
+
+            tcpConnection.Disconnect();
 
             throw new ConnectionException("Server timeout while receiving session ID!");
         }
