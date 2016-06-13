@@ -1,13 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using NetworkLibrary;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using System.Net;
-using System.Net.Sockets;
-using System;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 namespace PingPongClient.ControlLayer
 {
@@ -15,7 +11,9 @@ namespace PingPongClient.ControlLayer
     {
         ConnectLobby ConnectionLobby { get; set; }
 
-        LobbyVisualizer LobbyVisualizer { get { return base.Visualizer as LobbyVisualizer; } }
+        LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
+
+        bool Connecting { get; set; }
 
         public override GameMode GetMode { get { return GameMode.Lobby; } }
 
@@ -27,6 +25,8 @@ namespace PingPongClient.ControlLayer
             Input.AddPlayerInput(0, 0);
 
             Visualizer = new LobbyVisualizer(ConnectionLobby);
+
+            Connecting = false;
         }
 
         public void SetStatus(string status)
@@ -70,7 +70,16 @@ namespace PingPongClient.ControlLayer
 
         protected void InitializeNetwork()
         {
+            if (Connecting)
+                return;
+
             ConnectionLobby.Status = "";
+
+            if (Network != null)
+                return;
+
+
+
 
             IPAddress serverIP;
             if (!IPAddress.TryParse(ConnectionLobby.ServerIP, out serverIP))
@@ -79,37 +88,29 @@ namespace PingPongClient.ControlLayer
                 return;
             }
 
-            Log("Initializing network...");
+            InitializeNetworkHandler networkHandler = new InitializeNetworkHandler(serverIP, ParentControl.Logger);
+            networkHandler.NetworkInitializingFinished += NetworkHandler_NetworkInitializingFinished;
 
-            IPEndPoint server = new IPEndPoint(serverIP, NetworkConstants.SERVER_PORT);
-            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            Connecting = true;
+            networkHandler.InitializeNetwork();
+        }
 
-            try
+        private void NetworkHandler_NetworkInitializingFinished(InitializeNetworkHandler handler)
+        {
+            handler.NetworkInitializingFinished -= NetworkHandler_NetworkInitializingFinished;
+
+            ConnectionLobby.Status = handler.Message;
+
+            if (handler.Error)
             {
-                if (Network != null)
-                    Network.Disconnect();
-
-                IAsyncResult result = connectionSocket.BeginConnect(server, null, null);
-                result.AsyncWaitHandle.WaitOne(5000, true);
-
-                if (!connectionSocket.Connected)
-                {
-                    connectionSocket.Close();
-                    ConnectionLobby.Status = "Connect timeout!";
-                    return;
-                }
-
-                Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
-                Network.SessionDied += ParentControl.NetworkDeathHandler;
-                ConnectionLobby.Status = "Connected.";
-                ParentControl.LobbyControl.SetServerIP(ConnectionLobby.ServerIP);
-                ParentControl.Mode = GameMode.Lobby;
-                return;
+                handler.Network.Disconnect();
             }
-            catch (Exception ex)
+            else
             {
-                ConnectionLobby.Status = "Connection failed!\n" + ex.Message;
+                Network = handler.Network;
             }
+
+            Connecting = false;
         }
     }
 }
