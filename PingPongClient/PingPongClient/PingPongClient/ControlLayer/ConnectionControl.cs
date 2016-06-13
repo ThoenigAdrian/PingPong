@@ -107,15 +107,10 @@ namespace PingPongClient.ControlLayer
 
                 ConnectionLobby.Status = handler.Message;
 
-                if (handler.Error)
+                if (!handler.Error)
                 {
-                    if (handler.Network != null)
-                        handler.Network.Disconnect();
-                }
-                else
-                {
+                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler; ;
                     Network = handler.Network;
-                    Network.SessionDied += ParentControl.NetworkDeathHandler;
                     ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
                     ParentControl.Mode = GameMode.Lobby;
                 }

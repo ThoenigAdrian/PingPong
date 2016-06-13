@@ -9,9 +9,7 @@ namespace PingPongClient.NetworkLayer
 {
     class ServerSessionResponseHandler
     {
-        public Socket AcceptedSocket { get; private set; }
-
-        public NetworkConnection ServerConnection { get; private set; }
+        
 
         public delegate void ServerResponseHandler(ServerSessionResponseHandler handler);
         public event ServerResponseHandler ServerResponded;
@@ -20,11 +18,12 @@ namespace PingPongClient.NetworkLayer
 
         public LogWriter Logger { get; set; }
 
-        int SessionID { get; set; }
-
+        public Socket AcceptedSocket { get; private set; }
+        public NetworkConnection ServerConnection { get; private set; }
+        public int SessionID { get; private set; }
         public bool Connected { get; private set; }
-        private bool Error { get; set; }
 
+        private bool Error { get; set; }
         public string ErrorMessage { get; private set; }
 
         public ServerSessionResponseHandler(Socket acceptedSocket)

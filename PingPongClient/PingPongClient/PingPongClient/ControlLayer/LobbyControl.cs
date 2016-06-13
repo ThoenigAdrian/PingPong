@@ -34,7 +34,8 @@ namespace PingPongClient.ControlLayer
 
         public override void Update(GameTime gameTime)
         {
-            
+            if (Network != null)
+                Network.UpdateConnections();
         }
 
         protected void HandleRequestInput()

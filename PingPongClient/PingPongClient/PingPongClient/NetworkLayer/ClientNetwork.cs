@@ -25,7 +25,14 @@ namespace PingPongClient.NetworkLayer
         {
             bool response = ResponseHandler.GetResponse();
             if (response)
+            {
+                ClientSession = ResponseHandler.SessionID;
                 AddClientConnection(ResponseHandler.ServerConnection);
+            }
+            else
+            {
+                Disconnect();
+            }
             return response;
         }
                       
