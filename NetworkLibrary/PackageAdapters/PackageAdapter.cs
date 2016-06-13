@@ -16,15 +16,15 @@ namespace NetworkLibrary.PackageAdapters
             if (stream == null)
                 return null;
 
-            byte[][] dataSets = SplitStreamIntoData(stream);
+            string[] jsonStrings = ConvertStreamToValidJsonStrings(ConvertNetworkDataToString(stream));
 
-            if (dataSets == null)
+            if (jsonStrings == null)
                 return null;
 
             List<PackageInterface> packages = new List<PackageInterface>();
-            foreach (byte[] data in dataSets)
+            foreach (string data in jsonStrings)
             {
-                PackageInterface package = CreatePackageFromNetworkData(data);
+                PackageInterface package = CreatePackageFromJSONString(data);
                 if (package != null)
                     packages.Add(package);
             }
@@ -35,16 +35,33 @@ namespace NetworkLibrary.PackageAdapters
             return null;
         }
 
-        private byte[][] SplitStreamIntoData(byte[] stream)
+        private PackageInterface CreatePackageFromJSONString(string jsonString)
         {
-            if (stream == null)
-                return null;
+            PackageType type = GetPackageType(jsonString);
 
-            List<byte[]> dataSets = new List<byte[]>();
+            switch (type)
+            {
+                case PackageType.ServerData:
+                    return JsonConvert.DeserializeObject<ServerDataPackage>(jsonString);
+                case PackageType.ClientControl:
+                    return JsonConvert.DeserializeObject<ClientControlPackage>(jsonString);
+                case PackageType.ClientAddPlayerRequest:
+                    return JsonConvert.DeserializeObject<ClientAddPlayerRequest>(jsonString);
+                case PackageType.ClientInitalizeGamePackage:
+                    return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(jsonString);
+                case PackageType.ClientJoinGameRequest:
+                    return JsonConvert.DeserializeObject<ClientJoinGameRequest>(jsonString);
+                case PackageType.ServerAddPlayerResponsePackage:
+                    return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(jsonString);
+                case PackageType.ServerGameControl:
+                    return JsonConvert.DeserializeObject<ServerGameControlPackage>(jsonString);
+                case PackageType.ServerJoinGameResponsePackage:
+                    return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(jsonString);
+                case PackageType.ClientPlayerMovement:
+                    return JsonConvert.DeserializeObject<PlayerMovementPackage>(jsonString);
+            }
 
-            dataSets.Add(stream);
-
-            return dataSets.ToArray();
+            return null; 
         }
 
         public PackageInterface CreatePackageFromNetworkData(byte[] data)
@@ -52,33 +69,7 @@ namespace NetworkLibrary.PackageAdapters
             if (data == null)
                 return null;
 
-            string networkDataString = ConvertNetworkDataToString(data);
-
-            PackageType type = GetPackageType(networkDataString);
-
-            switch (type)
-            {
-                case PackageType.ServerData:
-                    return JsonConvert.DeserializeObject<ServerDataPackage>(networkDataString);
-                case PackageType.ClientControl:
-                    return JsonConvert.DeserializeObject<ClientControlPackage>(networkDataString);
-                case PackageType.ClientAddPlayerRequest:
-                    return JsonConvert.DeserializeObject<ClientAddPlayerRequest>(networkDataString);
-                case PackageType.ClientInitalizeGamePackage:
-                    return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(networkDataString);
-                case PackageType.ClientJoinGameRequest:
-                    return JsonConvert.DeserializeObject<ClientJoinGameRequest>(networkDataString);
-                case PackageType.ServerAddPlayerResponsePackage:
-                    return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(networkDataString);
-                case PackageType.ServerGameControl:
-                    return JsonConvert.DeserializeObject<ServerGameControlPackage>(networkDataString);
-                case PackageType.ServerJoinGameResponsePackage:
-                    return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(networkDataString);
-                case PackageType.ClientPlayerMovement:
-                    return JsonConvert.DeserializeObject<PlayerMovementPackage>(networkDataString);
-            }
-
-            return null;   
+            return CreatePackageFromJSONString(ConvertNetworkDataToString(data));
         }
 
         public byte[] CreateNetworkDataFromPackage(PackageInterface package)
@@ -125,7 +116,10 @@ namespace NetworkLibrary.PackageAdapters
                 }
             }
 
-            return jsonStrings.ToArray();
+            if (jsonStrings.Count > 0)
+                return jsonStrings.ToArray();
+
+            return null;
         }
 
         private string ConvertNetworkDataToString(byte[] array)
