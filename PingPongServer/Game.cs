@@ -10,82 +10,32 @@ namespace PingPongServer
 {
     public class Game
     {
+        public GameStates GameState { get; private set; }
         List<Player> Players = new List<Player>();
         List<Client> Clients = new List<Client>();
+        public PingPongBall Ball;                
+        private int maxPlayers;
+        private int NeededNumberOfPlayersForGameToStart;
+
         public GameNetwork Network;
-        public PingPongBall Ball;
-        public int maxPlayers;        
         public ServerDataPackage NextFrame;
+        public Dictionary<int, PackageInterface[]> packagesForNextFrame = new Dictionary<int, PackageInterface[]>();
         public List<GameTeam> ListOfTeams = new List<GameTeam>();
 
-        public GameStates GameState { get; private set; }
+                
 
-        public enum GameStates
-        {
-            Initializing,
-            Running,
-            Aborted,
-            Finished,
-            Ready
-        }
-
-        public Game(GameNetwork Network, int PlayerCount)
+        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
             this.Network = Network;            
-            this.GameState = GameStates.Initializing;
-
-            GameTeam g = new GameTeam(Teams.Team1);
-            ListOfTeams.Add(g);
-            g = new GameTeam(Teams.Team2);
-            ListOfTeams.Add(g);
-
-            maxPlayers = PlayerCount;
+            GameState = GameStates.Initializing;
+            InitializeTeams();
+            
+            this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
+            maxPlayers = NeededNumberOfPlayersForGameToStart;            
 
         }
 
-        private void Update()
-        {
-            foreach(Client c in Clients)
-                Players.AddRange(c.Players);
-
-        }
-        
-        private void AcceptNewPlayersFromConnectedClients()
-        {
-            for(int ClientID = 0; ClientID < Clients.Count; ClientID++)
-            {
-                ClientAddPlayerRequest Packet = Network.GetLastAddPlayerRequest(ClientID);
-                    
-                Clients[ClientID].AddPlayer(Players.Count, Packet.RequestedTeam);
-                if (Players.Count >= maxPlayers)
-                {
-                    GameState = GameStates.Ready;
-                    break;
-                }
-            }
-            Update();
-        }
-        
-        public void AddClient(NetworkConnection client)
-        {
-            Network.AddClientConnection(client);
-            Client newClient = new Client(Network, Clients.Count - 1, Players.Count - 1, GetFreeTeam());
-            if (Players.Count == maxPlayers)
-                GameState = GameStates.Ready;
-            Update();
-
-        }
-
-        public Teams GetFreeTeam()
-        {
-            if (maxPlayers/2 == ListOfTeams[0].PlayerCount)
-                return Teams.Team1;
-            return Teams.Team2;           
-                
-        }
-
-
-        public void StartGame(object justToMatchSignature)
+        public void StartGame(object justToMatchSignatureForThreadPool)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
             while (GameState == GameStates.Running)
@@ -94,11 +44,68 @@ namespace PingPongServer
                 Network.BroadcastFramesToClients(ServerPackage);
                 Thread.Sleep(20);
             }
-            GameState = GameStates.Finished;
-            
+            GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
 
-        public ServerDataPackage PrepareNextFrame()
+        public void AddClient(NetworkConnection client)
+        {
+            Network.AddClientConnection(client);
+            Client newClient = new Client(this, Clients.Count - 1, Players.Count - 1, GetFreeTeam());
+            if (Players.Count == maxPlayers)
+                GameState = GameStates.Ready;
+
+            AcceptNewPlayersFromConnectedClients();
+        }
+
+        private void GetAllThe()
+        {
+            packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
+        }
+
+              
+        public void AcceptNewPlayersFromConnectedClients()
+        {
+            GetAllThe();
+            foreach(Client c in Clients)
+            {                 
+                PackageInterface[] AddPlayerRequests = getAllDataRelatedToClient(c.session);
+
+                foreach(PackageInterface possibleRequest in AddPlayerRequests)
+                {
+                    if (possibleRequest == null || possibleRequest.PackageType != PackageType.ClientAddPlayerRequest)
+                        continue;
+
+                    ClientAddPlayerRequest a = (ClientAddPlayerRequest)possibleRequest;
+                    c.Players.Add(new Player(Players.Count, a.RequestedTeam));
+                    if (Players.Count >= maxPlayers)
+                    {
+                        GameState = GameStates.Ready;
+                        break;
+                    }
+                }
+
+                Players.AddRange(c.Players);
+            }                
+        }
+
+        private PackageInterface[] getAllDataRelatedToClient(int sessionID)
+        {
+            List<PackageInterface> ps = new List<PackageInterface>();
+            foreach (PackageInterface p in packagesForNextFrame[sessionID])
+            {
+                ps.Add(p);
+            }
+            return ps.ToArray();
+        }
+        
+        private Teams GetFreeTeam()
+        {
+            if (maxPlayers/2 == ListOfTeams[0].PlayerCount)
+                return Teams.Team1;
+            return Teams.Team2;               
+        }
+        
+        private ServerDataPackage PrepareNextFrame()
         {
             this.GameState = GameStates.Running;
             return CalculateFrame();
@@ -123,61 +130,81 @@ namespace PingPongServer
             return NextFrame;
         }
 
+        private void InitializeTeams()
+        {
+            GameTeam Team1 = new GameTeam(Teams.Team1);
+            ListOfTeams.Add(Team1);
+            GameTeam Team2 = new GameTeam(Teams.Team2);
+            ListOfTeams.Add(Team2);
+        }
+
+     
+        public ClientControls GetLastPlayerControl(int playerID)
+        {
+            List<ClientControlPackage> cc = new List<ClientControlPackage>();
+            foreach (Client c in Clients)
+            {
+                PackageInterface[] ps = getAllDataRelatedToClient(c.session);
+                foreach(PackageInterface p in ps)
+                {
+                    if (p == null || p.PackageType == PackageType.ClientControl)
+                        continue;
+                    cc.Add((ClientControlPackage)p);
+                }
+            }
+            return cc[cc.Count - 1].ControlInput;
+        }
+
+        public ClientMovement GetLastPlayerMovement(int ClientID, int playerID)
+        {
+
+            List<PlayerMovementPackage> cc = new List<PlayerMovementPackage>();
+            foreach (Client c in Clients)
+            {
+                PackageInterface[] ps = getAllDataRelatedToClient(c.session);
+                foreach (PackageInterface p in ps)
+                {
+                    if (p == null || p.PackageType == PackageType.ClientPlayerMovement)
+                        continue;
+                    cc.Add((PlayerMovementPackage)p);
+                }
+            }
+            return cc[cc.Count - 1].PlayerMovement;
+        }
+
         public class Client
         {
-            GameNetwork GameNetwork;
+            Game Game;
             public int ClientID;
             public int session;
             public List<Player> Players = new List<Player>();
 
-            public Client(GameNetwork GameNetwork, int ClientID, int FirstPlayerID, Teams FirstPlayerTeam)
+            public Client(Game Game, int ClientID, int FirstPlayerID, Teams FirstPlayerTeam)
             {
                 this.ClientID = ClientID;
-                this.GameNetwork = GameNetwork;
-                AddPlayer(FirstPlayerID, FirstPlayerTeam);
+                this.Game = Game;
+                Players.Add(new Player(FirstPlayerID, FirstPlayerTeam));
 
             }
 
-            public void AddPlayer(int PlayerID, Teams Team)
-            {
-                Players.Add(new Player(this, PlayerID, Team));
-            }
+            
 
-            public ClientControls ReceiveLastPlayerControl(int PlayerID)
-            {
-                return GameNetwork.GetLastPlayerControl(ClientID, PlayerID);
-            }
-
-            public ClientMovement ReceiveLastPlayerMovement(int PlayerID)
-            {
-                return GameNetwork.GetLastPlayerMovement(ClientID, PlayerID);
-            }
+            
         }
         
         public class Player : ServerDataPackage.Player
         {
             public ClientMovement PlayerMovement { get; set; }
+
             Teams Team;
-            Client Client;
             public int PlayerID;
 
-            public Player(Client Client, int PlayerID, Teams Team)
+            public Player(int PlayerID, Teams Team)
             {
-                this.Client = Client;
                 this.PlayerID = PlayerID;
                 this.Team = Team;
             }
-
-            public ClientControls ReceiveLastPlayerControl()
-            {
-                return Client.ReceiveLastPlayerControl(this.PlayerID);
-            }
-            public ClientMovement ReceiveLastPlayerMovement()
-            {
-                return Client.ReceiveLastPlayerMovement(this.PlayerID);
-            }
-
-
+            
         }
 
         public class GameTeam
