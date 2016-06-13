@@ -42,7 +42,7 @@ namespace PingPongServer
             BroadCastUDP(Frame);
         }
 
-        public PackageInterface[] GetAllOfPackagesOfClient(int sessionID)
+        private PackageInterface[] GetAllOfPackagesOfClient(int sessionID)
         {
             return GetAllDataTCP(sessionID);
         }
