@@ -6,11 +6,17 @@ using System.Net;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
+using NetworkLibrary.PackageAdapters;
+using System.Threading;
 
 namespace PingPongClient.NetworkLayer
 {
     public class ClientNetwork : NetworkInterface
     {
+        public int ClientSession { get; set; }
+
+        EventWaitHandle ReceivedEvent { get; set; }
+
         public ClientNetwork(Socket connectedSocket)
             : this(connectedSocket, null)
         {
@@ -19,9 +25,28 @@ namespace PingPongClient.NetworkLayer
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
             : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
+            ReceivedEvent = new EventWaitHandle(false, EventResetMode.ManualReset);
+
             TCPConnection tcpConnection = new TCPConnection(connectedSocket, logger);
+            tcpConnection.DataReceivedEvent += ReadIDRespone;
             tcpConnection.InitializeReceiving();
-            AddClientConnection(new NetworkConnection(tcpConnection));
+
+            if (ReceivedEvent.WaitOne(5000))
+            {
+                NetworkConnection serverConnection = new NetworkConnection(tcpConnection);
+                ClientSession = AddClientConnection(serverConnection, ClientSession);
+            }
+
+            throw new ConnectionException("Server timeout while receiving session ID!");
+        }
+
+        private void ReadIDRespone(TCPConnection sender, byte[] data)
+        {
+            sender.DataReceivedEvent -= ReadIDRespone;
+            PackageAdapter adapter = new PackageAdapter();
+            ServerSessionResponse responsePackage = adapter.CreatePackagesFromStream(data)[0] as ServerSessionResponse;
+            ClientSession = responsePackage.ClientSessionID;
+            ReceivedEvent.Set();
         }
 
         public void SendClientStart()

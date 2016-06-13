@@ -6,7 +6,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class TCPConnection : ConnectionInterface
     {
-        public delegate void DataReceivedHandler(byte[] data);
+        public delegate void DataReceivedHandler(TCPConnection sender, byte[] data);
 
         public event DataReceivedHandler DataReceivedEvent;
 
@@ -51,7 +51,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         void RaiseReceivedEvent(byte[] data)
         {
             if (DataReceivedEvent != null)
-                DataReceivedEvent.Invoke(data);
+                DataReceivedEvent.Invoke(this, data);
         }
     }
 }

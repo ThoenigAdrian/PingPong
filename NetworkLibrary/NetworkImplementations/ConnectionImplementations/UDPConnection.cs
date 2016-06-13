@@ -6,7 +6,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class UDPConnection: ConnectionInterface
     {
-        public delegate void DataReceivedHandler(byte[] data, IPEndPoint endPoint);
+        public delegate void DataReceivedHandler(UDPConnection sender, byte[] data, IPEndPoint endPoint);
 
         public event DataReceivedHandler DataReceivedEvent;
 
@@ -45,7 +45,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
             if (DataReceivedEvent != null)
-                DataReceivedEvent.Invoke(data, source);
+                DataReceivedEvent.Invoke(this, data, source);
         }
     }
 }

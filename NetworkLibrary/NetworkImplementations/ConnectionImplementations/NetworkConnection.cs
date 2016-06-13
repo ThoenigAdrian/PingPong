@@ -81,13 +81,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             return null;
         }
 
-        private void ReceiveUDP(byte[] data, IPEndPoint source)
+        private void ReceiveUDP(UDPConnection sender, byte[] data, IPEndPoint source)
         {
             if (RemoteEndPoint.Port == source.Port)
                 UdpData.Write(new DataWrapper<byte[]>(data));
         }
 
-        private void ReceiveTCP(byte[] data)
+        private void ReceiveTCP(TCPConnection sender, byte[] data)
         {
             PackageInterface[] packages = Adapter.CreatePackagesFromStream(data);
             foreach (PackageInterface package in packages)
