@@ -96,37 +96,38 @@ namespace PingPongServer
                     foreach (NetworkConnection conn in IncomingConnections)
                     {
                         PackageInterface packet = conn.ReadTCP();
-                        if (packet != null)
+                        if (packet == null)
+                            continue;
+                        
+                        switch (packet.PackageType)
                         {
-                            switch (packet.PackageType)
-                            {
-                                case PackageType.ClientInitalizeGamePackage:
+                            case PackageType.ClientInitalizeGamePackage:
+                                {
+                                    ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
+                                    GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, conn);
+                                    Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
+                                    PendingGames.Add(newGame);
+                                    break;
+                                }
+
+                            case PackageType.ClientJoinGameRequest:
+                                {
+                                    ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
+                                    PendingGames[0].AddClient(conn);
+                                    if (PendingGames[0].GameState == Game.GameStates.Ready)
                                     {
-                                        ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
-                                        GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, conn);
-                                        Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
-                                        PendingGames.Add(newGame);
-                                        break;
+                                        RunningGames.Add(PendingGames[0]);
+                                        PendingGames.RemoveAt(0);
+
+                                        // Start each game which is ready in a new Thread. Communication will be done via the "StateOfRunningGames" which indicates if the Game is finished
+                                        ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
                                     }
-
-                                case PackageType.ClientJoinGameRequest:
-                                    {
-                                        ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
-                                        PendingGames[0].AddClient(conn);
-                                        if (PendingGames[0].GameState == Game.GameStates.Ready)
-                                        {
-                                            RunningGames.Add(PendingGames[0]);
-                                            PendingGames.RemoveAt(0);
-
-                                            // Start each game which is ready in a new Thread. Communication will be done via the "StateOfRunningGames" which indicates if the Game is finished
-                                            ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
-                                        }
                                             
-                                        break;
+                                    break;
                                         
-                                    }
+                                }
                             }
-                        }
+                        
                     }
 
                     Thread.Sleep(10);
