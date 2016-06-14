@@ -46,7 +46,7 @@ namespace PingPongServer
             {
                 ServerPackage = PrepareNextFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(10);
+                Thread.Sleep(3);
             }
             GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
@@ -141,10 +141,10 @@ namespace PingPongServer
         {
             NextFrame = new ServerDataPackage();
 
-            Ball.PositionX = (Ball.PositionX + 0.5F) % 300 + 100;
+            Ball.PositionX = (Ball.PositionX + 0.2F) % 300;
             NextFrame.Ball.PositionX = Ball.PositionX;
 
-            Ball.PositionY = (Ball.PositionX + 0.5F) % 300 + 100;
+            Ball.PositionY = (Ball.PositionX + 0.2F) % 300;
             NextFrame.Ball.PositionY = Ball.PositionY;
 
             foreach (Player player in Players)
