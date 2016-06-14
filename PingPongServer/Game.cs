@@ -31,7 +31,7 @@ namespace PingPongServer
         {
             this.Network = Network;            
             GameState = GameStates.Initializing;
-            GameStructure GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
+            GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;            
 
@@ -55,7 +55,9 @@ namespace PingPongServer
         {
             Network.AddClientConnection(client);
             Client newClient = new Client(client.ClientSession.SessionID, GameStructure.PlayersCount, GameStructure.GetFreeTeam());
-            newClient.Players.Add(new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), 50F));
+            Player p = new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), 50F);
+            newClient.Players.Add(p);
+            GameStructure.AddPlayer(p, GameStructure.GetFreeTeam());
             Clients.Add(newClient);
             packagesForNextFrame.Add(newClient.session, new PackageInterface[0]);
             

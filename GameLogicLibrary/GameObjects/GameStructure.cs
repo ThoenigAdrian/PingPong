@@ -27,6 +27,8 @@ namespace GameLogicLibrary.GameObjects
         {
             this.maxPlayers = maxPlayers;
             GameField = new GameField();
+            GameTeams.Add(0, new List<Player>());
+            GameTeams.Add(1, new List<Player>());
             Ball = new PlayBall();
         }
 
@@ -50,7 +52,7 @@ namespace GameLogicLibrary.GameObjects
                 if (entry.Value.Count < maxPlayers / numberOfTeams)
                     return entry.Key;
             }
-            return -1;
+            return 0;
         }
                 
     }
