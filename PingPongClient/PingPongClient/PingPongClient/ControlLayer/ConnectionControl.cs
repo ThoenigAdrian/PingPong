@@ -5,6 +5,7 @@ using System.Net;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
 using System.Threading;
+using PingPongClient.InputLayer.KeyboardInputs;
 
 namespace PingPongClient.ControlLayer
 {
@@ -63,7 +64,7 @@ namespace PingPongClient.ControlLayer
             }
             else
             {
-                ConnectionLobby.ServerIP += Input.GetNumberInput();
+                ConnectionLobby.ServerIP += Input.GetNumberInputAsString();
             }
         }
 

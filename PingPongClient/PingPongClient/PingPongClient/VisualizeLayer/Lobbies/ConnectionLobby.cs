@@ -26,19 +26,11 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         public ConnectLobby()
         {
-            DrawableServerIP = CreateServerIPString();
-            DrawableStatus = CreateStatusString();
-        }
+            DrawableServerIP = new DrawableString(CreateIPString(""), new Vector2(100, 100), Color.White);
+            DrawableStatus = new DrawableString("", new Vector2(100, 150), Color.White);
 
-        public override DrawableString[] GetDrawableStrings
-        {
-            get
-            {
-                DrawableString[] drawableStrings = new DrawableString[2];
-                drawableStrings[0] = DrawableServerIP;
-                drawableStrings[1] = DrawableStatus;
-                return drawableStrings;
-            }
+            Strings.Add(DrawableServerIP);
+            Strings.Add(DrawableStatus);
         }
 
         public override Color GetBackgroundColor { get { return Color.Black; } }
@@ -46,26 +38,6 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         string CreateIPString(string serverIP)
         {
             return "Enter server IP: " + serverIP;
-        }
-
-        DrawableString CreateServerIPString()
-        {
-            DrawableString serverIPDraw = new DrawableString(CreateIPString(""));
-            serverIPDraw.StringColor = Color.White;
-            serverIPDraw.PosX = 100;
-            serverIPDraw.PosY = 100;
-
-            return serverIPDraw;
-        }
-
-        DrawableString CreateStatusString()
-        {
-            DrawableString statusDraw = new DrawableString("");
-            statusDraw.StringColor = Color.White;
-            statusDraw.PosX = 100;
-            statusDraw.PosY = 150;
-
-            return statusDraw;
         }
     }
 }

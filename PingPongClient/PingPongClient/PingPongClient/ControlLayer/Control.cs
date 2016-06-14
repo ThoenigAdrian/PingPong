@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using PingPongClient.InputLayer;
+using PingPongClient.InputLayer.KeyboardInputs;
 using PingPongClient.NetworkLayer;
 using NetworkLibrary.Utility;
 using PingPongClient.ControlLayer;

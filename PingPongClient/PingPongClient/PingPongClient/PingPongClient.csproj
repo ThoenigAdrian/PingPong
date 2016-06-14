@@ -82,6 +82,7 @@
     <Compile Include="ControlLayer\Interpolation.cs" />
     <Compile Include="ControlLayer\LobbyControl.cs" />
     <Compile Include="ControlLayer\SubControlInterface.cs" />
+    <Compile Include="InputLayer\InputTranslation\SelectionTranslation.cs" />
     <Compile Include="InputLayer\KeyboardInputs\ControlInput.cs" />
     <Compile Include="InputLayer\InputInterface.cs" />
     <Compile Include="InputLayer\InputManager.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="InputLayer\InputTranslation\TextEditTranslation.cs" />
     <Compile Include="InputLayer\InputTranslation\TranslationFactory.cs" />
     <Compile Include="InputLayer\KeyboardInputs\PlayerInput.cs" />
+    <Compile Include="InputLayer\KeyboardInputs\SelectionInput.cs" />
     <Compile Include="InputLayer\KeyboardInputs\TextEditInput.cs" />
     <Compile Include="NetworkLayer\ClientNetwork.cs" />
     <Compile Include="NetworkLayer\InitializeNetworkHandler.cs" />
@@ -100,6 +102,8 @@
     <Compile Include="VisualizeLayer\Lobbies\ConnectionLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\LobbyInterface.cs" />
     <Compile Include="VisualizeLayer\Lobbies\RequestLobby.cs" />
+    <Compile Include="VisualizeLayer\Lobbies\SelectionLists\SelectionListInterface.cs" />
+    <Compile Include="VisualizeLayer\Lobbies\SelectionLists\StartJoinSelection.cs" />
     <Compile Include="VisualizeLayer\Visualizers\LobbyVisualizer.cs" />
     <Compile Include="VisualizeLayer\Visualizers\VisualizerInterface.cs" />
     <Compile Include="VisualizeLayer\Visualizers\VisualizerInitializatonData.cs" />

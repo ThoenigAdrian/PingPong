@@ -8,5 +8,7 @@ namespace NetworkLibrary.DataPackages.ClientSourcePackages
     public class ClientJoinGameRequest : ClientRegisteredPackage
     {
         public override PackageType PackageType { get { return PackageType.ClientJoinGameRequest; } }
+
+        public int PlayerCountOfClient { get; set; }
     }
 }
