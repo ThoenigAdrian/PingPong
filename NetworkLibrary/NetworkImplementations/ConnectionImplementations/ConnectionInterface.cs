@@ -28,22 +28,31 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             get
             {
                 SocketLock.WaitOne();
+                try
+                {
+                    if (Disconnecting || !ConnectionSocket.Connected)
+                        return false;
 
-                if (Disconnecting || !ConnectionSocket.Connected)
+                    bool connected = true;
+                    if (ConnectionSocket.Poll(0, SelectMode.SelectRead))
+                    {
+                        byte[] data = new byte[1];
+                        connected = ConnectionSocket.Receive(data, SocketFlags.Peek) != 0;
+                    }
+
+                    return connected;
+                }
+                catch (SocketException)
+                {
+
+                }
+                finally
                 {
                     SocketLock.Release();
-                    return false;
                 }
 
-                bool connected = true;
-                if (ConnectionSocket.Poll(0, SelectMode.SelectRead))
-                {
-                    byte[] data = new byte[1];
-                    connected = ConnectionSocket.Receive(data, SocketFlags.Peek) != 0;
-                }
+                return false;
 
-                SocketLock.Release();
-                return connected;
             }
         }
 

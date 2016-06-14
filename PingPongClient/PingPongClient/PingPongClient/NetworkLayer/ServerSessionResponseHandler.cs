@@ -9,11 +9,6 @@ namespace PingPongClient.NetworkLayer
 {
     class ServerSessionResponseHandler
     {
-        
-
-        public delegate void ServerResponseHandler(ServerSessionResponseHandler handler);
-        public event ServerResponseHandler ServerResponded;
-
         EventWaitHandle ReceivedEvent { get; set; }
 
         public LogWriter Logger { get; set; }
