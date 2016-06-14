@@ -70,6 +70,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\DataContainer\DoubleBuffer.cs" />
     <Compile Include="Utility\DataContainer\SafeStack.cs" />
+    <Compile Include="Utility\OneShotTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameLogicLibrary\GameLogicLibrary.csproj">
