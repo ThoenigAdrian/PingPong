@@ -46,6 +46,7 @@
     <Compile Include="GameObjects\GameField.cs" />
     <Compile Include="GameInitializers.cs" />
     <Compile Include="GameObjects\GameStructure.cs" />
+    <Compile Include="GameObjects\Player.cs" />
     <Compile Include="GameObjects\PlayerBar.cs" />
     <Compile Include="GameStates.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

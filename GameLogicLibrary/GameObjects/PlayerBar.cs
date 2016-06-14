@@ -2,19 +2,21 @@
 {
     public class PlayerBar
     {
-        public float PosX { get; set; }
-        public float PosY { get; set; }
+        public float PositionX { get; set; }
+        public float PositionY { get; set; }
 
         public float Height { get; set; }
         public float Width { get; set; }
 
-        public PlayerBar(float posX)
+        
+        public PlayerBar(float PositionX)
         {
-            PosX = posX;
-            PosY = GameInitializers.PLAYER_Y;
+            this.PositionX = PositionX;
+            PositionY = GameInitializers.PLAYER_Y;
 
             Height = GameInitializers.PLAYER_HEIGHT;
             Width = GameInitializers.PLAYER_WIDTH;
+            
         }
     }
 }
