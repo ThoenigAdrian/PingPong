@@ -85,14 +85,16 @@ namespace ConnectionTesting
             Socket acceptedSocket;
             while ((acceptedSocket = Listen.m_socketQueue.Read()) != null)
             {
+                m_logger.Log("Client connected.");
                 int sessionID = m_sessionPool.GetSessionID;
                 NetworkConnection clientConnection = new NetworkConnection(new TCPConnection(acceptedSocket), sessionID);
                 ServerSessionResponse response = new ServerSessionResponse();
                 response.ClientSessionID = sessionID;
                 clientConnection.SendTCP(response);
+                m_logger.Log("Sent client session ID: " + sessionID);
                 m_network.AddClientConnection(clientConnection);
 
-                m_logger.Log("Client connected.");
+                
             }
         }
 
@@ -127,8 +129,8 @@ namespace ConnectionTesting
                     string[] split = cmd.Split(' ');
                     if (split.Length > 1)
                     {
-                        try { Sender.m_sendInterval = Convert.ToInt32(split[1]); }
-                        catch { Sender.m_sendInterval = 0; }
+                        try { Sender.SendInterval = Convert.ToInt64(split[1]) * 1000; }
+                        catch { Sender.SendInterval = 0; }
                     }
                 }
                 else
@@ -235,9 +237,10 @@ namespace ConnectionTesting
     {
         public bool m_spammingActive = false;
         public SendMode m_sendMode = SendMode.UDP;
-        public int m_sendInterval = 0;
-        DateTime m_lastSendStamp;
+        public long SendInterval { set { timer.TimerInterval(value); } }
         public ServerNetwork m_network;
+
+        OneShotTimer timer = new OneShotTimer(0);
 
         Random m_random = new Random();
         float BallX = 0;
@@ -247,7 +250,6 @@ namespace ConnectionTesting
 
         public Sending()
         {
-            m_lastSendStamp = DateTime.Now;
         }
 
         public void Broadcast()
@@ -255,10 +257,12 @@ namespace ConnectionTesting
             if (m_network == null)
                 return;
 
-            DateTime currentTime = DateTime.Now;
-
-            if (currentTime.Ticks - (m_sendInterval * 10000) < m_lastSendStamp.Ticks)
+            if (timer == false)
+            {
                 return;
+            }
+
+            timer.Restart();
 
             ServerDataPackage package = new ServerDataPackage();
 
@@ -283,8 +287,6 @@ namespace ConnectionTesting
                     m_network.SendPositionDataTCP(package);
                     break;
             }
-
-            m_lastSendStamp = currentTime;
             Console.Out.WriteLine("Sent position data.");
         }
     }
