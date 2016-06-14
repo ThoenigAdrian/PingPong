@@ -16,8 +16,8 @@
         ServerData,
         ServerGameControl,
         ServerAddPlayerResponsePackage,
-        ServerJoinGameResponsePackage
-        
+        ServerJoinGameResponsePackage,
+        ServerSessionResponse
     }
 
     public enum Result

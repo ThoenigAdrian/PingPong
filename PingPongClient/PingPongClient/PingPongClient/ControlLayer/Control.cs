@@ -6,6 +6,7 @@ using PingPongClient.ControlLayer;
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using PingPongClient.VisualizeLayer.Visualizers;
+using NetworkLibrary.NetworkImplementations;
 
 namespace PingPongClient
 {
@@ -107,7 +108,7 @@ namespace PingPongClient
             base.Draw(gameTime);
         }
 
-        public void NetworkDeathHandler(int sessionID)
+        public void NetworkDeathHandler(NetworkInterface sender, int sessionID)
         {
             Network.SessionDied -= NetworkDeathHandler;
             Network.Disconnect();

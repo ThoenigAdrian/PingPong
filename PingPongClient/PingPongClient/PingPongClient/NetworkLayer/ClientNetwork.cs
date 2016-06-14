@@ -11,52 +11,70 @@ namespace PingPongClient.NetworkLayer
 {
     public class ClientNetwork : NetworkInterface
     {
-        public ClientNetwork(Socket connectedSocket)
-            : this(connectedSocket, null)
-        {
-        }
+        public int ClientSession { get; set; }
+
+        ServerSessionResponseHandler ResponseHandler { get; set; }
 
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
             : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
-            TCPConnection tcpConnection = new TCPConnection(connectedSocket, logger);
-            tcpConnection.InitializeReceiving();
-            AddClientConnection(new NetworkConnection(tcpConnection));
+            ResponseHandler = new ServerSessionResponseHandler(connectedSocket);
         }
+
+        public bool GetServerSessionResponse()
+        {
+            bool response = ResponseHandler.GetResponse();
+            if (response)
+            {
+                ClientSession = ResponseHandler.SessionID;
+                AddClientConnection(ResponseHandler.ServerConnection);
+            }
+            else
+            {
+                Disconnect();
+            }
+            return response;
+        }
+                      
 
         public void SendClientStart()
         {
             ClientInitializeGamePackage package = new ClientInitializeGamePackage();
             package.PlayerCount = 2;
-            package.SessionID = 0;
-
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
         }
 
         public void SendClientJoin()
         {
             ClientJoinGameRequest package = new ClientJoinGameRequest();
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
         }
 
         public void SendClientControl(ClientControlPackage package)
         {
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
         }
 
         public void SendPlayerMovement(PlayerMovementPackage package)
         {
-            SendDataTCP(package, 0);
+            SendIDPackageTCP(package);
+        }
+
+        private void SendIDPackageTCP(ClientRegisteredPackage package)
+        {
+            package.SessionID = ClientSession;
+            SendDataTCP(package, ClientSession);
         }
 
         public void SendUDPTestData(PlayerMovementPackage package)
         {
-            SendDataUDP(package, 0);
+            package.SessionID = ClientSession;
+            SendDataUDP(package, ClientSession);
         }
 
         public ServerDataPackage GetServerData()
         {
-            return GetDataUDP(0) as ServerDataPackage;
+            return GetDataUDP(ClientSession) as ServerDataPackage;
         }
     }
 }

@@ -1,12 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using NetworkLibrary;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using System.Net;
-using System.Net.Sockets;
-using System;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
+using System.Threading;
 
 namespace PingPongClient.ControlLayer
 {
@@ -14,18 +12,22 @@ namespace PingPongClient.ControlLayer
     {
         ConnectLobby ConnectionLobby { get; set; }
 
-        LobbyVisualizer LobbyVisualizer { get { return base.Visualizer as LobbyVisualizer; } }
+        LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
+
+        bool Connecting { get; set; }
 
         public override GameMode GetMode { get { return GameMode.Lobby; } }
 
         public ConnectionControl(Control parent) : base(parent)
         {
             ConnectionLobby = new ConnectLobby();
-            ConnectionLobby.ServerIP = "213.47.183.165";
+            ConnectionLobby.ServerIP = "127.0.0.1";
 
             Input.AddPlayerInput(0, 0);
 
             Visualizer = new LobbyVisualizer(ConnectionLobby);
+
+            Connecting = false;
         }
 
         public void SetStatus(string status)
@@ -69,48 +71,54 @@ namespace PingPongClient.ControlLayer
 
         protected void InitializeNetwork()
         {
-            ConnectionLobby.Status = "";
+            InitializeNetworkHandler networkHandler;
 
-            IPAddress serverIP;
-            if (!IPAddress.TryParse(ConnectionLobby.ServerIP, out serverIP))
+            lock (ConnectionLobby)
             {
-                ConnectionLobby.Status = "Invalid IP!";
-                return;
-            }
+                if (Connecting)
+                    return;
 
-            Log("Initializing network...");
+                ConnectionLobby.Status = "Connecting...";
 
-            IPEndPoint server = new IPEndPoint(serverIP, NetworkConstants.SERVER_PORT);
-            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            try
-            {
                 if (Network != null)
-                    Network.Disconnect();
+                    return;
 
-                IAsyncResult result = connectionSocket.BeginConnect(server, null, null);
-                result.AsyncWaitHandle.WaitOne(5000, true);
-
-                if (!connectionSocket.Connected)
+                IPAddress serverIP;
+                if (!IPAddress.TryParse(ConnectionLobby.ServerIP, out serverIP))
                 {
-                    connectionSocket.Close();
-                    ConnectionLobby.Status = "Connect timeout!";
+                    ConnectionLobby.Status = "Invalid IP!";
                     return;
                 }
 
-                Network = new ClientNetwork(connectionSocket, ParentControl.Logger);
-                Network.SessionDied += ParentControl.NetworkDeathHandler;
-                ConnectionLobby.Status = "Connected.";
-                ParentControl.LobbyControl.SetServerIP(ConnectionLobby.ServerIP);
-                ParentControl.Mode = GameMode.Lobby;
-                return;
-            }
-            catch
-            {
-                Log("Could not establish connection!");
+                networkHandler = new InitializeNetworkHandler(serverIP, ParentControl.Logger);
+                networkHandler.NetworkInitializingFinished += NetworkHandler_NetworkInitializingFinished;
+
+                Connecting = true;
             }
 
-            ConnectionLobby.Status = "Could not establish connection!";
+            new Thread(networkHandler.InitializeNetwork).Start();
+        }
+
+        private void NetworkHandler_NetworkInitializingFinished(InitializeNetworkHandler handler)
+        {
+            try
+            {
+                handler.NetworkInitializingFinished -= NetworkHandler_NetworkInitializingFinished;
+
+                ConnectionLobby.Status = handler.Message;
+
+                if (!handler.Error)
+                {
+                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler; ;
+                    Network = handler.Network;
+                    ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
+                    ParentControl.Mode = GameMode.Lobby;
+                }
+            }
+            finally
+            {
+                Connecting = false;
+            }
         }
     }
 }

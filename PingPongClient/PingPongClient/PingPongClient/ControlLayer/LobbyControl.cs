@@ -24,7 +24,7 @@ namespace PingPongClient.ControlLayer
 
         public void SetServerIP(string serverIP)
         {
-            RequestLobby.Status = "Connected to " + serverIP;
+            RequestLobby.Status = "Connected to " + serverIP + "   Session: " + Network.ClientSession;
         }
 
         public override void HandleInput()
@@ -34,7 +34,8 @@ namespace PingPongClient.ControlLayer
 
         public override void Update(GameTime gameTime)
         {
-            
+            if (Network != null)
+                Network.UpdateConnections();
         }
 
         protected void HandleRequestInput()

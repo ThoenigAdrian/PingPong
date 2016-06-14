@@ -57,6 +57,8 @@ namespace NetworkLibrary.PackageAdapters
                     return JsonConvert.DeserializeObject<ServerGameControlPackage>(jsonString);
                 case PackageType.ServerJoinGameResponsePackage:
                     return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(jsonString);
+                case PackageType.ServerSessionResponse:
+                    return JsonConvert.DeserializeObject<ServerSessionResponse>(jsonString);
                 case PackageType.ClientPlayerMovement:
                     return JsonConvert.DeserializeObject<PlayerMovementPackage>(jsonString);
             }
