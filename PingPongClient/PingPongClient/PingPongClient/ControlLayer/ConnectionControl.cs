@@ -23,8 +23,6 @@ namespace PingPongClient.ControlLayer
             ConnectionLobby = new ConnectLobby();
             ConnectionLobby.ServerIP = "127.0.0.1";
 
-            Input.AddPlayerInput(0, 0);
-
             Visualizer = new LobbyVisualizer(ConnectionLobby);
 
             Connecting = false;
