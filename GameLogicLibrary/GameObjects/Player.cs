@@ -5,13 +5,13 @@
         public PlayerBar PlayerBar { get; set; }
         public ClientMovement PlayerMovement { get; set; }
 
-        private Teams Team;
+        private int TeamNumber;
         private int PlayerID { get; set; }
         
-        public Player(int PlayerID, Teams Team, float PositionX)
+        public Player(int PlayerID, int TeamNumber, float PositionX)
         {
             this.PlayerID = PlayerID;
-            this.Team = Team;
+            this.TeamNumber = TeamNumber;
             PlayerBar = new PlayerBar(PositionX);
         }
      }
