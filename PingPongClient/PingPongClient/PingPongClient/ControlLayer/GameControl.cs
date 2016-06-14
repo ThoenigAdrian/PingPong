@@ -31,7 +31,6 @@ namespace PingPongClient.ControlLayer
             {
                 SendClientCommandos();
                 SendMovementInputs();
-                ApplyServerPositions();
             }
         }
 
@@ -39,6 +38,9 @@ namespace PingPongClient.ControlLayer
         {
             if (Network != null)
                 Network.UpdateConnections();
+
+            if (Network != null)
+                ApplyServerPositions();
 
             Interpolation.Interpolate(gameTime);
         }
