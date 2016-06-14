@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using PingPongClient.InputLayer;
+using PingPongClient.InputLayer.KeyboardInputs;
 using PingPongClient.VisualizeLayer.Visualizers;
 
 namespace PingPongClient.ControlLayer

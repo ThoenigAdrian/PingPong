@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using PingPongClient.InputLayer;
+using PingPongClient.InputLayer.KeyboardInputs;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
 
@@ -29,7 +29,8 @@ namespace PingPongClient.ControlLayer
 
         public override void HandleInput()
         {
-            HandleRequestInput();
+            HandleSelectInput();
+            HandlePlayerCountInput();
         }
 
         public override void Update(GameTime gameTime)
@@ -38,19 +39,61 @@ namespace PingPongClient.ControlLayer
                 Network.UpdateConnections();
         }
 
-        protected void HandleRequestInput()
+
+        private void HandleSelectInput()
         {
-            ControlInputs controlInput = Input.GetControlInput();
-            switch (controlInput)
+            SelectionInputs selection = Input.GetSelectionInput();
+
+            switch (selection)
             {
-                case ControlInputs.Restart:
-                    Network.SendClientStart();
+                case SelectionInputs.Select:
+                    SendRequestInput();
+                    break;
+
+                case SelectionInputs.Up:
+                    RequestLobby.Selection--;
+                    break;
+
+                case SelectionInputs.Down:
+                    RequestLobby.Selection++;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void SendRequestInput()
+        {
+            switch (RequestLobby.SelectedOption)
+            {
+                case RequestLobby.RequestOptions.Start:
+                    Network.SendClientStart(RequestLobby.PlayerCount);
                     ParentControl.Mode = GameMode.Game;
                     break;
 
-                case ControlInputs.Pause:
-                    Network.SendClientJoin();
+                case RequestLobby.RequestOptions.Join:
+                    Network.SendClientJoin(RequestLobby.PlayerCount);
                     ParentControl.Mode = GameMode.Game;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void HandlePlayerCountInput()
+        {
+            SelectionInputs selection = Input.GetSelectionInput();
+
+            switch (selection)
+            {
+                case SelectionInputs.Left:
+                    RequestLobby.PlayerCount--;
+                    break;
+
+                case SelectionInputs.Right:
+                    RequestLobby.PlayerCount++;
                     break;
 
                 default:

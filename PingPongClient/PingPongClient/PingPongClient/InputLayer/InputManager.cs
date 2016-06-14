@@ -11,30 +11,6 @@ namespace PingPongClient.InputLayer
         public PlayerMovementInputs MovementInput = PlayerMovementInputs.NoInput;
     }
 
-    public enum PlayerMovementInputs
-    {
-        StopMoving,
-        Up,
-        Down,
-        NoInput
-    }
-
-    public enum ControlInputs
-    {
-        Pause,
-        Quit,
-        Restart,
-        NoInput
-    }
-
-    public enum TextEditInputs
-    {
-        Number,
-        Delete,
-        Enter,
-        NoInput
-    }
-
     public class InputManager
     {
         KeyboardAdvanced KeyboardAdapter = new KeyboardAdvanced();
@@ -42,12 +18,14 @@ namespace PingPongClient.InputLayer
         ControlInput ControlInput;
         List<PlayerInput> PlayerInputs;
         TextEditInput TextInput;
+        SelectionInput SelectInput;
 
         public InputManager()
         {
             ControlInput = new ControlInput(KeyboardAdapter);
             PlayerInputs = new List<PlayerInput>();
             TextInput = new TextEditInput(KeyboardAdapter);
+            SelectInput = new SelectionInput(KeyboardAdapter);
         }
 
         public void Initialize()
@@ -87,9 +65,19 @@ namespace PingPongClient.InputLayer
             return TextInput.GetTextEditInputs();
         }
 
-        public string GetNumberInput()
+        public string GetNumberInputAsString()
         {
             return TextInput.GetPressedKeyString();
+        }
+
+        public int GetNumberInput()
+        {
+            return TextInput.GetPressedKeyValue();
+        }
+
+        public SelectionInputs GetSelectionInput()
+        {
+            return SelectInput.GetSelectionInput();
         }
     }
 }

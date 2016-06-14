@@ -4,6 +4,14 @@ using System;
 
 namespace PingPongClient.InputLayer.KeyboardInputs
 {
+    public enum ControlInputs
+    {
+        Pause,
+        Quit,
+        Restart,
+        NoInput
+    }
+
     class ControlInput : InputInterfaceKeyboard
     {
         ControlTranslation Translation { get; set; }

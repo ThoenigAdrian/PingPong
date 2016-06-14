@@ -4,6 +4,14 @@ using System;
 
 namespace PingPongClient.InputLayer.KeyboardInputs
 {
+    public enum PlayerMovementInputs
+    {
+        StopMoving,
+        Up,
+        Down,
+        NoInput
+    }
+
     class PlayerInput : InputInterfaceKeyboard
     {
         public int ID { get; set; }

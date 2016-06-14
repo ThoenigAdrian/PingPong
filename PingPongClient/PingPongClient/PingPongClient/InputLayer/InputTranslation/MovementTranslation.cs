@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using PingPongClient.InputLayer.KeyboardInputs;
 
 namespace PingPongClient.InputLayer.InputTranslation
 {
