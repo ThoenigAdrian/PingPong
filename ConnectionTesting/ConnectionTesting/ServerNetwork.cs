@@ -23,40 +23,6 @@ namespace ConnectionTesting
             BroadCastTCP(package);
         }
 
-        public Dictionary<int, PackageInterface[]> GetAllSessionDataTCP()
-        {
-            Dictionary<int, PackageInterface[]> packages = new Dictionary<int, PackageInterface[]>();
-
-            foreach (int session in GetSessionIDs)
-            {
-                PackageInterface[] sessionPackages = GetAllDataTCP(session);
-                if(sessionPackages != null)
-                    packages.Add(session, sessionPackages);
-            }
-
-            if (packages.Count > 0)
-                return packages;
-
-            return null;
-        }
-
-        public Dictionary<int, PackageInterface> GetAllSessionDataUDP()
-        {
-            Dictionary<int, PackageInterface> packages = new Dictionary<int, PackageInterface>();
-
-            foreach (int session in GetSessionIDs)
-            {
-                PackageInterface sessionPackage = GetDataUDP(session);
-                if(sessionPackage != null)
-                    packages.Add(session, sessionPackage);
-            }
-
-            if (packages.Count > 0)
-                return packages;
-
-            return null;
-        }
-
         public PackageInterface[] ReceivePackageTCP(int session)
         {
             return GetAllDataTCP(session);
@@ -65,6 +31,16 @@ namespace ConnectionTesting
         public PackageInterface ReceivePackageUDP(int session)
         {
             return GetDataUDP(session);
+        }
+
+        public Dictionary<int, PackageInterface[]> CollectDataTCP()
+        {
+            return GetDataFromEverySessionTCP();
+        }
+
+        public Dictionary<int, PackageInterface> CollectDataUDP()
+        {
+            return GetDataFromEverySessionUDP();
         }
     }
 }

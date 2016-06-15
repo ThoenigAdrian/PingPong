@@ -1,11 +1,11 @@
-﻿using NetworkLibrary.Utility;
+﻿using NetworkLibrary.DataPackages;
+using NetworkLibrary.NetworkImplementations;
+using NetworkLibrary.Utility;
 using PingPongClient.NetworkLayer;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
+using System.Threading;
 
 namespace ConnectionTesting
 {
@@ -13,6 +13,8 @@ namespace ConnectionTesting
     {
         ClientNetwork m_network;
         bool m_spamConnections;
+
+        Semaphore m_disconnectLock = new Semaphore(1, 1);
 
         public Client(LogWriter logger) : base(logger)
         {
@@ -35,6 +37,8 @@ namespace ConnectionTesting
                 connectSocket.Connect(new IPEndPoint(IPAddress.Loopback, 4200));
 
                 m_network = new ClientNetwork(connectSocket, null);
+                m_network.GetServerSessionResponse();
+                m_network.SessionDied += ConnectionDied;
                 Logger.Log("Connected.");
                 return true;
             }
@@ -50,21 +54,31 @@ namespace ConnectionTesting
 
         private void Disconnect()
         {
+            m_disconnectLock.WaitOne();
             if (m_network != null)
             {
-                Logger.Log("Disconnecting from server...");
                 m_network.Disconnect();
                 m_network = null;
                 Logger.Log("Disconnected.");
             }
+            m_disconnectLock.Release();
+        }
+
+        private void ConnectionDied(NetworkInterface sender, int sessionID)
+        {
+            Disconnect();
+            Logger.Log("Session with server died.");
         }
 
         protected override void ExecuteModuleActions()
         {
+            if(m_network != null)
+                ReceiveData();
+
             if (m_spamConnections)
             {
-                Disconnect();
                 Connect();
+                Disconnect();
             }
         }
 
@@ -83,6 +97,29 @@ namespace ConnectionTesting
                     break;
             }
         }
+
+
+        private void ReceiveData()
+        {
+            Dictionary<int, PackageInterface[]> tcpPackages = m_network.CollectDataTCP();
+            if (tcpPackages != null)
+            {
+                foreach (KeyValuePair<int, PackageInterface[]> entry in tcpPackages)
+                {
+                    Logger.Log("Received " + entry.Value.Length + " TCP packages from session " + entry.Key + ".");
+                }
+            }
+
+            Dictionary<int, PackageInterface> udpPackages = m_network.CollectDataUDP();
+            if (udpPackages != null)
+            {
+                foreach (KeyValuePair<int, PackageInterface> entry in udpPackages)
+                {
+                    Logger.Log("Received UDP package from session " + entry.Key + ".");
+                }
+            }
+        }
+
 
         protected override void ShutdownActions()
         {

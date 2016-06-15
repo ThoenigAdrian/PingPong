@@ -79,7 +79,7 @@ namespace ConnectionTesting
 
         private void ReceiveData()
         {
-            Dictionary<int, PackageInterface[]> tcpPackages = m_network.GetAllSessionDataTCP();
+            Dictionary<int, PackageInterface[]> tcpPackages = m_network.CollectDataTCP();
             if(tcpPackages != null)
             {
                 foreach (KeyValuePair<int, PackageInterface[]> entry in tcpPackages)
@@ -88,7 +88,7 @@ namespace ConnectionTesting
                 }
             }
 
-            Dictionary<int, PackageInterface> udpPackages = m_network.GetAllSessionDataUDP();
+            Dictionary<int, PackageInterface> udpPackages = m_network.CollectDataUDP();
             if (udpPackages != null)
             {
                 foreach (KeyValuePair<int, PackageInterface> entry in udpPackages)
@@ -171,7 +171,7 @@ namespace ConnectionTesting
             {
                 m_listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 m_listeningSocket.Bind(new IPEndPoint(IPAddress.Any, m_listeningPort));
-                m_listeningSocket.Listen(3);
+                m_listeningSocket.Listen(10);
             }
             catch
             {
@@ -192,6 +192,7 @@ namespace ConnectionTesting
                 {
                     acceptedSocket = m_listeningSocket.Accept();
                     m_socketQueue.Write(acceptedSocket);
+                    Thread.Sleep(100);
                 }
                 catch (SocketException)
                 {
@@ -220,8 +221,8 @@ namespace ConnectionTesting
         Random m_random = new Random();
         float BallX = 0;
         float BallY = 0;
-        float dirX = 0.1F;
-        float dirY = 0.1F;
+        float dirX = 1F;
+        float dirY = 1F;
 
         public Sending()
         {

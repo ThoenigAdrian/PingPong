@@ -6,6 +6,7 @@ using System.Net;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
+using System.Collections.Generic;
 
 namespace PingPongClient.NetworkLayer
 {
@@ -76,6 +77,16 @@ namespace PingPongClient.NetworkLayer
         public ServerDataPackage GetServerData()
         {
             return GetDataUDP(ClientSession) as ServerDataPackage;
+        }
+
+        public Dictionary<int, PackageInterface[]> CollectDataTCP()
+        {
+            return GetDataFromEverySessionTCP();
+        }
+
+        public Dictionary<int, PackageInterface> CollectDataUDP()
+        {
+            return GetDataFromEverySessionUDP();
         }
     }
 }
