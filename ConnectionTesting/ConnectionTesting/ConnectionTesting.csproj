@@ -44,10 +44,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
+    <Compile Include="ClientNetwork.cs" />
+    <Compile Include="InitializeNetworkHandler.cs" />
+    <Compile Include="Module.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServerNetwork.cs" />
+    <Compile Include="ServerSessionResponseHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

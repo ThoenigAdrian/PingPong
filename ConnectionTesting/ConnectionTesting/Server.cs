@@ -17,7 +17,7 @@ namespace ConnectionTesting
         UDP
     }
 
-    class Server
+    class Server : Module
     {
         ServerNetwork m_network;
         SessionIDPool m_sessionPool;
@@ -25,34 +25,21 @@ namespace ConnectionTesting
         Listening Listen;
         Sending Sender;
 
-        LogWriter m_logger = new LogWriterConsole();
-
-        bool m_stopServer = false;
-
-
-        public SafeStack<string> m_commandStack;
-
-        public delegate void ServerInitErrorHandle();
-        public event ServerInitErrorHandle ServerInitError;
-
-        public Server()
+        public Server(LogWriter logger) : base(logger)
         {
             m_sessionPool = new SessionIDPool();
-            m_commandStack = new SafeStack<string>();
             Listen = new Listening(4200);
             Sender = new Sending();
         }
 
-        public void StartServer()
+        protected override void Initialize()
         {
-            m_logger.Log("Initializing server...");
+            Logger.Log("Initializing server...");
 
             if (!Listen.InitialiseListening())
             {
-                m_logger.Log("Initializing error!\nServer shut down.");
-                if (ServerInitError != null)
-                    ServerInitError.Invoke();
-
+                Logger.Log("Initializing error!\nServer shut down.");
+                RaiseInitFailEvent();
                 return;
             }
 
@@ -61,23 +48,17 @@ namespace ConnectionTesting
 
             Sender.m_network = m_network;
 
-            m_logger.Log("Server started.");
-
-            ServerCylce();
+            Logger.Log("Server started.");
         }
 
-        private void ServerCylce()
+        protected override void ExecuteModuleActions()
         {
-            while (!m_stopServer)
-            {
-                m_network.UpdateConnections();
-                AddAcceptedSocketsToNetwork();
-                ReceiveData();
-                ExecuteCommand();
+            m_network.UpdateConnections();
+            AddAcceptedSocketsToNetwork();
+            ReceiveData();
 
-                if (Sender.m_spammingActive)
-                    Sender.Broadcast();
-            }
+            if (Sender.m_spammingActive)
+                Sender.Broadcast();
         }
 
         private void AddAcceptedSocketsToNetwork()
@@ -85,16 +66,14 @@ namespace ConnectionTesting
             Socket acceptedSocket;
             while ((acceptedSocket = Listen.m_socketQueue.Read()) != null)
             {
-                m_logger.Log("Client connected.");
+                Logger.Log("Client connected.");
                 int sessionID = m_sessionPool.GetSessionID;
                 NetworkConnection clientConnection = new NetworkConnection(new TCPConnection(acceptedSocket), sessionID);
+                m_network.AddClientConnection(clientConnection);
                 ServerSessionResponse response = new ServerSessionResponse();
                 response.ClientSessionID = sessionID;
                 clientConnection.SendTCP(response);
-                m_logger.Log("Sent client session ID: " + sessionID);
-                m_network.AddClientConnection(clientConnection);
-
-                
+                Logger.Log("Sent client session ID: " + sessionID);
             }
         }
 
@@ -105,7 +84,7 @@ namespace ConnectionTesting
             {
                 foreach (KeyValuePair<int, PackageInterface[]> entry in tcpPackages)
                 {
-                    m_logger.Log("Received " + entry.Value.Length + " TCP packages from session " + entry.Key + ".");
+                    Logger.Log("Received " + entry.Value.Length + " TCP packages from session " + entry.Key + ".");
                 }
             }
 
@@ -114,44 +93,41 @@ namespace ConnectionTesting
             {
                 foreach (KeyValuePair<int, PackageInterface> entry in udpPackages)
                 {
-                    m_logger.Log("Received UDP package from session " + entry.Key + ".");
+                    Logger.Log("Received UDP package from session " + entry.Key + ".");
                 }
             }
         }
 
-        private void ExecuteCommand()
+        protected override void ExecuteCommand(string cmd)
         {
-            string cmd;
-            while ((cmd = m_commandStack.Read()) != default(string))
+            if (cmd.Contains("interval"))
             {
-                if (cmd.Contains("interval"))
+                string[] split = cmd.Split(' ');
+                if (split.Length > 1)
                 {
-                    string[] split = cmd.Split(' ');
-                    if (split.Length > 1)
-                    {
-                        try { Sender.SendInterval = Convert.ToInt64(split[1]) * 1000; }
-                        catch { Sender.SendInterval = 0; }
-                    }
+                    try { Sender.SendInterval = Convert.ToInt64(split[1]) * 1000; }
+                    catch { Sender.SendInterval = 0; }
                 }
-                else
+            }
+            else
+            {
+                switch (cmd)
                 {
-                    switch (cmd)
-                    {
-                        case "mode tcp":
-                            Sender.m_sendMode = SendMode.TCP;
-                            m_logger.Log("Now sending in TCP mode.");
-                            break;
-                        case "mode udp":
-                            Sender.m_sendMode = SendMode.UDP;
-                            m_logger.Log("Now sending in UDP mode.");
-                            break;
-                        case "send":
-                            Sender.Broadcast();
-                            break;
-                        case "spam":
-                            Sender.m_spammingActive = !Sender.m_spammingActive;
-                            break;
-                    }
+                    case "mode tcp":
+                        Sender.m_sendMode = SendMode.TCP;
+                        Logger.Log("Now sending in TCP mode.");
+                        break;
+                    case "mode udp":
+                        Sender.m_sendMode = SendMode.UDP;
+                        Logger.Log("Now sending in UDP mode.");
+                        break;
+                    case "send":
+                        Sender.Broadcast();
+                        break;
+                    case "spam":
+                        Sender.m_spammingActive = !Sender.m_spammingActive;
+                        break;
+
                 }
             }
         }
@@ -163,10 +139,9 @@ namespace ConnectionTesting
             Console.Out.WriteLine("Client disconnected.");
         }
 
-        public void Shutdown()
+        protected override void ShutdownActions()
         {
             Console.Out.WriteLine("Shutting down server...");
-            m_stopServer = true;
             Listen.Disconnect();
             m_network.Disconnect();
 

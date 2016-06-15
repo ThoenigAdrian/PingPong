@@ -1,57 +1,86 @@
-﻿using System;
+﻿using NetworkLibrary.Utility;
+using System;
 using System.Threading;
 
 namespace ConnectionTesting
 {
     class Program
     {
+        static Module m_activeModule;
         static Server server;
+        static Client client;
+
+        static LogWriter Logger = new LogWriterConsole();
+
         static void Main(string[] args)
         {
-            CreateServer();
-
             string cmd;
             while((cmd = Console.In.ReadLine()) != "exit")
             {
-                // server offline commands
-                if (cmd == "start")
+                switch (cmd)
                 {
-                    CreateServer();
-                }
+                    case "server":
+                        ShutdownModule();
+                        StartNewServer();
+                        m_activeModule = server;
+                        break;
 
-                // server online commands
-                else if(server != null)
-                {
-                    if (cmd == "stop")
-                    {
-                        server.Shutdown();
-                        server = null;
-                    }
-                    else
-                        server.m_commandStack.Write(cmd);
+                    case "client":
+                        ShutdownModule();
+                        StartNewClient();
+                        m_activeModule = client;
+                        break;
+
+                    case "stop":
+                        ShutdownModule();
+                        break;
+
+                    default:
+                        SendCommand(cmd);
+                        break;
                 }
             }
 
-            if (server != null)
-                server.Shutdown();
+            ShutdownModule();
 
             Console.In.ReadLine();
         }
 
-        static void CreateServer()
+        static void ShutdownModule()
         {
-            if (server == null)
-            {
-                server = new Server();
-                server.ServerInitError += InitErrorHandler;
-                new Thread(server.StartServer).Start();
-            }
+            if (server != null)
+                server.Shutdown();
+
+            if (client != null)
+                client.Shutdown();
+
+            m_activeModule = null;
         }
 
-        static void InitErrorHandler()
+        static void SendCommand(string cmd)
         {
-            server.ServerInitError -= InitErrorHandler;
-            server = null;
+            if(m_activeModule != null)
+                m_activeModule.CommandStack.Write(cmd);
+        }
+
+        static void StartNewServer()
+        {
+            server = new Server(Logger);
+            server.InitFailedEvent += InitErrorHandler;
+            new Thread(server.Run).Start();
+        }
+
+        static void StartNewClient()
+        {
+            client = new Client(Logger);
+            client.InitFailedEvent += InitErrorHandler;
+            new Thread(client.Run).Start();
+        }
+
+        static void InitErrorHandler(Module sender)
+        {
+            sender.InitFailedEvent -= InitErrorHandler;
+            m_activeModule = null;
         }
     }
 }
