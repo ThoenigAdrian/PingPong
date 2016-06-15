@@ -22,8 +22,6 @@ namespace NetworkLibrary.NetworkImplementations
 
         LogWriter Logger { get; set; }
 
-        volatile bool m_shuttingDown;
-
         protected int[] GetSessionIDs
         {
             get
@@ -47,7 +45,6 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
-            m_shuttingDown = false;
             Logger = logger;
             m_listLock = new Semaphore(1, 1);
 
@@ -75,6 +72,11 @@ namespace NetworkLibrary.NetworkImplementations
         void ConnectionDiedHandler(NetworkConnection sender)
         {
             sender.ConnectionDiedEvent -= ConnectionDiedHandler;
+
+            m_listLock.WaitOne();
+            ClientConnections.Remove(sender);
+            m_listLock.Release();
+
             RaiseDeadSessionEvent(sender);
         }
 
@@ -94,7 +96,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             foreach (NetworkConnection deadCon in deadCons)
             {
-                RaiseDeadSessionEvent(deadCon);
+                ConnectionDiedHandler(deadCon);
             }
         }
 
@@ -113,18 +115,11 @@ namespace NetworkLibrary.NetworkImplementations
             }
             m_listLock.Release();
 
-            RaiseDeadSessionEvent(deadConnection);
+            ConnectionDiedHandler(deadConnection);
         }
 
         private void RaiseDeadSessionEvent(NetworkConnection connection)
         {
-            if(m_shuttingDown)
-                return;
-
-            m_listLock.WaitOne();
-            ClientConnections.Remove(connection);
-            m_listLock.Release();
-
             if (SessionDied != null)
                 SessionDied.Invoke(this, connection.ClientSession.SessionID);
         }
@@ -132,13 +127,12 @@ namespace NetworkLibrary.NetworkImplementations
         public void Disconnect()
         {
             m_listLock.WaitOne();
-            m_shuttingDown = true;
 
             try
             {
                 foreach (NetworkConnection clientCon in ClientConnections)
                 {
-                    clientCon.ConnectionDiedEvent -= RaiseDeadSessionEvent;
+                    clientCon.ConnectionDiedEvent -= ConnectionDiedHandler;
                     clientCon.CloseConnection();
                 }
 
