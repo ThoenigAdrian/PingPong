@@ -54,6 +54,19 @@ namespace GameLogicLibrary.GameObjects
             }
             return 0;
         }
-                
+
+        public Player[] GetAllPlayers()
+        {
+            List<Player> allPlayers = new List<Player>();
+
+            foreach (KeyValuePair<int, List<Player>> entry in GameTeams)
+            {
+                foreach (Player player in entry.Value)
+                    allPlayers.Add(player);
+            }
+
+            return allPlayers.ToArray();
+        }
+
     }
 }
