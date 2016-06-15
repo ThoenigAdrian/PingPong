@@ -6,6 +6,6 @@ namespace NetworkLibrary.DataPackages
     {
         public override PackageType PackageType { get { return PackageType.ClientAddPlayerRequest; } }
 
-        public Teams RequestedTeam { get; set; }
+        public int RequestedTeam { get; set; }
     }
 }
