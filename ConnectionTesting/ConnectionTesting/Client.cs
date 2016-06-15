@@ -39,7 +39,7 @@ namespace ConnectionTesting
                 m_network = new ClientNetwork(connectSocket, null);
                 m_network.GetServerSessionResponse();
                 m_network.SessionDied += ConnectionDied;
-                Logger.Log("Connected.");
+                Logger.Log("Connected with session ID " + m_network.ClientSession);
                 return true;
             }
             catch (SocketException) 
