@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -8,14 +7,14 @@ namespace PingPongClient.VisualizeLayer.Visualizers
     class GameStructureVisualizer : VisualizerInterface
     {
         GameStructure Structure { get; set; }
-        List<PlayerBar> Players { get { return Structure.m_players; } }
-        PlayBall Ball { get { return Structure.m_ball; } }
+        Player[] Players { get { return Structure.GetAllPlayers(); } }
+        PlayBall Ball { get { return Structure.Ball; } }
 
         Texture2D FieldTexture;
         Texture2D BallTexture;
         Texture2D PlayerTexture;
 
-        public Vector2 FieldSize { get { return new Vector2(Structure.m_field.Width, Structure.m_field.Height); } }
+        public Vector2 FieldSize { get { return new Vector2(Structure.GameField.Width, Structure.GameField.Height); } }
 
 
         DrawingOffsetTranslation DrawingTranslation;
@@ -70,9 +69,9 @@ namespace PingPongClient.VisualizeLayer.Visualizers
             DrawBorders();
             DrawBall();
             
-            foreach(PlayerBar player in Players)
+            foreach(Player player in Players)
             {
-                DrawPlayer(player);
+                DrawPlayer(player.PlayerBar);
             }
         }
 
@@ -83,8 +82,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected void DrawBall()
         {
-            int BallPosX = (int)DrawingTranslation.GetAbsoluteX(Ball.PosX - Ball.Radius);
-            int BallPosY = (int)DrawingTranslation.GetAbsoluteY(Ball.PosY - Ball.Radius);
+            int BallPosX = (int)DrawingTranslation.GetAbsoluteX(Ball.PositionX - Ball.Radius);
+            int BallPosY = (int)DrawingTranslation.GetAbsoluteY(Ball.PositionY - Ball.Radius);
             int BallRadius = (int)DrawingTranslation.GetAbsoluteSize(Ball.Radius);
 
             SpriteBatchMain.Draw(BallTexture, new Rectangle(BallPosX, BallPosY, BallRadius * 2, BallRadius * 2), Color.Black);
@@ -104,8 +103,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected void DrawPlayer(PlayerBar player)
         {
-            int playerPosX = (int)DrawingTranslation.GetAbsoluteX(player.PosX);
-            int playerPosY = (int)DrawingTranslation.GetAbsoluteY(player.PosY);
+            int playerPosX = (int)DrawingTranslation.GetAbsoluteX(player.PositionX);
+            int playerPosY = (int)DrawingTranslation.GetAbsoluteY(player.PositionY);
             int playerWidth = (int)DrawingTranslation.GetAbsoluteSize(player.Width);
             int playerHeight = (int)DrawingTranslation.GetAbsoluteSize(player.Height);
 

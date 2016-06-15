@@ -12,10 +12,13 @@ namespace PingPongClient.ControlLayer
     public class GameControl : SubControlInterface
     {
         GameStructure Structure { get; set; }
+        PlayBall Ball { get { return Structure.Ball; } }
+        GameField Field { get { return Structure.GameField; } }
 
         Interpolation Interpolation { get; set; }
 
         public override GameMode GetMode { get { return GameMode.Game; } }
+
 
         public GameControl(Control parent) : base(parent)
         {
@@ -86,15 +89,15 @@ namespace PingPongClient.ControlLayer
 
             for (int i = 0; i < data.PlayerList.Count; i++)
             {
-                if (i >= Structure.m_players.Count)
-                    break;
+                //if (i >= Structure..Count)
+                //    break;
 
-                Structure.m_players[i].PosX = data.PlayerList[i].PositionX;
-                Structure.m_players[i].PosY = data.PlayerList[i].PositionY;
+                //Structure.m_players[i].PosX = data.PlayerList[i].PositionX;
+                //Structure.m_players[i].PosY = data.PlayerList[i].PositionY;
             }
 
-            Structure.m_ball.PosX = data.Ball.PositionX;
-            Structure.m_ball.PosY = data.Ball.PositionY;
+            Structure.Ball.PositionX = data.Ball.PositionX;
+            Structure.Ball.PositionY = data.Ball.PositionY;
         }
 
         protected void SendClientCommandos()
