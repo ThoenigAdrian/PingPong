@@ -1,7 +1,6 @@
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -26,13 +25,21 @@ namespace NetworkLibrary.NetworkImplementations
         {
             get
             {
-                List<int> sessionIDs = new List<int>(ClientConnections.Count);
-                foreach (NetworkConnection clientCon in ClientConnections)
+                m_listLock.WaitOne();
+                try
                 {
-                    sessionIDs.Add(clientCon.ClientSession.SessionID);
-                }
+                    List<int> sessionIDs = new List<int>(ClientConnections.Count);
+                    foreach (NetworkConnection clientCon in ClientConnections)
+                    {
+                        sessionIDs.Add(clientCon.ClientSession.SessionID);
+                    }
 
-                return sessionIDs.ToArray();
+                    return sessionIDs.ToArray();
+                }
+                finally
+                {
+                    m_listLock.Release();
+                }
             }
         }
 
@@ -192,12 +199,46 @@ namespace NetworkLibrary.NetworkImplementations
             return null;
         }
 
+        protected Dictionary<int, PackageInterface[]> GetDataFromEverySessionTCP()
+        {
+            Dictionary<int, PackageInterface[]> packages = new Dictionary<int, PackageInterface[]>();
+
+            foreach (int session in GetSessionIDs)
+            {
+                PackageInterface[] sessionPackages = GetAllDataTCP(session);
+                if (sessionPackages != null)
+                    packages.Add(session, sessionPackages);
+            }
+
+            if (packages.Count > 0)
+                return packages;
+
+            return null;
+        }
+
         protected PackageInterface GetDataUDP(int session)
         {
             NetworkConnection sessionConnection = GetConnection(session);
 
             if (sessionConnection != null)
                 return sessionConnection.ReadUDP();
+
+            return null;
+        }
+
+        protected Dictionary<int, PackageInterface> GetDataFromEverySessionUDP()
+        {
+            Dictionary<int, PackageInterface> packages = new Dictionary<int, PackageInterface>();
+
+            foreach (int session in GetSessionIDs)
+            {
+                PackageInterface sessionPackage = GetDataUDP(session);
+                if (sessionPackage != null)
+                    packages.Add(session, sessionPackage);
+            }
+
+            if (packages.Count > 0)
+                return packages;
 
             return null;
         }
