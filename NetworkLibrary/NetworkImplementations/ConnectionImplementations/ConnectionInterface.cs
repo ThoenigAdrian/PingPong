@@ -1,5 +1,6 @@
 ﻿using NetworkLibrary.Utility;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -16,9 +17,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         }
     }
 
-
     public abstract class ConnectionInterface
     {
+        public delegate void ReceiveErrorHandler(ConnectionInterface sender, IPEndPoint endPoint);
+        public event ReceiveErrorHandler ReceiveErrorEvent;
+
         LogWriter Logger { get; set; }
 
         protected Semaphore SocketLock;
@@ -42,17 +45,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
                     return connected;
                 }
-                catch (SocketException)
-                {
-
-                }
+                catch (SocketException) { }
                 finally
                 {
                     SocketLock.Release();
                 }
 
                 return false;
-
             }
         }
 
@@ -67,6 +66,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         }
 
         protected Socket ConnectionSocket { get; set; }
+        protected IPEndPoint ConnectionEndpoint { get; set; }
 
         protected Thread ReceiveThread { get; set; }
         protected bool Disconnecting { get; set; }
@@ -75,14 +75,20 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
         }
 
-        public ConnectionInterface(Socket connectionSocket, LogWriter logger)
+        public ConnectionInterface(Socket connectionSocket, LogWriter logger) : this(connectionSocket, connectionSocket.RemoteEndPoint as IPEndPoint, logger)
         {
-            SocketLock = new Semaphore(1, 1);
+        }
 
+        public ConnectionInterface(Socket connectionSocket, IPEndPoint remote, LogWriter logger)
+        {
             Logger = logger;
 
+            SocketLock = new Semaphore(1, 1);
+
+            ConnectionEndpoint = new IPEndPoint(remote.Address, remote.Port);
             InitializeSocket(connectionSocket);
         }
+
 
         public void RestartConnection(Socket socket)
         {
@@ -97,21 +103,25 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             SocketLock.WaitOne();
 
-            if (Disconnecting)
+            try
+            {
+                if (Disconnecting)
+                {
+                    throw new ConnectionException("Can not receive from a disconnected connection!");
+                }
+
+                if (!Receiving)
+                {
+
+                    Receiving = true;
+                    PreReceiveSettings();
+                    StartReceiving();
+                }
+            }
+            finally
             {
                 SocketLock.Release();
-                throw new ConnectionException("Can not receive from a disconnected connection!");
             }
-
-            if (!Receiving)
-            {
-
-                Receiving = true;
-                PreReceiveSettings();
-                StartReceiving();
-            }
-
-            SocketLock.Release();
         }
 
         protected abstract void PreReceiveSettings();
@@ -141,22 +151,25 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 {
                     ReceiveFromSocket();
                 }
-                catch (SocketException ex)
+                catch (SocketException)
                 {
-                    Log(ex.Message);
+                    ReceiveThread = null;
+                    ReceiveErrorHandling(ConnectionEndpoint);
                 }
-                catch (Exception ex)
+                catch (ObjectDisposedException)
                 {
-                    Receiving = false;
-
-                    if (Disconnecting)
-                        return;
-
-                    throw new ConnectionException("Receive loop threw exception: " + ex.Message, ex);
+                    ReceiveThread = null;
+                    ReceiveErrorHandling(ConnectionEndpoint);
                 }
             }
 
             Receiving = false;
+        }
+
+        protected void ReceiveErrorHandling(IPEndPoint source)
+        {
+            try { ReceiveErrorEvent.Invoke(this, source); }
+            catch (NullReferenceException) { }
         }
 
         protected byte[] TrimData(byte[] data, int size)

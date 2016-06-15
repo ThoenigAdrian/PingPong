@@ -1,13 +1,13 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using NetworkLibrary.Utility;
+using System;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class TCPConnection : ConnectionInterface
     {
         public delegate void DataReceivedHandler(TCPConnection sender, byte[] data);
-
         public event DataReceivedHandler DataReceivedEvent;
 
         public IPEndPoint GetEndPoint { get { return ConnectionSocket.RemoteEndPoint as IPEndPoint; } }
@@ -21,10 +21,15 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             SocketLock.WaitOne();
 
-            if(!Disconnecting)
-                ConnectionSocket.Send(data);
-
-            SocketLock.Release();
+            try
+            {
+                if (!Disconnecting)
+                    ConnectionSocket.Send(data);
+            }
+            finally
+            {
+                SocketLock.Release();
+            }
         }
 
         protected override void PreReceiveSettings()
@@ -41,7 +46,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (size <= 0)
             {
                 ReceiveThread = null;
-                Disconnect();
+                ReceiveErrorHandling(ConnectionEndpoint);
                 return;
             }
 
