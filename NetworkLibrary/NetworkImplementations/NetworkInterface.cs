@@ -99,6 +99,7 @@ namespace NetworkLibrary.NetworkImplementations
         {
             NetworkConnection deadConnection = null;
 
+            m_listLock.WaitOne();
             foreach (NetworkConnection clientCon in ClientConnections)
             {
                 if (clientCon.ISConnectedTo(receiveEndPoint.Port))
@@ -107,6 +108,7 @@ namespace NetworkLibrary.NetworkImplementations
                     break;
                 }
             }
+            m_listLock.Release();
 
             RaiseDeadSessionEvent(deadConnection);
         }
@@ -124,16 +126,21 @@ namespace NetworkLibrary.NetworkImplementations
         public void Disconnect()
         {
             m_listLock.WaitOne();
-            UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
-            UdpConnection.Disconnect();
-
-            foreach (NetworkConnection clientCon in ClientConnections)
+            try
             {
-                clientCon.ConnectionDiedEvent -= RaiseDeadSessionEvent;
-                clientCon.CloseConnection();
-            }
+                UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
+                UdpConnection.Disconnect();
 
-            m_listLock.Release();
+                foreach (NetworkConnection clientCon in ClientConnections)
+                {
+                    clientCon.ConnectionDiedEvent -= RaiseDeadSessionEvent;
+                    clientCon.CloseConnection();
+                }
+            }
+            finally
+            {
+                m_listLock.Release();
+            }
         }
 
         private NetworkConnection GetConnection(int session)
@@ -219,7 +226,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            List<NetworkConnection> clients = ClientConnections;
+            List<NetworkConnection> clients = new List<NetworkConnection>(ClientConnections);
             foreach (NetworkConnection clientCon in clients)
             {
                 clientCon.SendTCP(package);
@@ -231,7 +238,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            List<NetworkConnection> clients = ClientConnections;
+            List<NetworkConnection> clients = new List<NetworkConnection>(ClientConnections);
             foreach (NetworkConnection clientCon in clients)
             {
                 clientCon.SendUDP(package);
