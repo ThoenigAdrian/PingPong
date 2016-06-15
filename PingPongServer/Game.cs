@@ -31,7 +31,8 @@ namespace PingPongServer
         {
             this.Network = Network;            
             GameState = GameStates.Initializing;
-            GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
+            GameStructure = new GameStructure();
+            GameStructure.maxPlayers = NeededNumberOfPlayersForGameToStart;
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;            
 
