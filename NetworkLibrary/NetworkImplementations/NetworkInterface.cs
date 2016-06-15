@@ -22,6 +22,8 @@ namespace NetworkLibrary.NetworkImplementations
 
         LogWriter Logger { get; set; }
 
+        volatile bool m_shuttingDown;
+
         protected int[] GetSessionIDs
         {
             get
@@ -45,6 +47,7 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
+            m_shuttingDown = false;
             Logger = logger;
             m_listLock = new Semaphore(1, 1);
 
@@ -115,6 +118,9 @@ namespace NetworkLibrary.NetworkImplementations
 
         private void RaiseDeadSessionEvent(NetworkConnection connection)
         {
+            if(m_shuttingDown)
+                return;
+
             m_listLock.WaitOne();
             ClientConnections.Remove(connection);
             m_listLock.Release();
@@ -126,16 +132,19 @@ namespace NetworkLibrary.NetworkImplementations
         public void Disconnect()
         {
             m_listLock.WaitOne();
+            m_shuttingDown = true;
+
             try
             {
-                UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
-                UdpConnection.Disconnect();
-
                 foreach (NetworkConnection clientCon in ClientConnections)
                 {
                     clientCon.ConnectionDiedEvent -= RaiseDeadSessionEvent;
                     clientCon.CloseConnection();
                 }
+
+                UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
+                UdpConnection.Disconnect();
+
             }
             finally
             {
