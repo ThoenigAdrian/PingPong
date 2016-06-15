@@ -23,7 +23,7 @@ namespace PingPongClient.ControlLayer
         public GameControl(Control parent) : base(parent)
         {
             Visualizer = new GameStructureVisualizer();
-            Structure = new GameStructure(6);
+            Structure = new GameStructure();
             Interpolation = new Interpolation(Structure);
 
             (Visualizer as GameStructureVisualizer).SetGameStructure(Structure);

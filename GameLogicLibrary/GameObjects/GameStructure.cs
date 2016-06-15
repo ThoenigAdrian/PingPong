@@ -20,12 +20,12 @@ namespace GameLogicLibrary.GameObjects
                 
                 return PlayersCount;
             }
-            set { }
         }
 
-        public GameStructure(int maxPlayers)
+        // i can not tell how many players the game will have when i construct the field - using default 2 
+        public GameStructure()
         {
-            this.maxPlayers = maxPlayers;
+            this.maxPlayers = 2;
             GameField = new GameField();
             GameTeams.Add(0, new List<Player>());
             GameTeams.Add(1, new List<Player>());
