@@ -1,7 +1,10 @@
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
+using System.Threading;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -12,6 +15,8 @@ namespace NetworkLibrary.NetworkImplementations
         public event SessionDeathHandler SessionDied;
 
         List<NetworkConnection> ClientConnections { get; set; }
+
+        Semaphore m_listLock;
 
         UDPConnection UdpConnection { get; set; }
 
@@ -41,9 +46,11 @@ namespace NetworkLibrary.NetworkImplementations
         protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
         {
             Logger = logger;
+            m_listLock = new Semaphore(1, 1);
 
             ClientConnections = new List<NetworkConnection>();
             UdpConnection = udpConnection;
+            UdpConnection.ReceiveErrorEvent += HandleUDPReceiveError;
             UdpConnection.InitializeReceiving();
         }
 
@@ -53,54 +60,97 @@ namespace NetworkLibrary.NetworkImplementations
             if (GetConnection(sessionID) != null)
                 throw new ConnectionException("Connection with this session ID is already in the network!");
 
-            if (clientConnection.Connected)
-            {
-                clientConnection.SetUDPConnection(UdpConnection);
-                clientConnection.ClientSession.SessionID = sessionID;
-                ClientConnections.Add(clientConnection);
-                return;
-            }
+            clientConnection.ConnectionDiedEvent += ConnectionDiedHandler;
+            clientConnection.SetUDPConnection(UdpConnection);
+            clientConnection.ClientSession.SessionID = sessionID;
 
-            throw new ConnectionException("Could not add client connection because it is disconnected!");
+            m_listLock.WaitOne();
+            ClientConnections.Add(clientConnection);
+            m_listLock.Release();
+        }
+
+        void ConnectionDiedHandler(NetworkConnection sender)
+        {
+            sender.ConnectionDiedEvent -= ConnectionDiedHandler;
+            RaiseDeadSessionEvent(sender);
         }
 
         public void UpdateConnections()
         {
-            List<NetworkConnection> deadConnections = new List<NetworkConnection>();
+            List<NetworkConnection> deadCons = new List<NetworkConnection>();
 
+            m_listLock.WaitOne();
             foreach (NetworkConnection clientCon in ClientConnections)
             {
                 if (!clientCon.Connected)
                 {
-                    clientCon.CloseConnection();
-                    deadConnections.Add(clientCon);
+                    deadCons.Add(clientCon);
+                }
+            }
+            m_listLock.Release();
+
+            foreach (NetworkConnection deadCon in deadCons)
+            {
+                RaiseDeadSessionEvent(deadCon);
+            }
+        }
+
+        private void HandleUDPReceiveError(ConnectionInterface sender, IPEndPoint receiveEndPoint)
+        {
+            NetworkConnection deadConnection = null;
+
+            foreach (NetworkConnection clientCon in ClientConnections)
+            {
+                if (clientCon.ISConnectedTo(receiveEndPoint.Port))
+                {
+                    deadConnection = clientCon;
+                    break;
                 }
             }
 
-            foreach (NetworkConnection deadCon in deadConnections)
-            {
-                ClientConnections.Remove(deadCon);
+            RaiseDeadSessionEvent(deadConnection);
+        }
 
-                if (SessionDied != null)
-                    SessionDied.Invoke(this, deadCon.ClientSession.SessionID);
+        private void RaiseDeadSessionEvent(NetworkConnection connection)
+        {
+            m_listLock.WaitOne();
+            ClientConnections.Remove(connection);
+            m_listLock.Release();
 
-            }
+            if (SessionDied != null)
+                SessionDied.Invoke(this, connection.ClientSession.SessionID);
         }
 
         public void Disconnect()
         {
-            foreach (NetworkConnection clientCon in ClientConnections)
-                clientCon.CloseConnection();
-
+            m_listLock.WaitOne();
+            UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
             UdpConnection.Disconnect();
+
+            foreach (NetworkConnection clientCon in ClientConnections)
+            {
+                clientCon.ConnectionDiedEvent -= RaiseDeadSessionEvent;
+                clientCon.CloseConnection();
+            }
+
+            m_listLock.Release();
         }
 
         private NetworkConnection GetConnection(int session)
         {
-            foreach (NetworkConnection clientCon in ClientConnections)
+            m_listLock.WaitOne();
+
+            try
             {
-                if (clientCon.ClientSession.SessionID == session)
-                    return clientCon;
+                foreach (NetworkConnection clientCon in ClientConnections)
+                {
+                    if (clientCon.ClientSession.SessionID == session)
+                        return clientCon;
+                }
+            }
+            finally
+            {
+                m_listLock.Release();
             }
 
             return null;
@@ -169,7 +219,8 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            foreach(NetworkConnection clientCon in ClientConnections)
+            List<NetworkConnection> clients = ClientConnections;
+            foreach (NetworkConnection clientCon in clients)
             {
                 clientCon.SendTCP(package);
             }
@@ -180,7 +231,8 @@ namespace NetworkLibrary.NetworkImplementations
             if (!CanSend())
                 return;
 
-            foreach (NetworkConnection clientCon in ClientConnections)
+            List<NetworkConnection> clients = ClientConnections;
+            foreach (NetworkConnection clientCon in clients)
             {
                 clientCon.SendUDP(package);
             }

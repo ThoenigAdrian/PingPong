@@ -3,11 +3,16 @@ using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System;
 using System.Net;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class NetworkConnection : IDisposable
     {
+        public delegate void ConnectionDiedHandler(NetworkConnection sender);
+        public event ConnectionDiedHandler ConnectionDiedEvent;
+
         public Session ClientSession { get; set; }
 
         TCPConnection TcpConnection { get; set; }
@@ -20,7 +25,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         IPEndPoint RemoteEndPoint { get; set; }
 
-        public bool Connected { get { return TcpConnection.Connected; } }
+        volatile bool m_connected;
+        public bool Connected { get { return m_connected && TcpConnection.Connected; } }
+        Semaphore m_disconnectLock;
 
         public NetworkConnection(TCPConnection tcpConnection, int sessionID)
         {
@@ -32,9 +39,18 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
+            TcpConnection.ReceiveErrorEvent += HandleTCPReceiveError;
             TcpConnection.InitializeReceiving();
 
             RemoteEndPoint = new IPEndPoint(TcpConnection.GetEndPoint.Address, TcpConnection.GetEndPoint.Port);
+
+            m_connected = true;
+            m_disconnectLock = new Semaphore(1, 1);
+        }
+
+        public bool ISConnectedTo(int port)
+        {
+            return RemoteEndPoint.Port == port;
         }
 
         public void SetUDPConnection(UDPConnection udpConnection)
@@ -47,15 +63,40 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void CloseConnection()
         {
-            TcpConnection.DataReceivedEvent -= ReceiveTCP;
-            UdpConnection.DataReceivedEvent -= ReceiveUDP;
+            m_disconnectLock.WaitOne();
 
-            TcpConnection.Disconnect();
+            try
+            {
+                if (m_connected)
+                {
+                    m_connected = false;
+
+                    TcpConnection.ReceiveErrorEvent -= HandleTCPReceiveError;
+                    TcpConnection.DataReceivedEvent -= ReceiveTCP;
+                    UdpConnection.DataReceivedEvent -= ReceiveUDP;
+
+                    TcpConnection.Disconnect();
+
+                    RaiseConnectionDiedEvent();
+                }
+            }
+            finally
+            {
+                m_disconnectLock.Release();
+            }
+        }
+
+        private void RaiseConnectionDiedEvent()
+        {
+            if (ConnectionDiedEvent != null)
+                ConnectionDiedEvent.Invoke(this);
         }
 
         public void SendTCP(PackageInterface package)
         {
-            TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package));
+            try { TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package)); }
+            catch (SocketException)
+            { CloseConnection(); }
         }
 
         public void SendUDP(PackageInterface package)
@@ -63,7 +104,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
-            UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint);
+            try { UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint); }
+            catch (SocketException)
+            { CloseConnection(); }
         }
 
         public PackageInterface ReadTCP()
@@ -96,6 +139,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             {
                 TcpPackages.Write(package);
             }
+        }
+
+        private void HandleTCPReceiveError(ConnectionInterface sender, IPEndPoint source)
+        {
+            CloseConnection();
         }
 
         void IDisposable.Dispose()
