@@ -80,11 +80,21 @@ namespace NetworkLibrary.NetworkImplementations
         {
             sender.ConnectionDiedEvent -= ConnectionDiedHandler;
 
-            m_listLock.WaitOne();
-            ClientConnections.Remove(sender);
-            m_listLock.Release();
-
+            RemoveConnection(sender);
             RaiseDeadSessionEvent(sender);
+        }
+
+        private void RemoveConnection(NetworkConnection connection)
+        {
+            m_listLock.WaitOne();
+            ClientConnections.Remove(connection);
+            m_listLock.Release();
+        }
+
+        private void RaiseDeadSessionEvent(NetworkConnection connection)
+        {
+            if (SessionDied != null)
+                SessionDied.Invoke(this, connection.ClientSession.SessionID);
         }
 
         public void UpdateConnections()
@@ -103,7 +113,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             foreach (NetworkConnection deadCon in deadCons)
             {
-                ConnectionDiedHandler(deadCon);
+                deadCon.CloseConnection();
             }
         }
 
@@ -122,13 +132,8 @@ namespace NetworkLibrary.NetworkImplementations
             }
             m_listLock.Release();
 
-            ConnectionDiedHandler(deadConnection);
-        }
-
-        private void RaiseDeadSessionEvent(NetworkConnection connection)
-        {
-            if (SessionDied != null)
-                SessionDied.Invoke(this, connection.ClientSession.SessionID);
+            if (deadConnection != null)
+                deadConnection.CloseConnection();
         }
 
         public void Disconnect()
