@@ -18,7 +18,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         PackageAdapter Adapter { get; set; }
 
-        IPEndPoint RemoteEndPoint { get { return TcpConnection.GetEndPoint; } }
+        IPEndPoint RemoteEndPoint { get; set; }
 
         public bool Connected { get { return TcpConnection.Connected; } }
 
@@ -33,6 +33,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
             TcpConnection.InitializeReceiving();
+
+            RemoteEndPoint = new IPEndPoint(TcpConnection.GetEndPoint.Address, TcpConnection.GetEndPoint.Port);
         }
 
         public void SetUDPConnection(UDPConnection udpConnection)
