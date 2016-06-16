@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataPackages\ClientSourcePackages\ClientAddPlayerRequest.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\ClientOpenPortPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientInitializeGamePackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientJoinGameRequest.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientRegisteredPackage.cs" />

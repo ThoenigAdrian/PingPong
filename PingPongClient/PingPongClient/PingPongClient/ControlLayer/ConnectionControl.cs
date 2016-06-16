@@ -108,9 +108,10 @@ namespace PingPongClient.ControlLayer
 
                 if (!handler.Error)
                 {
-                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler; ;
+                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler;
                     Network = handler.Network;
                     ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
+                    Network.SendOpenPortRequest();
                     ParentControl.Mode = GameMode.Lobby;
                 }
             }
