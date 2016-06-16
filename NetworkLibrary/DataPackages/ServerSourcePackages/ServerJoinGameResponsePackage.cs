@@ -14,5 +14,6 @@ namespace NetworkLibrary.DataPackages.ServerSourcePackages
 
         public Result Result;
         public string Reason;
+        public int maxPlayers;
     }
 }
