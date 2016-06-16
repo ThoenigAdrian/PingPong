@@ -55,7 +55,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
         }
 
-        bool m_receiving = false;
+        volatile bool m_receiving = false;
         public bool Receiving
         {
             get { return m_receiving && !Disconnecting; }
@@ -69,7 +69,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         protected IPEndPoint ConnectionEndpoint { get; set; }
 
         protected Thread ReceiveThread { get; set; }
-        protected bool Disconnecting { get; set; }
+        volatile protected bool Disconnecting { get; set; }
 
         private ConnectionInterface()
         {
