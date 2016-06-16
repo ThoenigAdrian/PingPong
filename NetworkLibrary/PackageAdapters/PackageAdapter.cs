@@ -37,7 +37,13 @@ namespace NetworkLibrary.PackageAdapters
 
         private PackageInterface CreatePackageFromJSONString(string jsonString)
         {
+            // If it's a keep alive package return null 
+            if(jsonString == "{}" || jsonString == "[]")
+                return null;
+
             PackageType type = GetPackageType(jsonString);
+                            
+
 
             switch (type)
             {
@@ -83,7 +89,8 @@ namespace NetworkLibrary.PackageAdapters
         public PackageType GetPackageType(string json)
         {
             string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
-            return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
+            return (PackageType)Enum.Parse(typeof(PackageType), PackageType);           
+            
         }
 
         private string[] ConvertStreamToValidJsonStrings(string json)

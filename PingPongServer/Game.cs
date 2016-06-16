@@ -29,6 +29,7 @@ namespace PingPongServer
 
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
+            Console.Write("Starting a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + "");
             this.Network = Network;            
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure();
@@ -62,8 +63,7 @@ namespace PingPongServer
             Clients.Add(newClient);
             packagesForNextFrame.Add(newClient.session, new PackageInterface[0]);
             
-            AcceptNewPlayersFromConnectedClients();
-
+            
             if (GameStructure.PlayersCount == maxPlayers)
                 GameState = GameStates.Ready;
         }
@@ -75,32 +75,7 @@ namespace PingPongServer
         }
 
               
-        public void AcceptNewPlayersFromConnectedClients()
-        {
-            GetAllThe();
-            foreach(Client c in Clients)
-            {                 
-                PackageInterface[] AddPlayerRequests = getAllDataRelatedToClient(c.session);
-
-                foreach(PackageInterface possibleRequest in AddPlayerRequests)
-                {
-                    if (possibleRequest == null || possibleRequest.PackageType != PackageType.ClientAddPlayerRequest)
-                        continue;
-
-                    ClientAddPlayerRequest PlayerAddRequest = (ClientAddPlayerRequest)possibleRequest;
-                    int playerID = GameStructure.PlayersCount;
-                    Player newPlayer = new Player(GameStructure.PlayersCount - 1, PlayerAddRequest.RequestedTeam, GameInitializers.PLAYER_1_X);
-                    GameStructure.AddPlayer(newPlayer, PlayerAddRequest.RequestedTeam);
-                    c.Players.Add(newPlayer);
-                    if (GameStructure.PlayersCount >= maxPlayers)
-                    {
-                        GameState = GameStates.Ready;
-                        break;
-                    }
-                }
-                
-            }           
-        }
+        
 
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
