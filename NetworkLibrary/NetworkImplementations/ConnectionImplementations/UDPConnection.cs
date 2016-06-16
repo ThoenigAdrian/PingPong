@@ -16,11 +16,24 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
         {
             SocketLock.WaitOne();
-
             try
             {
                 if (!Disconnecting)
                     ConnectionSocket.SendTo(data, remoteEndPoint);
+            }
+            finally
+            {
+                SocketLock.Release();
+            }
+        }
+
+        public void SendKeepAlive(IPEndPoint remoteEndPoint)
+        {
+            SocketLock.WaitOne();
+            try
+            {
+                if (!Disconnecting)
+                    ConnectionSocket.SendTo(new byte[] { 1 }, remoteEndPoint);
             }
             finally
             {

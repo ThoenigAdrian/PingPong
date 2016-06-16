@@ -3,6 +3,7 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -17,6 +18,8 @@ namespace NetworkLibrary.NetworkImplementations
         UDPConnection UdpConnection { get; set; }
 
         LogWriter Logger { get; set; }
+
+        volatile bool m_keepAlive;
 
         protected int[] GetSessionIDs
         {
@@ -47,6 +50,9 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection = udpConnection;
             UdpConnection.ReceiveErrorEvent += HandleUDPReceiveError;
             UdpConnection.InitializeReceiving();
+            m_keepAlive = true;
+
+            new Thread(BroadCastKeepAlive).Start();
         }
 
         public void AddClientConnection(NetworkConnection clientConnection)
@@ -116,6 +122,8 @@ namespace NetworkLibrary.NetworkImplementations
 
         public void Disconnect()
         {
+            m_keepAlive = false;
+
             foreach (NetworkConnection clientCon in ClientConnections.Entries)
             {
                 clientCon.ConnectionDiedEvent -= ConnectionDiedHandler;
@@ -248,6 +256,19 @@ namespace NetworkLibrary.NetworkImplementations
             foreach (NetworkConnection clientCon in ClientConnections.Entries)
             {
                 clientCon.SendUDP(package);
+            }
+        }
+
+        private void BroadCastKeepAlive()
+        {
+            while (m_keepAlive)
+            {
+                foreach (NetworkConnection clientCon in ClientConnections.Entries)
+                {
+                    clientCon.SendKeepAliveUDP();
+                }
+
+                Thread.Sleep(1000);
             }
         }
 

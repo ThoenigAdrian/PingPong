@@ -2,6 +2,7 @@
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -97,6 +98,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             try { TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package)); }
             catch (SocketException)
             { CloseConnection(); }
+            catch (IOException)
+            { CloseConnection(); }
         }
 
         public void SendUDP(PackageInterface package)
@@ -106,6 +109,20 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             try { UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint); }
             catch (SocketException)
+            { CloseConnection(); }
+            catch (IOException)
+            { CloseConnection(); }
+        }
+
+        public void SendKeepAliveUDP()
+        {
+            if (UdpConnection == null)
+                return;
+
+            try { UdpConnection.SendKeepAlive(RemoteEndPoint); }
+            catch (SocketException)
+            { CloseConnection(); }
+            catch (IOException)
             { CloseConnection(); }
         }
 
