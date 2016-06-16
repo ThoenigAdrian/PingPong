@@ -27,20 +27,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             }
         }
 
-        public void SendKeepAlive(IPEndPoint remoteEndPoint)
-        {
-            SocketLock.WaitOne();
-            try
-            {
-                if (!Disconnecting)
-                    ConnectionSocket.SendTo(new byte[] { 1 }, remoteEndPoint);
-            }
-            finally
-            {
-                SocketLock.Release();
-            }
-        }
-
         protected override void PreReceiveSettings()
         {
             ConnectionSocket.Bind(ConnectionEndpoint);

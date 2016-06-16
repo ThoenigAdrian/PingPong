@@ -265,7 +265,7 @@ namespace NetworkLibrary.NetworkImplementations
             {
                 foreach (NetworkConnection clientCon in ClientConnections.Entries)
                 {
-                    clientCon.SendKeepAliveUDP();
+                    clientCon.SendKeepAlive();
                 }
 
                 Thread.Sleep(1000);

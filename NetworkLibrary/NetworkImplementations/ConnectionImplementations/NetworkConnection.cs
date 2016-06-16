@@ -114,12 +114,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             { CloseConnection(); }
         }
 
-        public void SendKeepAliveUDP()
+        public void SendKeepAlive()
         {
-            if (UdpConnection == null)
-                return;
-
-            try { UdpConnection.SendKeepAlive(RemoteEndPoint); }
+            try { TcpConnection.SendKeepAlive(); }
             catch (SocketException)
             { CloseConnection(); }
             catch (IOException)

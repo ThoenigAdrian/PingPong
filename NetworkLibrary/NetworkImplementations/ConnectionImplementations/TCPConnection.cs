@@ -20,16 +20,23 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public virtual void Send(byte[] data)
         {
             SocketLock.WaitOne();
-
             try
             {
                 if (!Disconnecting)
                     ConnectionSocket.Send(data);
             }
-            finally
+            finally { SocketLock.Release(); }
+        }
+
+        public void SendKeepAlive()
+        {
+            SocketLock.WaitOne();
+            try
             {
-                SocketLock.Release();
+                if (!Disconnecting)
+                    ConnectionSocket.Send(new byte[] { 123, 125 });
             }
+            finally { SocketLock.Release(); }
         }
 
         protected override void PreReceiveSettings()
