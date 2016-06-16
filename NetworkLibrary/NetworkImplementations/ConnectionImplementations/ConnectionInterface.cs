@@ -69,7 +69,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         protected IPEndPoint ConnectionEndpoint { get; set; }
 
         protected Thread ReceiveThread { get; set; }
-        volatile protected bool Disconnecting { get; set; }
+
+        private volatile bool m_disconnected;
+        protected bool Disconnecting
+        {
+            get { return m_disconnected; }
+            set { m_disconnected = value; }
+        }
 
         private ConnectionInterface()
         {

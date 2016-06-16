@@ -3,7 +3,6 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -89,9 +88,7 @@ namespace NetworkLibrary.NetworkImplementations
             foreach (NetworkConnection clientCon in ClientConnections.Entries)
             {
                 if (!clientCon.Connected)
-                {
                     deadCons.Add(clientCon);
-                }
             }
 
             foreach (NetworkConnection deadCon in deadCons)
