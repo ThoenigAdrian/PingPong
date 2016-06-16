@@ -135,6 +135,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         private void ReceiveTCP(TCPConnection sender, byte[] data)
         {
             PackageInterface[] packages = Adapter.CreatePackagesFromStream(data);
+            if (packages == null)
+                return;
             foreach (PackageInterface package in packages)
             {
                 TcpPackages.Write(package);
