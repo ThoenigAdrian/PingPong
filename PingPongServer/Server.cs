@@ -56,8 +56,19 @@ namespace PingPongServer
         {
             while (true)
             {
+                for (int index = PendingGames.Count - 1; index >= 0; index--)
+                {
+                    PendingGames[index].AcceptNewPlayersFromConnectedClients();
+                    if (PendingGames[index].GameState == GameStates.Ready)
+                    {
+                        RunningGames.Add(PendingGames[index]);
+                        PendingGames.RemoveAt(index);
+                    }
+                }
+
                 lock (IncomingConnections)
                     ServeClientGameRequests();
+                    
                 
                 Thread.Sleep(10);
             }
@@ -97,6 +108,7 @@ namespace PingPongServer
                     case PackageType.ClientJoinGameRequest:
                         JoinClientToGame(conn, packet);
                         break;
+
                 }
             }
         }
@@ -113,13 +125,16 @@ namespace PingPongServer
         private void JoinClientToGame(NetworkConnection conn, PackageInterface packet)
         {
             ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
+
+            if (PendingGames.Count <= 0)
+                return;                
+
             PendingGames[0].AddClient(conn);
             if (PendingGames[0].GameState == GameStates.Ready)
             {
                 RunningGames.Add(PendingGames[0]);
                 PendingGames.RemoveAt(0);
 
-                // Start each game which is ready in a new Thread. Communication will be done via the "StateOfRunningGames" which indicates if the Game is finished
                 ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
             }
         }
