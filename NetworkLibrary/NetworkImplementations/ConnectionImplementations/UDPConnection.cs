@@ -16,7 +16,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public virtual void Send(byte[] data, IPEndPoint remoteEndPoint)
         {
             SocketLock.WaitOne();
-
             try
             {
                 if (!Disconnecting)
