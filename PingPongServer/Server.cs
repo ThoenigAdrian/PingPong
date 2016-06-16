@@ -29,13 +29,19 @@ namespace PingPongServer
         private List<Game> RunningGames = new List<Game>();
         private static List<bool> StateOfRunningGames = new List<bool>();
 
-        
+
         public Server()
         {
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterListeningSocket.Listen(1);
             
             MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT), Logger);
+            MasterUDPSocket.DataReceivedEvent += MasterUDPSocket_DataReceivedEvent;
+        }
+
+        private void MasterUDPSocket_DataReceivedEvent(UDPConnection sender, byte[] data, IPEndPoint endPoint)
+        {
+            Console.WriteLine("received");
         }
 
         public void Run()
@@ -51,6 +57,7 @@ namespace PingPongServer
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
+        
 
         private void ManageGames()
         {
@@ -58,7 +65,7 @@ namespace PingPongServer
             {
                 for (int index = PendingGames.Count - 1; index >= 0; index--)
                 {
-                    PendingGames[index].AcceptNewPlayersFromConnectedClients();
+                    PendingGames[index].Network.receiveUDPTest();
                     if (PendingGames[index].GameState == GameStates.Ready)
                     {
                         RunningGames.Add(PendingGames[index]);
