@@ -37,16 +37,20 @@ namespace NetworkLibrary.PackageAdapters
 
         private PackageInterface CreatePackageFromJSONString(string jsonString)
         {
+            // If it's a keep alive package return null 
+            if(jsonString == "{}" || jsonString == "[]")
+                return null;
+
             PackageType type = GetPackageType(jsonString);
+                            
+
 
             switch (type)
             {
                 case PackageType.ServerData:
                     return JsonConvert.DeserializeObject<ServerDataPackage>(jsonString);
                 case PackageType.ClientControl:
-                    return JsonConvert.DeserializeObject<ClientControlPackage>(jsonString);
-                case PackageType.ClientAddPlayerRequest:
-                    return JsonConvert.DeserializeObject<ClientAddPlayerRequest>(jsonString);
+                    return JsonConvert.DeserializeObject<ClientControlPackage>(jsonString);                
                 case PackageType.ClientInitalizeGamePackage:
                     return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(jsonString);
                 case PackageType.ClientJoinGameRequest:
@@ -83,7 +87,8 @@ namespace NetworkLibrary.PackageAdapters
         public PackageType GetPackageType(string json)
         {
             string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
-            return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
+            return (PackageType)Enum.Parse(typeof(PackageType), PackageType);           
+            
         }
 
         private string[] ConvertStreamToValidJsonStrings(string json)
