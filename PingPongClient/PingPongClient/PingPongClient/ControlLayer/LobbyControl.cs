@@ -68,13 +68,11 @@ namespace PingPongClient.ControlLayer
             switch (RequestLobby.SelectedOption)
             {
                 case RequestLobby.RequestOptions.Start:
-                    Network.SendOpenPortRequest();
                     Network.SendClientStart(RequestLobby.PlayerCount);
                     ParentControl.Mode = GameMode.Game;
                     break;
 
                 case RequestLobby.RequestOptions.Join:
-                    Network.SendOpenPortRequest();
                     Network.SendClientJoin(RequestLobby.PlayerCount);
                     ParentControl.Mode = GameMode.Game;
                     break;
