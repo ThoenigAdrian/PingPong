@@ -25,14 +25,25 @@ namespace ConnectionTesting
             Logger.Log("Client started.");
         }
 
-        private bool Connect()
+        private bool Connect(string ipAdress = "127.0.0.1")
         {
             if (m_network != null)
                 Disconnect();
 
+
+            IPAddress serverIP;
             try
             {
-                Logger.Log("Connecting to server...");
+                serverIP = IPAddress.Parse(ipAdress);
+            }
+            catch
+            {
+                Logger.Log("Could not parse ip string: \"" + ipAdress + "\"");
+            }
+
+            try
+            {
+                Logger.Log("Connecting to " + ipAdress);
                 Socket connectSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 connectSocket.Connect(new IPEndPoint(IPAddress.Loopback, 4200));
 
@@ -84,17 +95,32 @@ namespace ConnectionTesting
 
         protected override void ExecuteCommand(string cmd)
         {
-            switch (cmd)
+            if (cmd.Length > 6 && cmd.Substring(0, 7) == "connect")
             {
-                case "spam":
-                    m_spamConnections = !m_spamConnections;
-                    break;
-                case "connect":
+                string[] split = cmd.Split();
+                if (split.Length > 1)
+                {
+                    string ip = split[1];
+                    Connect(ip);
+                }
+                else
+                {
                     Connect();
-                    break;
-                case "disconnect":
-                    Disconnect();
-                    break;
+                }
+            }
+            else
+            {
+                switch (cmd)
+                {
+                    case "spam":
+                        m_spamConnections = !m_spamConnections;
+                        break;
+                    case "connect":
+
+                    case "disconnect":
+                        Disconnect();
+                        break;
+                }
             }
         }
 
