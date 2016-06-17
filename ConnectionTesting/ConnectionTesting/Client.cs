@@ -44,6 +44,10 @@ namespace ConnectionTesting
                     return false;
                 }
             }
+            else if(m_target == null)
+            {
+                m_target = IPAddress.Loopback;
+            }
 
 
             try
@@ -52,10 +56,12 @@ namespace ConnectionTesting
                 Socket connectSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 connectSocket.Connect(new IPEndPoint(m_target, 4200));
 
+                m_disconnectLock.WaitOne();
                 m_network = new ClientNetwork(connectSocket, Logger);
                 m_network.GetServerSessionResponse();
                 m_network.SessionDied += ConnectionDied;
                 Logger.Log("Connected with session ID " + m_network.ClientSession);
+                
                 return true;
             }
             catch (SocketException) 
@@ -63,6 +69,10 @@ namespace ConnectionTesting
                 Disconnect();
                 m_network = null;
                 Logger.Log("Failed to connect.");
+            }
+            finally
+            {
+                m_disconnectLock.Release();
             }
 
             return false;
@@ -140,8 +150,6 @@ namespace ConnectionTesting
                 switch (cmd)
                 {
                     case "spam":
-                        if (m_target == null)
-                            Logger.Log("Set a target (target x.x.x.x) before calling spam.");
                         m_spamConnections = !m_spamConnections;
                         break;
                     case "disconnect":
