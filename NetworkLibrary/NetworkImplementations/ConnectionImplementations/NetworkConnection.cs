@@ -30,11 +30,14 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public bool Connected { get { return m_connected && TcpConnection.Connected; } }
         Semaphore m_disconnectLock;
 
+        SafeList<ResponseRequest> m_openResponses;
+
         public NetworkConnection(TCPConnection tcpConnection, int sessionID)
         {
             Adapter = new PackageAdapter();
 
             TcpPackages = new SafeStack<PackageInterface>();
+            m_openResponses = new SafeList<ResponseRequest>();
 
             ClientSession = new Session(sessionID);
 
@@ -47,6 +50,11 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             m_connected = true;
             m_disconnectLock = new Semaphore(1, 1);
+        }
+
+        public void IssueResponse(ResponseRequest responseHandler)
+        {
+            m_openResponses.Add(responseHandler);
         }
 
         public bool ISConnectedTo(int port)
@@ -151,10 +159,26 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             PackageInterface[] packages = Adapter.CreatePackagesFromStream(data);
             if (packages == null)
                 return;
+
             foreach (PackageInterface package in packages)
             {
-                TcpPackages.Write(package);
+                if(!CheckForResponse(package))
+                    TcpPackages.Write(package);
             }
+        }
+        
+        private bool CheckForResponse(PackageInterface package)
+        {
+            foreach (ResponseRequest responseRequest in m_openResponses.Entries)
+            {
+                if (responseRequest.InspectPackage(package) || responseRequest.State == ResponseRequest.ResponseState.Timeout)
+                {
+                    m_openResponses.Remove(responseRequest);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void HandleTCPReceiveError(ConnectionInterface sender, IPEndPoint source)

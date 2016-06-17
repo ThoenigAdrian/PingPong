@@ -68,83 +68,6 @@ namespace NetworkLibrary.NetworkImplementations
             ClientConnections.Add(clientConnection);
         }
 
-        void ConnectionDiedHandler(NetworkConnection sender)
-        {
-            sender.ConnectionDiedEvent -= ConnectionDiedHandler;
-
-            RemoveConnection(sender);
-            RaiseDeadSessionEvent(sender);
-        }
-
-        private void RemoveConnection(NetworkConnection connection)
-        {
-            ClientConnections.Remove(connection);
-        }
-
-        private void RaiseDeadSessionEvent(NetworkConnection connection)
-        {
-            if (SessionDied != null)
-                SessionDied.Invoke(this, connection.ClientSession.SessionID);
-        }
-
-        public void UpdateConnections()
-        {
-            List<NetworkConnection> deadCons = new List<NetworkConnection>();
-
-            foreach (NetworkConnection clientCon in ClientConnections.Entries)
-            {
-                if (!clientCon.Connected)
-                    deadCons.Add(clientCon);
-            }
-
-            foreach (NetworkConnection deadCon in deadCons)
-            {
-                deadCon.CloseConnection();
-            }
-        }
-
-        private void HandleUDPReceiveError(ConnectionInterface sender, IPEndPoint receiveEndPoint)
-        {
-            NetworkConnection deadConnection = null;
-
-            foreach (NetworkConnection clientCon in ClientConnections.Entries)
-            {
-                if (clientCon.ISConnectedTo(receiveEndPoint.Port))
-                {
-                    deadConnection = clientCon;
-                    break;
-                }
-            }
-
-            if (deadConnection != null)
-                deadConnection.CloseConnection();
-        }
-
-        public void Disconnect()
-        {
-            m_keepAlive = false;
-
-            foreach (NetworkConnection clientCon in ClientConnections.Entries)
-            {
-                clientCon.ConnectionDiedEvent -= ConnectionDiedHandler;
-                clientCon.CloseConnection();
-            }
-
-            UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
-            UdpConnection.Disconnect();
-        }
-
-        private NetworkConnection GetConnection(int session)
-        {
-            foreach (NetworkConnection clientCon in ClientConnections.Entries)
-            {
-                if (clientCon.ClientSession.SessionID == session)
-                    return clientCon;
-            }
-
-            return null;
-        }
-
         protected PackageInterface GetDataTCP(int session)
         {
             NetworkConnection sessionConnection = GetConnection(session);
@@ -270,6 +193,90 @@ namespace NetworkLibrary.NetworkImplementations
 
                 Thread.Sleep(1000);
             }
+        }
+
+        protected void IssueResponse(ResponseRequest responseRequest, int session)
+        {
+            NetworkConnection connection = GetConnection(session);
+            if (connection != null)
+                connection.IssueResponse(responseRequest);
+        }
+
+        private NetworkConnection GetConnection(int session)
+        {
+            foreach (NetworkConnection clientCon in ClientConnections.Entries)
+            {
+                if (clientCon.ClientSession.SessionID == session)
+                    return clientCon;
+            }
+
+            return null;
+        }
+
+        void ConnectionDiedHandler(NetworkConnection sender)
+        {
+            sender.ConnectionDiedEvent -= ConnectionDiedHandler;
+
+            RemoveConnection(sender);
+            RaiseDeadSessionEvent(sender);
+        }
+
+        private void RemoveConnection(NetworkConnection connection)
+        {
+            ClientConnections.Remove(connection);
+        }
+
+        private void RaiseDeadSessionEvent(NetworkConnection connection)
+        {
+            if (SessionDied != null)
+                SessionDied.Invoke(this, connection.ClientSession.SessionID);
+        }
+
+        public void UpdateConnections()
+        {
+            List<NetworkConnection> deadCons = new List<NetworkConnection>();
+
+            foreach (NetworkConnection clientCon in ClientConnections.Entries)
+            {
+                if (!clientCon.Connected)
+                    deadCons.Add(clientCon);
+            }
+
+            foreach (NetworkConnection deadCon in deadCons)
+            {
+                deadCon.CloseConnection();
+            }
+        }
+
+        private void HandleUDPReceiveError(ConnectionInterface sender, IPEndPoint receiveEndPoint)
+        {
+            NetworkConnection deadConnection = null;
+
+            foreach (NetworkConnection clientCon in ClientConnections.Entries)
+            {
+                if (clientCon.ISConnectedTo(receiveEndPoint.Port))
+                {
+                    deadConnection = clientCon;
+                    break;
+                }
+            }
+
+            if (deadConnection != null)
+                deadConnection.CloseConnection();
+        }
+
+        public void Disconnect()
+        {
+            m_keepAlive = false;
+
+            foreach (NetworkConnection clientCon in ClientConnections.Entries)
+            {
+                clientCon.ConnectionDiedEvent -= ConnectionDiedHandler;
+                clientCon.CloseConnection();
+            }
+
+            UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
+            UdpConnection.Disconnect();
         }
 
         protected void Log(string text)
