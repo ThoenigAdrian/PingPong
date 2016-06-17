@@ -36,7 +36,11 @@ namespace PingPongClient.NetworkLayer
             }
             return response;
         }
-                      
+
+        public void IssueServerResponse(ResponseRequest responseRequest)
+        {
+            IssueResponse(responseRequest, ClientSession);
+        }
 
         public void SendClientStart(int playerCount)
         {
@@ -66,6 +70,12 @@ namespace PingPongClient.NetworkLayer
         {
             package.SessionID = ClientSession;
             SendDataTCP(package, ClientSession);
+        }
+
+        private void SendIDPackageUDP(ClientRegisteredPackage package)
+        {
+            package.SessionID = ClientSession;
+            SendDataUDP(package, ClientSession);
         }
 
         public void SendUDPTestData(PlayerMovementPackage package)

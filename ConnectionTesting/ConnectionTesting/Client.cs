@@ -2,6 +2,7 @@
 using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.Utility;
 using PingPongClient.NetworkLayer;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -18,8 +19,13 @@ namespace ConnectionTesting
 
         Semaphore m_disconnectLock = new Semaphore(1, 1);
 
+        OneShotTimer m_interval;
+
+        bool m_sendStart = true;
+
         public Client(LogWriter logger) : base(logger)
         {
+            m_interval = new OneShotTimer(0);
         }
 
         protected override void Initialize()
@@ -52,30 +58,25 @@ namespace ConnectionTesting
 
             try
             {
+                m_disconnectLock.WaitOne();
                 Logger.Log("Connecting to " + m_target.ToString());
                 Socket connectSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 connectSocket.Connect(new IPEndPoint(m_target, 4200));
 
-                m_disconnectLock.WaitOne();
                 m_network = new ClientNetwork(connectSocket, Logger);
                 m_network.GetServerSessionResponse();
                 m_network.SessionDied += ConnectionDied;
                 Logger.Log("Connected with session ID " + m_network.ClientSession);
-                
+                m_disconnectLock.Release();
                 return true;
             }
             catch (SocketException) 
             {
-                Disconnect();
-                m_network = null;
-                Logger.Log("Failed to connect.");
-            }
-            finally
-            {
                 m_disconnectLock.Release();
+                Disconnect();
+                Logger.Log("Failed to connect.");
+                return false;
             }
-
-            return false;
         }
 
         private void Disconnect()
@@ -104,12 +105,44 @@ namespace ConnectionTesting
             if (m_spamConnections)
             {
                 Connect();
+                Thread.Sleep(1000);
+                if(m_sendStart)
+                    SendStartGame();
+                else
+                    SendJoinGame();
+
+                Thread.Sleep(5000);
                 Disconnect();
+            }
+        }
+
+        private void SendStartGame()
+        {
+            if(m_network != null)
+            {
+                m_network.SendClientStart(2);
+            }
+        }
+
+        private void SendJoinGame()
+        {
+            if (m_network != null)
+            {
+                m_network.SendClientJoin(1);
             }
         }
 
         protected override void ExecuteCommand(string cmd)
         {
+            if (cmd.Length > 7 && cmd.Substring(0, 8) == "interval")
+            {
+                string[] split = cmd.Split(' ');
+                if (split.Length > 1)
+                {
+                    try { m_interval.TimerInterval(Convert.ToInt64(split[1]) * 1000); }
+                    catch { m_interval.TimerInterval(0); }
+                }
+            }
             if (cmd.Length > 5 && cmd.Substring(0, 6) == "target")
             {
                 string[] split = cmd.Split();
@@ -131,8 +164,7 @@ namespace ConnectionTesting
                     Logger.Log("Command needs an argument.");
                 }
             }
-
-                if (cmd.Length > 6 && cmd.Substring(0, 7) == "connect")
+            else if (cmd.Length > 6 && cmd.Substring(0, 7) == "connect")
             {
                 string[] split = cmd.Split();
                 if (split.Length > 1)
@@ -155,6 +187,11 @@ namespace ConnectionTesting
                     case "disconnect":
                         Disconnect();
                         break;
+
+                    case "mode":
+                        m_sendStart = !m_sendStart;
+                        break;
+
                 }
 
                 if (m_network != null)
