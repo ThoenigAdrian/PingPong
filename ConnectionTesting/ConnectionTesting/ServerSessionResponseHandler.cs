@@ -21,8 +21,9 @@ namespace PingPongClient.NetworkLayer
         private bool Error { get; set; }
         public string ErrorMessage { get; private set; }
 
-        public ServerSessionResponseHandler(Socket acceptedSocket)
+        public ServerSessionResponseHandler(Socket acceptedSocket, LogWriter logger)
         {
+            Logger = logger;
             AcceptedSocket = acceptedSocket;
             Connected = false;
             Error = false;

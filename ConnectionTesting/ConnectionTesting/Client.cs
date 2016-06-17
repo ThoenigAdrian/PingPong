@@ -14,6 +14,8 @@ namespace ConnectionTesting
         ClientNetwork m_network;
         bool m_spamConnections;
 
+        IPAddress m_target = null;
+
         Semaphore m_disconnectLock = new Semaphore(1, 1);
 
         public Client(LogWriter logger) : base(logger)
@@ -25,30 +27,32 @@ namespace ConnectionTesting
             Logger.Log("Client started.");
         }
 
-        private bool Connect(string ipAdress = "213.47.183.165")
+        private bool Connect(string ipAdress = "")
         {
             if (m_network != null)
                 Disconnect();
 
+            if (ipAdress.Length > 0)
+            {
+                try
+                {
+                    m_target = IPAddress.Parse(ipAdress);
+                }
+                catch
+                {
+                    Logger.Log("Could not parse ip string: \"" + ipAdress + "\"");
+                    return false;
+                }
+            }
 
-            IPAddress serverIP;
-            try
-            {
-                serverIP = IPAddress.Parse(ipAdress);
-            }
-            catch
-            {
-                Logger.Log("Could not parse ip string: \"" + ipAdress + "\"");
-                return false;
-            }
 
             try
             {
                 Logger.Log("Connecting to " + ipAdress);
                 Socket connectSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                connectSocket.Connect(new IPEndPoint(serverIP, 4200));
+                connectSocket.Connect(new IPEndPoint(m_target, 4200));
 
-                m_network = new ClientNetwork(connectSocket, null);
+                m_network = new ClientNetwork(connectSocket, Logger);
                 m_network.GetServerSessionResponse();
                 m_network.SessionDied += ConnectionDied;
                 Logger.Log("Connected with session ID " + m_network.ClientSession);
@@ -96,7 +100,29 @@ namespace ConnectionTesting
 
         protected override void ExecuteCommand(string cmd)
         {
-            if (cmd.Length > 6 && cmd.Substring(0, 7) == "connect")
+            if (cmd.Length > 5 && cmd.Substring(0, 6) == "target")
+            {
+                string[] split = cmd.Split();
+                if (split.Length > 1)
+                {
+                    string ip = split[1];
+                    if (!IPAddress.TryParse(ip, out m_target))
+                    {
+                        Logger.Log("Could not parse ip string \"" + ip + "\".");
+                        m_target = null;
+                    }
+                    else
+                    {
+                        Logger.Log("Target set to " + m_target.ToString());
+                    }
+                }
+                else
+                {
+                    Logger.Log("Command needs an argument.");
+                }
+            }
+
+                if (cmd.Length > 6 && cmd.Substring(0, 7) == "connect")
             {
                 string[] split = cmd.Split();
                 if (split.Length > 1)
@@ -114,6 +140,8 @@ namespace ConnectionTesting
                 switch (cmd)
                 {
                     case "spam":
+                        if (m_target == null)
+                            Logger.Log("Set a target (target x.x.x.x) before calling spam.");
                         m_spamConnections = !m_spamConnections;
                         break;
                     case "disconnect":

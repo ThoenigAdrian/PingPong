@@ -19,7 +19,7 @@ namespace PingPongClient.NetworkLayer
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
             : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
-            ResponseHandler = new ServerSessionResponseHandler(connectedSocket);
+            ResponseHandler = new ServerSessionResponseHandler(connectedSocket, logger);
         }
 
         public bool GetServerSessionResponse()
