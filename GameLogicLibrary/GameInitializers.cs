@@ -8,6 +8,8 @@
         public const int BALL_RADIUS = 5;
         public const int BALL_POSX = 250;
         public const int BALL_POSY = 100;
+        public const float BALL_DIRX = 0.1F;
+        public const float BALL_DIRY = 0.1F;
 
         public const int PLAYER_HEIGHT = 50;
         public const int PLAYER_WIDTH = 5;
