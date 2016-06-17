@@ -22,7 +22,7 @@ namespace PingPongClient.ControlLayer
         public ConnectionControl(Control parent) : base(parent)
         {
             ConnectionLobby = new ConnectLobby();
-            ConnectionLobby.ServerIP = "213.47.183.165";
+            ConnectionLobby.ServerIP = "127.0.0.1";
 
             Visualizer = new LobbyVisualizer(ConnectionLobby);
 

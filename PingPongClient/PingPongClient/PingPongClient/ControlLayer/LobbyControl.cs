@@ -71,10 +71,12 @@ namespace PingPongClient.ControlLayer
             {
                 case RequestLobby.RequestOptions.Start:
                     Network.SendClientStart(RequestLobby.PlayerCount);
+                    ParentControl.SwitchMode(GameMode.Game);
                     break;
 
                 case RequestLobby.RequestOptions.Join:
                     Network.SendClientJoin(RequestLobby.PlayerCount);
+                    ParentControl.SwitchMode(GameMode.Game);
                     break;
 
                 default:
@@ -86,12 +88,10 @@ namespace PingPongClient.ControlLayer
 
         protected override void ServerResponseActions(PackageInterface responsePackage)
         {
-            ParentControl.SwitchMode(GameMode.Game);
         }
 
         protected override void ResponseTimeoutActions(PackageType requestedPackageType)
         {
-            ParentControl.NetworkDeathHandler(Network, 0);
         }
 
         private void HandlePlayerCountInput()

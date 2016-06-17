@@ -3,11 +3,19 @@ using NetworkLibrary.DataPackages;
 using Newtonsoft.Json;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
+using System;
 
 namespace NetworkLibrary.PackageAdapters
 {
     public class JSONAdapter : PackageAdapter
-    {
+    { 
+        public override PackageType GetPackageType(string json)
+        {
+            string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
+            return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
+
+        }
+
         public override PackageInterface[] CreatePackagesFromStream(byte[] stream)
         {
             if (stream == null)
@@ -38,6 +46,12 @@ namespace NetworkLibrary.PackageAdapters
                 return null;
 
             return CreatePackageFromJSONString(ConvertNetworkDataToString(data));
+        }
+
+        public override byte[] CreateNetworkDataFromPackage(PackageInterface package)
+        {
+            string networkDataString = JsonConvert.SerializeObject(package);
+            return System.Text.Encoding.Default.GetBytes(networkDataString);
         }
 
         private PackageInterface CreatePackageFromJSONString(string jsonString)
