@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using NetworkLibrary.Utility;
-using System;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
@@ -65,8 +64,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         void RaiseReceivedEvent(byte[] data)
         {
-            if (DataReceivedEvent != null)
-                DataReceivedEvent.Invoke(this, data);
+            DataReceivedHandler threadCopy = DataReceivedEvent;
+            if (threadCopy != null)
+                threadCopy.Invoke(this, data);
         }
     }
 }
