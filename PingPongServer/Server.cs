@@ -41,17 +41,18 @@ namespace PingPongServer
 
         private void MasterUDPSocket_DataReceivedEvent(UDPConnection sender, byte[] data, IPEndPoint endPoint)
         {
-            Console.WriteLine("received");
+            Logger.Log("[Debug] Received a UDP Package on the Master UDP Socket");
         }
 
         public void Run()
         {
+            Logger.Log("Starting Connection Acceptor Thread");
             Thread ConnectionAcceptorThread = new Thread(new ThreadStart(AcceptIncomingConnections) );
             ConnectionAcceptorThread.Start();
-
+            Logger.Log("Starting Game Manager Thread");
             Thread GameManagerThread = new Thread(new ThreadStart(ManageGames) );
             GameManagerThread.Start();
-
+            Logger.Log("Server is now running\n");
             while(true)
             {
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
@@ -68,6 +69,7 @@ namespace PingPongServer
                     PendingGames[index].Network.receiveUDPTest();
                     if (PendingGames[index].GameState == GameStates.Ready)
                     {
+                        Logger.Log("Found a Game which is ready to start \n Starting the Game with index: " + index.ToString());
                         RunningGames.Add(PendingGames[index]);
                         PendingGames.RemoveAt(index);
                     }
@@ -109,6 +111,7 @@ namespace PingPongServer
                 switch (packet.PackageType)
                 {
                     case PackageType.ClientInitalizeGamePackage:
+                        Logger.Log("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString() + "\n Creating a new game");
                         CreateNewGame(conn, packet);
                         break;
 
@@ -153,6 +156,7 @@ namespace PingPongServer
                 for (int index = RunningGames.Count; index >= 0; index--)
                 {
                     if (RunningGames[index].GameState == GameStates.Finished)
+                        Logger.Log("Found a finished Game removing it now" + RunningGames.ToString());
                         RunningGames.RemoveAt(index);
                 }
             }
