@@ -22,7 +22,7 @@ namespace PingPongClient.ControlLayer
         public ConnectionControl(Control parent) : base(parent)
         {
             ConnectionLobby = new ConnectLobby();
-            ConnectionLobby.ServerIP = "127.0.0.1";
+            ConnectionLobby.ServerIP = "213.47.183.165";
 
             Visualizer = new LobbyVisualizer(ConnectionLobby);
 
@@ -108,7 +108,7 @@ namespace PingPongClient.ControlLayer
 
                 if (!handler.Error)
                 {
-                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler; ;
+                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler;
                     Network = handler.Network;
                     ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
                     ParentControl.Mode = GameMode.Lobby;

@@ -174,8 +174,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected void ReceiveErrorHandling(IPEndPoint source)
         {
-            try { ReceiveErrorEvent.Invoke(this, source); }
-            catch (NullReferenceException) { }
+            ReceiveErrorHandler threadCopy = ReceiveErrorEvent;
+            if(threadCopy != null)
+                ReceiveErrorEvent.Invoke(this, source);
         }
 
         protected byte[] TrimData(byte[] data, int size)
@@ -225,8 +226,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         protected virtual void WaitForDisconnect()
         {
-            try { ReceiveThread.Join(); }
-            catch (NullReferenceException) { }
+            Thread threadCopy = ReceiveThread;
+            if (threadCopy != null)
+                ReceiveThread.Join();
         }
 
         protected void Log(string text)

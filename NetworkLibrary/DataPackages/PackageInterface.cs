@@ -9,7 +9,7 @@
     {
         ClientControl,
         ClientPlayerMovement,
-        ClientAddPlayerRequest,
+        OpenPort,
         ClientInitalizeGamePackage,
         ClientJoinGameRequest,
 

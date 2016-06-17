@@ -20,6 +20,15 @@ namespace PingPongServer
         {
             
         }
+        
+        public void receiveUDPTest()
+        {
+            if(GetDataFromEverySessionUDP()!=null)
+            {
+                Console.Write("empfangen");
+            }
+            
+        }
 
         public void AddClient(NetworkConnection connection)
         {
