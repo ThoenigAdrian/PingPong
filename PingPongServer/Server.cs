@@ -111,7 +111,8 @@ namespace PingPongServer
                 switch (packet.PackageType)
                 {
                     case PackageType.ClientInitalizeGamePackage:
-                        Logger.GameLog("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString() + "\n Creating a new game");
+                        Logger.NetworkLog("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString());
+                        Logger.GameLog("Creating a new game");
                         CreateNewGame(conn, packet);
                         break;
 

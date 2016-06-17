@@ -12,7 +12,7 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 namespace PingPongServer
 {
-    public class Game
+    public class ServerGame
     {
         public GameStates GameState { get; private set; }
         List<Client> Clients = new List<Client>();
@@ -27,7 +27,7 @@ namespace PingPongServer
 
                 
 
-        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
+        public ServerGame(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
             Console.Write("Starting a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + "");
             this.Network = Network;            
