@@ -34,7 +34,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             try
             {
                 if (!Disconnecting)
+                {
                     ConnectionSocket.Send(new byte[] { 123, 125 });
+                    Log("Sent keepalive.");
+                }
             }
             finally { SocketLock.Release(); }
         }
