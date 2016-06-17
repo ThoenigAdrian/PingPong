@@ -111,7 +111,7 @@ namespace PingPongClient.ControlLayer
                     handler.Network.SessionDied += ParentControl.NetworkDeathHandler;
                     Network = handler.Network;
                     ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
-                    ParentControl.Mode = GameMode.Lobby;
+                    ParentControl.SwitchMode(GameMode.Lobby);
                 }
             }
             finally

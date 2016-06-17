@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using NetworkLibrary.DataPackages;
+using NetworkLibrary.Utility;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using PingPongClient.VisualizeLayer.Visualizers;
@@ -9,6 +11,7 @@ namespace PingPongClient.ControlLayer
     {
         protected Control ParentControl { get; set; }
         protected VisualizerInterface Visualizer { get; set; }
+        public bool WaitingForResponse { get; private set; }
 
         protected ClientNetwork Network
         {
@@ -21,9 +24,31 @@ namespace PingPongClient.ControlLayer
         public SubControlInterface(Control parent)
         {
             ParentControl = parent;
+            WaitingForResponse = false;
         }
 
         public abstract GameMode GetMode { get; }
+
+        protected void IssueServerResponse(ResponseRequest responseRequest)
+        {
+            WaitingForResponse = true;
+            ParentControl.IssueServerResponse(responseRequest);
+        }
+
+        public void ProcessServerResponse(PackageInterface responsePackage)
+        {
+            WaitingForResponse = false;
+            ServerResponseActions(responsePackage);
+        }
+
+        public void HandleResponseTimeout(PackageType requestedPackageType)
+        {
+            WaitingForResponse = false;
+            ResponseTimeoutActions(requestedPackageType);
+        }
+
+        protected virtual void ServerResponseActions(PackageInterface responsePackage) { }
+        protected virtual void ResponseTimeoutActions(PackageType requestedPackageType) { }
 
         public abstract void HandleInput();
         
