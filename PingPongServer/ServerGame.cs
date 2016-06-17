@@ -8,7 +8,7 @@ using GameLogicLibrary.GameObjects;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-
+using NetworkLibrary.Utility;
 
 namespace PingPongServer
 {
@@ -24,16 +24,16 @@ namespace PingPongServer
         public ServerDataPackage NextFrame;
         public Dictionary<int, PackageInterface[]> packagesForNextFrame = new Dictionary<int, PackageInterface[]>();
         public GameStructure GameStructure;
+        private LogWriterConsole Logger = new LogWriterConsole();
 
-                
+
 
         public ServerGame(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
-            Console.Write("Starting a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + "");
+            Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + "");
             this.Network = Network;            
             GameState = GameStates.Initializing;
-            GameStructure = new GameStructure();
-            GameStructure.maxPlayers = NeededNumberOfPlayersForGameToStart;
+            GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;            
 
@@ -49,12 +49,20 @@ namespace PingPongServer
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
             GameState = GameStates.Running;
+            Logger.GameLog("Game started");
+            int i = 0;
             while (GameState == GameStates.Running)
             {
-                ServerPackage = PrepareNextFrame();
+                i++;
+                if (i == 1000)
+                    break;
+                ServerPackage = CalculateFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(3);
+                Thread.Sleep(10);
             }
+            Logger.GameLog("Game finished");
+            Logger.NetworkLog("Tearing Down Network");
+            Network.Close();
             GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
 
@@ -95,21 +103,13 @@ namespace PingPongServer
         }
         
         
-        
-        private ServerDataPackage PrepareNextFrame()
-        {
-            this.GameState = GameStates.Running;
-            return CalculateFrame();
-        }
 
         public ServerDataPackage CalculateFrame()
         {
             NextFrame = new ServerDataPackage();
 
-            GameStructure.Ball.PositionX = (GameStructure.Ball.PositionX + 0.2F) % 300;
+            GameStructure.CalculateFrame(10);
             NextFrame.Ball.PositionX = GameStructure.Ball.PositionX;
-
-            GameStructure.Ball.PositionY = (GameStructure.Ball.PositionX + 0.2F) % 300;
             NextFrame.Ball.PositionY = GameStructure.Ball.PositionY;
 
             foreach (KeyValuePair<int, List<Player>> a in GameStructure.GameTeams)

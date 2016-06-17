@@ -68,6 +68,13 @@ namespace NetworkLibrary.NetworkImplementations
             ClientConnections.Add(clientConnection);
         }
 
+        public void CloseNetwork()
+        {
+            // Hello Dave this is not working as expected only the first connections get's closed. It looks like it breaks out of the for loop
+            for (int index = 0; index < ClientConnections.Count; index++)
+                ClientConnections[index].CloseConnection();
+        }
+
         protected PackageInterface GetDataTCP(int session)
         {
             NetworkConnection sessionConnection = GetConnection(session);
