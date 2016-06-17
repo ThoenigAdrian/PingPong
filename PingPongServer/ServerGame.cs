@@ -39,7 +39,12 @@ namespace PingPongServer
 
         }
 
-        
+        public override string ToString()
+        {
+            // Build a nice custom string in the future
+            return "Game with " + GameStructure.PlayersCount.ToString() + " Players " + "and Score" + GameStructure.GameTeams.ToString();
+        }
+
         public void StartGame(object justToMatchSignatureForThreadPool)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
