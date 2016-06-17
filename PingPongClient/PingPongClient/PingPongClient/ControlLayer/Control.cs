@@ -8,6 +8,7 @@ using System;
 using Microsoft.Xna.Framework.Graphics;
 using PingPongClient.VisualizeLayer.Visualizers;
 using NetworkLibrary.NetworkImplementations;
+using NetworkLibrary.DataPackages;
 
 namespace PingPongClient
 {
@@ -23,7 +24,7 @@ namespace PingPongClient
         public GameMode Mode
         {
             get { return ActiveControl.GetMode; }
-            set
+            private set
             {
                 switch(value)
                 {
@@ -41,6 +42,8 @@ namespace PingPongClient
         }
 
         SubControlInterface ActiveControl { get; set; }
+
+        private ResponseRequest CurrentResponseRequest { get; set; }
 
         public ConnectionControl ConnectionControl { get; set; }
         public LobbyControl LobbyControl { get; set; }
@@ -98,21 +101,61 @@ namespace PingPongClient
 
             InputManager.Update();
 
+            DetectExitInput();
+
+            CheckResponse();
+
             ActiveControl.Update(gameTime);
 
-            if (IsActive)
+            if (IsActive && CurrentResponseRequest == null)
             {
-                HandleControlInputs();
                 ActiveControl.HandleInput();
             }
 
             base.Update(gameTime);
         }
 
-        protected void HandleControlInputs()
+        protected void DetectExitInput()
         {
             if (InputManager.GetControlInput() == ControlInputs.Quit)
                 Exit();
+        }
+
+        public bool IssueServerResponse(ResponseRequest responseRequest)
+        {
+            if (Network == null || CurrentResponseRequest != null)
+                return false;
+
+            CurrentResponseRequest = responseRequest;
+            Network.IssueServerResponse(responseRequest);
+            return true;
+        }
+
+        private void CheckResponse()
+        {
+            if(CurrentResponseRequest != null && CurrentResponseRequest.State != ResponseRequest.ResponseState.Pending)
+            {
+                if (CurrentResponseRequest.State == ResponseRequest.ResponseState.Received)
+                {
+                    PackageInterface package = CurrentResponseRequest.ResponsePackage;
+                    CurrentResponseRequest = null;
+                    ActiveControl.ProcessServerResponse(package);
+                }
+                else
+                {
+                    PackageType type = CurrentResponseRequest.ResponsePackageType;
+                    CurrentResponseRequest = null;
+                    ActiveControl.HandleResponseTimeout(type);
+                }
+            }
+        }
+
+        public void SwitchMode(GameMode mode)
+        {
+            if (CurrentResponseRequest != null)
+                throw new Exception("Mode switch while waiting for a response!");
+
+            Mode = mode;
         }
 
         protected override void Draw(GameTime gameTime)
@@ -132,6 +175,7 @@ namespace PingPongClient
         void CleanUpNetwork()
         {
             Network = null;
+            CurrentResponseRequest = null;
             ConnectionControl.SetStatus("Connection died.");
             Mode = GameMode.Connect;
             m_networkDied = false;

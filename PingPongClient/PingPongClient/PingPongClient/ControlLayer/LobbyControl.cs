@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using NetworkLibrary.DataPackages;
+using NetworkLibrary.Utility;
 using PingPongClient.InputLayer.KeyboardInputs;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
@@ -69,17 +71,27 @@ namespace PingPongClient.ControlLayer
             {
                 case RequestLobby.RequestOptions.Start:
                     Network.SendClientStart(RequestLobby.PlayerCount);
-                    ParentControl.Mode = GameMode.Game;
                     break;
 
                 case RequestLobby.RequestOptions.Join:
                     Network.SendClientJoin(RequestLobby.PlayerCount);
-                    ParentControl.Mode = GameMode.Game;
                     break;
 
                 default:
-                    break;
+                    return;
             }
+
+            IssueServerResponse(new ResponseRequest(PackageType.ServerData, 5000));
+        }
+
+        protected override void ServerResponseActions(PackageInterface responsePackage)
+        {
+            ParentControl.SwitchMode(GameMode.Game);
+        }
+
+        protected override void ResponseTimeoutActions(PackageType requestedPackageType)
+        {
+            ParentControl.NetworkDeathHandler(Network, 0);
         }
 
         private void HandlePlayerCountInput()

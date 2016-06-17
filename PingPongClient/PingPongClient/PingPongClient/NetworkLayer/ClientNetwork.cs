@@ -36,11 +36,10 @@ namespace PingPongClient.NetworkLayer
             return response;
         }
 
-
-        public void SendOpenPortRequest()
+        public void IssueServerResponse(ResponseRequest responseRequest)
         {
-            SendIDPackageUDP(new ClientOpenPortPackage());
-        }              
+            IssueResponse(responseRequest, ClientSession);
+        }
 
         public void SendClientStart(int playerCount)
         {
