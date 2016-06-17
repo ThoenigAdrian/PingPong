@@ -53,6 +53,8 @@ namespace PingPongClient
 
         public LogWriter Logger = new LogWriterConsole();
 
+        volatile bool m_networkDied;
+
         public Control()
         {
             InputManager = new InputManager();
@@ -63,6 +65,8 @@ namespace PingPongClient
             GameControl = new GameControl(this);
 
             ActiveControl = ConnectionControl;
+
+            m_networkDied = false;
         }
 
         protected override void Initialize()
@@ -89,6 +93,9 @@ namespace PingPongClient
 
         protected override void Update(GameTime gameTime)
         {
+            if (m_networkDied)
+                CleanUpNetwork();
+
             InputManager.Update();
 
             ActiveControl.Update(gameTime);
@@ -102,6 +109,12 @@ namespace PingPongClient
             base.Update(gameTime);
         }
 
+        protected void HandleControlInputs()
+        {
+            if (InputManager.GetControlInput() == ControlInputs.Quit)
+                Exit();
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             ActiveControl.Draw(gameTime);
@@ -113,15 +126,15 @@ namespace PingPongClient
         {
             Network.SessionDied -= NetworkDeathHandler;
             Network.Disconnect();
+            m_networkDied = true;
+        }
+
+        void CleanUpNetwork()
+        {
             Network = null;
             ConnectionControl.SetStatus("Connection died.");
             Mode = GameMode.Connect;
-        }
-
-        protected void HandleControlInputs()
-        {
-            if (InputManager.GetControlInput() == ControlInputs.Quit)
-                Exit();
+            m_networkDied = false;
         }
 
         protected override void OnExiting(object sender, EventArgs args)
