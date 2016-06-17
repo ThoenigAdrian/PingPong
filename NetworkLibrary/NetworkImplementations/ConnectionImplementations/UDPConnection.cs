@@ -44,8 +44,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void RaiseReceivedEvent(byte[] data, IPEndPoint source)
         {
-            if (DataReceivedEvent != null)
-                DataReceivedEvent.Invoke(this, data, source);
+            DataReceivedHandler threadCopy = DataReceivedEvent;
+            if (threadCopy != null)
+                threadCopy.Invoke(this, data, source);
         }
     }
 }
