@@ -32,9 +32,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         SafeList<ResponseRequest> m_openResponses;
 
-        public NetworkConnection(TCPConnection tcpConnection, int sessionID)
+        public NetworkConnection(TCPConnection tcpConnection, int sessionID) : this(tcpConnection, sessionID, new JSONAdapter()) { }
+        public NetworkConnection(TCPConnection tcpConnection, int sessionID, PackageAdapter adapter)
         {
-            Adapter = new PackageAdapter();
+            Adapter = adapter;
 
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();

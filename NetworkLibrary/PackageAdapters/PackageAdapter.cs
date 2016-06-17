@@ -9,9 +9,11 @@ namespace NetworkLibrary.PackageAdapters
 {
     public class InvalidPackageException : Exception { };
 
-    public class PackageAdapter
+    public abstract class PackageAdapter
     {
-        public PackageInterface[] CreatePackagesFromStream(byte[] stream)
+
+
+        public abstract PackageInterface[] CreatePackagesFromStream(byte[] stream);
         {
             if (stream == null)
                 return null;
@@ -43,8 +45,6 @@ namespace NetworkLibrary.PackageAdapters
 
             PackageType type = GetPackageType(jsonString);
                             
-
-
             switch (type)
             {
                 case PackageType.ServerData:

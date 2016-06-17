@@ -14,6 +14,7 @@ namespace PingPongClient.NetworkLayer
         public LogWriter Logger { get; set; }
 
         public Socket AcceptedSocket { get; private set; }
+        PackageAdapter Adapter { get; set; }
         public NetworkConnection ServerConnection { get; private set; }
         public int SessionID { get; private set; }
         public bool Connected { get; private set; }
@@ -21,10 +22,11 @@ namespace PingPongClient.NetworkLayer
         private bool Error { get; set; }
         public string ErrorMessage { get; private set; }
 
-        public ServerSessionResponseHandler(Socket acceptedSocket, LogWriter logger)
+        public ServerSessionResponseHandler(Socket acceptedSocket, PackageAdapter adapter, LogWriter logger)
         {
             Logger = logger;
             AcceptedSocket = acceptedSocket;
+            Adapter = adapter;
             Connected = false;
             Error = false;
             ErrorMessage = "";
@@ -67,8 +69,7 @@ namespace PingPongClient.NetworkLayer
             try
             {
                 sender.DataReceivedEvent -= ReadIDResponse;
-                PackageAdapter adapter = new PackageAdapter();
-                ServerSessionResponse responsePackage = adapter.CreatePackagesFromStream(data)[0] as ServerSessionResponse;
+                ServerSessionResponse responsePackage = Adapter.CreatePackagesFromStream(data)[0] as ServerSessionResponse;
                 SessionID = responsePackage.ClientSessionID;
             }
             catch
