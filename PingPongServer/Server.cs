@@ -25,8 +25,8 @@ namespace PingPongServer
         private List<NetworkConnection> IncomingConnections = new List<NetworkConnection>();
 
         private LogWriterConsole Logger = new LogWriterConsole();
-        private List<Game> PendingGames = new List<Game>();
-        private List<Game> RunningGames = new List<Game>();
+        private List<ServerGame> PendingGames = new List<ServerGame>();
+        private List<ServerGame> RunningGames = new List<ServerGame>();
         private static List<bool> StateOfRunningGames = new List<bool>();
 
 
@@ -41,17 +41,18 @@ namespace PingPongServer
 
         private void MasterUDPSocket_DataReceivedEvent(UDPConnection sender, byte[] data, IPEndPoint endPoint)
         {
-            Console.WriteLine("received");
+            Logger.Log("[Debug] Received a UDP Package on the Master UDP Socket");
         }
 
         public void Run()
         {
+            Logger.Log("Starting Connection Acceptor Thread");
             Thread ConnectionAcceptorThread = new Thread(new ThreadStart(AcceptIncomingConnections) );
             ConnectionAcceptorThread.Start();
-
+            Logger.Log("Starting Game Manager Thread");
             Thread GameManagerThread = new Thread(new ThreadStart(ManageGames) );
             GameManagerThread.Start();
-
+            Logger.Log("Server is now running\n");
             while(true)
             {
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
@@ -68,6 +69,7 @@ namespace PingPongServer
                     PendingGames[index].Network.receiveUDPTest();
                     if (PendingGames[index].GameState == GameStates.Ready)
                     {
+                        Logger.Log("Found a Game which is ready to start \n Starting the Game with index: " + index.ToString());
                         RunningGames.Add(PendingGames[index]);
                         PendingGames.RemoveAt(index);
                     }
@@ -86,7 +88,7 @@ namespace PingPongServer
             while (true)
             {
                 Socket newSocket = MasterListeningSocket.Accept();
-                Logger.Log("Client connected " + newSocket.RemoteEndPoint.ToString());
+                Logger.NetworkLog("Client connected " + newSocket.RemoteEndPoint.ToString());
                 TCPConnection tcp = new TCPConnection(newSocket, null);
                 NetworkConnection newNetworkConnection = new NetworkConnection(tcp, new Random().Next());
                 ServerSessionResponse response = new ServerSessionResponse();
@@ -109,6 +111,8 @@ namespace PingPongServer
                 switch (packet.PackageType)
                 {
                     case PackageType.ClientInitalizeGamePackage:
+                        Logger.NetworkLog("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString());
+                        Logger.GameLog("Creating a new game");
                         CreateNewGame(conn, packet);
                         break;
 
@@ -118,13 +122,16 @@ namespace PingPongServer
 
                 }
             }
+            RemoveDeadConnections();
+
+
         }
 
         private void CreateNewGame(NetworkConnection conn, PackageInterface packet)
         {
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            Game newGame = new Game(newGameNetwork, initPackage.PlayerCount);
+            ServerGame newGame = new ServerGame(newGameNetwork, initPackage.PlayerCount);
             PendingGames.Add(newGame);
             PendingGames[0].AddClient(conn);
         }
@@ -145,14 +152,28 @@ namespace PingPongServer
                 ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
             }
         }
+
+        private void RemoveDeadConnections()
+        {
+            for (int index = IncomingConnections.Count - 1; index >= 0; index--)
+            {
+                if (!IncomingConnections[index].Connected)
+                {
+                    Logger.NetworkLog("Removing disconnected connection from Incoming Connection ( Client :  " + IncomingConnections[index].RemoteEndPoint.ToString() + ")");
+                    IncomingConnections.RemoveAt(index);
+                }
+                    
+            }
+        }
                 
         private void RemoveFinishedGames()
         {   // We need to do cleanups otherwise the server will run for a few days and be out of memory
             lock (RunningGames)
             {
-                for (int index = RunningGames.Count; index >= 0; index--)
+                for (int index = RunningGames.Count - 1; index >= 0; index--)
                 {
                     if (RunningGames[index].GameState == GameStates.Finished)
+                        Logger.GameLog("Found a finished Game removing it now" + RunningGames.ToString());
                         RunningGames.RemoveAt(index);
                 }
             }

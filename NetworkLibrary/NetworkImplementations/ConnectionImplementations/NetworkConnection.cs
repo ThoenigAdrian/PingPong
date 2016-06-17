@@ -24,7 +24,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         PackageAdapter Adapter { get; set; }
 
-        IPEndPoint RemoteEndPoint { get; set; }
+        public IPEndPoint RemoteEndPoint { get; set; }
 
         volatile bool m_connected;
         public bool Connected { get { return m_connected && TcpConnection.Connected; } }
@@ -83,7 +83,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
                     TcpConnection.ReceiveErrorEvent -= HandleTCPReceiveError;
                     TcpConnection.DataReceivedEvent -= ReceiveTCP;
-                    UdpConnection.DataReceivedEvent -= ReceiveUDP;
+                    if(UdpConnection != null)
+                        UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
                     TcpConnection.Disconnect();
 
