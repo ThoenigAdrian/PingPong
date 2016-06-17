@@ -20,9 +20,7 @@ namespace PingPongServer
         {
             
         }
-        
-        
-                
+                        
         public void receiveUDPTest()
         {
             if(GetDataFromEverySessionUDP()!=null)
@@ -55,6 +53,11 @@ namespace PingPongServer
         private PackageInterface[] GetAllOfPackagesOfClient(int sessionID)
         {
             return GetAllDataTCP(sessionID);
+        }
+
+        public void Close()
+        {
+            CloseNetwork();
         }
                 
         public void BroadcastGenericPackage(PackageInterface package, SocketType type)
