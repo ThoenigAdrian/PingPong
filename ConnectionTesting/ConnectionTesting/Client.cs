@@ -48,7 +48,7 @@ namespace ConnectionTesting
 
             try
             {
-                Logger.Log("Connecting to " + ipAdress);
+                Logger.Log("Connecting to " + m_target.ToString());
                 Socket connectSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 connectSocket.Connect(new IPEndPoint(m_target, 4200));
 
