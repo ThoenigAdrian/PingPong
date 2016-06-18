@@ -47,7 +47,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         private string CreatePlayerString()
         {
-            return "Player " + Index + " - Team<" + TeamAsString + ">  Move with " + GetMovementKeyString() + ".";
+            return "Player " + (Index + 1).ToString() + " - Team<" + TeamAsString + ">  Move with " + GetMovementKeyString() + ".";
         }
 
         private string GetMovementKeyString()

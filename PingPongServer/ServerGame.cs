@@ -71,9 +71,9 @@ namespace PingPongServer
             if (GameStructure.MissingPlayers < playersToAdd)
                 return false; 
 
-            Network.AddClientConnection(client);
-
-            Client newClient = new Client(client.ClientSession.SessionID, GameStructure.PlayersCount, GameStructure.GetFreeTeam());
+            Network.AddClientConnection(client);            
+            Client newClient = new Client(GameStructure, GameStructure.GetFreeTeam());
+            
             for (int index = 0; index < playersToAdd; index++)
             {
                 float playerPosition = 0;
@@ -85,13 +85,12 @@ namespace PingPongServer
 
                 Player newPlayer = new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), playerPosition);
 
-                newClient.Players.Add(new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), 50F));
-                GameStructure.AddPlayer(newPlayer, GameStructure.GetFreeTeam());
+                newClient.AddPlayer(newPlayer, GameStructure);
             }
-
             Clients.Add(newClient);
 
-            ReserveEntryInPackagesForNextFrameForClient(newClient);
+
+            //ReserveEntryInPackagesForNextFrameForClient(newClient);
             
             
             if (GameStructure.PlayersCount == maxPlayers)
@@ -109,11 +108,12 @@ namespace PingPongServer
         {
             packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
         }
-                              
+        
+        /*                      
         private void ReserveEntryInPackagesForNextFrameForClient(Client client)
         {
             packagesForNextFrame.Add(client.session, new PackageInterface[0]);
-        }
+        }*/
 
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
@@ -188,11 +188,16 @@ namespace PingPongServer
             public int session;
             public List<Player> Players = new List<Player>();
 
-            public Client(int sessionID, int FirstPlayerID, int FirstPlayerTeam)
+            public Client(GameStructure gameStructure, int sessionID)
             {
                 this.session = sessionID;
-                Players.Add(new Player(FirstPlayerID, FirstPlayerTeam, GameInitializers.PLAYER_1_X));
 
+            }
+
+            public void AddPlayer(Player player, GameStructure GameStructure)
+            {
+                Players.Add(player);
+                GameStructure.AddPlayer(player, GameStructure.GetFreeTeam());
             }
             
 
