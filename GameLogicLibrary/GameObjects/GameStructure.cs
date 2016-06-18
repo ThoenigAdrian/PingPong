@@ -24,6 +24,14 @@ namespace GameLogicLibrary.GameObjects
             }
         }
 
+        public int MissingPlayers
+        {
+            get
+            {
+               return maxPlayers - PlayersCount;
+            }
+        }
+
         public GameStructure()
         {
             this.maxPlayers = 2;
