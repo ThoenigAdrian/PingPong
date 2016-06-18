@@ -24,7 +24,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         PackageAdapter Adapter { get; set; }
 
-        IPEndPoint RemoteEndPoint { get; set; }
+        public IPEndPoint RemoteEndPoint { get; set; }
 
         volatile bool m_connected;
         public bool Connected { get { return m_connected && TcpConnection.Connected; } }
@@ -32,14 +32,19 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         SafeList<ResponseRequest> m_openResponses;
 
-        public NetworkConnection(TCPConnection tcpConnection, int sessionID)
+        public NetworkConnection(TCPConnection tcpConnection) : this(tcpConnection, null) { }
+        public NetworkConnection(TCPConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
+        public NetworkConnection(TCPConnection tcpConnection, ResponseRequest responseRequest, PackageAdapter adapter)
         {
-            Adapter = new PackageAdapter();
+            Adapter = adapter;
 
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();
 
-            ClientSession = new Session(sessionID);
+            if (responseRequest != null)
+                m_openResponses.Add(responseRequest);
+
+            ClientSession = null;
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
@@ -82,7 +87,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
                     TcpConnection.ReceiveErrorEvent -= HandleTCPReceiveError;
                     TcpConnection.DataReceivedEvent -= ReceiveTCP;
-                    UdpConnection.DataReceivedEvent -= ReceiveUDP;
+                    if(UdpConnection != null)
+                        UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
                     TcpConnection.Disconnect();
 

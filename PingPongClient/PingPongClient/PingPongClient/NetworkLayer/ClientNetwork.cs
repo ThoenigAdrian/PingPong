@@ -1,11 +1,12 @@
+using System.Net;
+using System.Net.Sockets;
 using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
-using System.Net.Sockets;
-using NetworkLibrary.DataPackages;
-using System.Net;
-using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using NetworkLibrary.DataPackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
+using NetworkLibrary.PackageAdapters;
 
 namespace PingPongClient.NetworkLayer
 {
@@ -18,11 +19,12 @@ namespace PingPongClient.NetworkLayer
         public ClientNetwork(Socket connectedSocket, LogWriter logger)
             : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
         {
-            ResponseHandler = new ServerSessionResponseHandler(connectedSocket, logger);
+            ResponseHandler = new ServerSessionResponseHandler(connectedSocket, new JSONAdapter(), logger);
         }
 
-        public bool GetServerSessionResponse()
+        public bool GetServerFreshSessionResponse(SessionConnectParameters connectParams)
         {
+            ResponseHandler.ConnectParameters = connectParams;
             bool response = ResponseHandler.GetResponse();
             if (response)
             {
@@ -44,14 +46,16 @@ namespace PingPongClient.NetworkLayer
         public void SendClientStart(int playerCount)
         {
             ClientInitializeGamePackage package = new ClientInitializeGamePackage();
-            package.PlayerCount = playerCount;
+            package.GamePlayerCount = playerCount;
+            package.PlayerTeamwish = new int[] { 0 };
             SendIDPackageTCP(package);
         }
 
         public void SendClientJoin(int playerCount)
         {
             ClientJoinGameRequest package = new ClientJoinGameRequest();
-            package.PlayerCountOfClient = playerCount;
+            package.GamePlayerCount = playerCount;
+            package.PlayerTeamwish = new int[] { 1 };
             SendIDPackageTCP(package);
         }
 
@@ -68,24 +72,29 @@ namespace PingPongClient.NetworkLayer
         private void SendIDPackageTCP(ClientRegisteredPackage package)
         {
             package.SessionID = ClientSession;
-            SendDataTCP(package, ClientSession);
+            Out.SendDataTCP(package, ClientSession);
         }
 
         private void SendIDPackageUDP(ClientRegisteredPackage package)
         {
             package.SessionID = ClientSession;
-            SendDataUDP(package, ClientSession);
+            Out.SendDataUDP(package, ClientSession);
         }
 
         public void SendUDPTestData(PlayerMovementPackage package)
         {
             package.SessionID = ClientSession;
-            SendDataUDP(package, ClientSession);
+            Out.SendDataUDP(package, ClientSession);
         }
 
         public ServerDataPackage GetServerData()
         {
-            return GetDataUDP(ClientSession) as ServerDataPackage;
+            return In.GetDataUDP(ClientSession) as ServerDataPackage;
+        }
+
+        protected override void PostDisconnectActions()
+        {
+            TerminateUDPConnection();
         }
     }
 }

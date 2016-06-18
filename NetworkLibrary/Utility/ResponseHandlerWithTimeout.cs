@@ -47,9 +47,10 @@ namespace NetworkLibrary.Utility
             if (State == ResponseState.Pending)
             {
                 if (package != null && package.PackageType == ResponsePackageType)
+                {
                     ResponsePackage = package;
-
-                State = ResponseState.Received;
+                    State = ResponseState.Received;
+                }
             }
 
             return ResponsePackage != null;

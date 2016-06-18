@@ -15,21 +15,28 @@ namespace PingPongServer
     public class GameNetwork : NetworkInterface
     {
         public GameNetwork(UDPConnection UDPGameData) : this(UDPGameData, null) { }
+        public List<int> DiedSessions = new List<int>();
 
         public GameNetwork(UDPConnection UDPGameData, LogWriter Logger) : base (UDPGameData, Logger)
         {
-            
+            SessionDied += SessionDiedHandler;
         }
-        
+
+        private void SessionDiedHandler(NetworkInterface sender, int sessionID)
+        {
+            DiedSessions.Add(sessionID);
+        }
+
         public void receiveUDPTest()
         {
-            if(GetDataFromEverySessionUDP()!=null)
+            if(In.GetDataFromEverySessionUDP()!=null)
             {
                 Console.Write("empfangen");
             }
             
         }
 
+        
         public void AddClient(NetworkConnection connection)
         {
             AddClientConnection(connection); // from Inherited Class
@@ -37,30 +44,30 @@ namespace PingPongServer
                 
         public Dictionary<int, PackageInterface[]> GrabAllNetworkDataForNextFrame()
         {
-            Dictionary<int, PackageInterface[]> packagesOfAllClients = new Dictionary<int, PackageInterface[]>();
-            foreach (int sessionID in GetSessionIDs)
-            {
-                packagesOfAllClients[sessionID] = GetAllOfPackagesOfClient(sessionID);
-            }
-            return packagesOfAllClients;
+            return In.GetDataFromEverySessionTCP();            
         }
 
         public void BroadcastFramesToClients(ServerDataPackage Frame)
         {
-            BroadCastUDP(Frame);
+            Out.BroadCastUDP(Frame);
         }
 
         private PackageInterface[] GetAllOfPackagesOfClient(int sessionID)
         {
-            return GetAllDataTCP(sessionID);
+            return In.GetAllDataTCP(sessionID);
+        }
+
+        public void Close()
+        {
+            Disconnect();
         }
                 
         public void BroadcastGenericPackage(PackageInterface package, SocketType type)
         {
             if (type == SocketType.Dgram)
-                BroadCastTCP(package);
+                Out.BroadCastTCP(package);
             if (type == SocketType.Stream)
-                BroadCastUDP(package);
+                Out.BroadCastUDP(package);
         }
 
     }

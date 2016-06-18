@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace GameLogicLibrary.GameObjects
 {
@@ -7,8 +8,9 @@ namespace GameLogicLibrary.GameObjects
         public GameField GameField;
         public PlayBall Ball;
         public Dictionary<int,List<Player>> GameTeams = new Dictionary<int, List<Player>>();
-        private int numberOfTeams = 2; // restrict to two teams for now
-        public int maxPlayers;
+        public int numberOfTeams = 2; // restrict to two teams for now
+        public int maxPlayers { get; set; }
+
         public int PlayersCount
         {
             get
@@ -22,7 +24,14 @@ namespace GameLogicLibrary.GameObjects
             }
         }
 
-        // i can not tell how many players the game will have when i construct the field - using default 2 
+        public int MissingPlayers
+        {
+            get
+            {
+               return maxPlayers - PlayersCount;
+            }
+        }
+
         public GameStructure()
         {
             this.maxPlayers = 2;
@@ -30,6 +39,79 @@ namespace GameLogicLibrary.GameObjects
             GameTeams.Add(0, new List<Player>());
             GameTeams.Add(1, new List<Player>());
             Ball = new PlayBall();
+        }
+
+        public GameStructure(int maxPlayers)
+        {
+            this.maxPlayers = maxPlayers;
+            GameField = new GameField();
+            GameTeams.Add(0, new List<Player>());
+            GameTeams.Add(1, new List<Player>());
+            Ball = new PlayBall();
+        }
+
+        public void CalculateFrame(long timePassedInMilliseconds)
+        {
+            float oldBallPositionX = Ball.PositionX;
+            float oldBallPositionY = Ball.PositionY;
+
+            Ball.PositionX += Ball.DirectionX * timePassedInMilliseconds;
+            Ball.PositionY += Ball.DirectionY * timePassedInMilliseconds;
+
+            if (Ball.PositionX > GameField.Width)
+            {
+                Ball.PositionX = GameField.Width - (Ball.PositionX - GameField.Width);
+                Ball.DirectionX = Ball.DirectionX * -1;
+            }
+                
+            if (Ball.PositionY > GameField.Height)
+            {
+                Ball.PositionY = GameField.Height - (Ball.PositionY - GameField.Height);
+                Ball.DirectionY = Ball.DirectionY * -1;
+            }
+            if (Ball.PositionX < 0)
+            {
+                Ball.PositionX = Ball.PositionX * -1;
+                Ball.DirectionX = Ball.DirectionX * -1;
+            }
+
+            if (Ball.PositionY < 0)
+            {
+                Ball.PositionY = Ball.PositionY * -1;
+                Ball.DirectionY = Ball.DirectionY * -1;
+            }
+        }
+
+        private void CollisionDetection()
+        {
+            foreach (KeyValuePair<int, List<Player>> t in GameTeams)
+            {
+                foreach (Player p in t.Value)
+                {
+                    CircleInRectangular(p);
+                }
+            }
+        }
+
+        private bool CircleInRectangular(Player p)
+        {
+            /*
+            Tuple<float,float> a = Tuple.Create(Ball.PositionY, p.PlayerBar.PositionY);
+            if (Max(a) - Min(a) <= Ball.Radius)
+                return true; // this is a special case the return true has to be substituted by a deeper looking algorithm which checks if those two are colliding
+            if (Ball.PositionY + Ball.Radius --- Ball.PositionY - Ball.Radius p.PlayerBar.Height + p.PlayerBar.PositionY --- p.PlayerBar.Height - p.PlayerBar.PositionY)
+            Ball.PositionY + Ball.Radius (Ball.PositionY - Ball.Radius) ||*/
+            return false; //will be implemented later
+        }
+        
+        private float Max(Tuple<float,float> t)
+        {
+            return Math.Max(t.Item1, t.Item2);
+        }
+
+        private float Min(Tuple<float, float> t)
+        {
+            return Math.Min(t.Item1, t.Item2);
         }
 
         public void AddPlayer(Player Player, int Team)

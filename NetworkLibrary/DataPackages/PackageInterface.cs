@@ -12,12 +12,14 @@
         OpenPort,
         ClientInitalizeGamePackage,
         ClientJoinGameRequest,
+        ClientSessionRequest,
 
         ServerData,
         ServerGameControl,
         ServerAddPlayerResponsePackage,
         ServerJoinGameResponsePackage,
-        ServerSessionResponse
+        ServerSessionResponse,
+        ServerPlayerIDResponse
     }
 
     public enum Result
