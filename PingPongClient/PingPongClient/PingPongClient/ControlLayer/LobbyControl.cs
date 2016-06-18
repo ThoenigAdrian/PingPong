@@ -45,7 +45,7 @@ namespace PingPongClient.ControlLayer
             switch (selection)
             {
                 case SelectionInputs.Select:
-                    SendRequestInput();
+                    ApplyConfiguration();
                     break;
 
                 case SelectionInputs.Up:
@@ -61,23 +61,11 @@ namespace PingPongClient.ControlLayer
             }
         }
 
-        private void SendRequestInput()
+        private void ApplyConfiguration()
         {
-            switch (RequestLobby.SelectedOption)
-            {
-                case RequestLobby.RequestOptions.Start:
-                    Network.SendClientStart(RequestLobby.PlayerCount);
-                    ParentControl.SwitchMode(GameMode.Game);
-                    break;
-
-                case RequestLobby.RequestOptions.Join:
-                    Network.SendClientJoin(RequestLobby.PlayerCount);
-                    ParentControl.SwitchMode(GameMode.Game);
-                    break;
-
-                default:
-                    return;
-            }
+            ParentControl.RegistrationControl.MaxPlayers = RequestLobby.PlayerCount;
+            ParentControl.RegistrationControl.RequestType = RequestLobby.SelectedOption;
+            ParentControl.SwitchMode(GameMode.Registration);
         }
 
         protected override void ServerResponseActions(PackageInterface responsePackage)

@@ -5,7 +5,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
 {
     class ConnectOptions : SelectionListInterface
     {
-        protected override SelectionEntry[] CreateListEntries()
+        protected override SelectionEntry[] CreateInitialListEntries()
         {
             SelectionEntry[] entries = new SelectionEntry[2];
             entries[0] = new SelectionEntry(new DrawableString("Connect with a new session", new Vector2(0, 0), Color.White), new Selector());
