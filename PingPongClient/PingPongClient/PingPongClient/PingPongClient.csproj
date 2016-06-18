@@ -96,6 +96,7 @@
     <Compile Include="NetworkLayer\ClientNetwork.cs" />
     <Compile Include="NetworkLayer\InitializeNetworkHandler.cs" />
     <Compile Include="NetworkLayer\ServerSessionResponseHandler.cs" />
+    <Compile Include="NetworkLayer\SubControlResponseRequest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
