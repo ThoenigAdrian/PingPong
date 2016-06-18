@@ -60,20 +60,20 @@ namespace PingPongClient.ControlLayer
             {
                 case RequestOptions.Start:
                     Network.SendClientStart(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
-                    IssueServerResponse(PackageType.ServerPlayerIDResponse);
                     break;
 
                 case RequestOptions.Join:
                     Network.SendClientJoin(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
                     break;
-
-                default:
-                    return;
             }
+
+            IssueServerResponse(PackageType.ServerPlayerIDResponse);
+            RegistrationLobby.SetStatus("Waiting for server response...");
         }
 
         public override void Update(GameTime gameTime)
         {
+            RegistrationLobby.UpdateStatusVisibility();
         }
 
         protected override void ServerResponseActions(PackageInterface responsePackage)
@@ -95,7 +95,8 @@ namespace PingPongClient.ControlLayer
 
         protected override void ResponseTimeoutActions(PackageType requestedPackageType)
         {
-            base.ResponseTimeoutActions(requestedPackageType);
+            RegistrationLobby.SetStatus("Server response timeout.");
+            ParentControl.SwitchMode(GameMode.Game);
         }
     }
 }

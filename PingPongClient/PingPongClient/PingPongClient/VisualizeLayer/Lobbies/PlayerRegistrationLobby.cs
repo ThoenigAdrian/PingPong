@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using NetworkLibrary.Utility;
 using PingPongClient.VisualizeLayer.Lobbies.SelectionLists;
 using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 using System.Collections.Generic;
@@ -18,6 +19,9 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         public override Color GetBackgroundColor { get { return Color.Black; } }
 
         SelectionEntry StringAddPlayerEntry { get; set; }
+
+        DrawableString Status { get; set; }
+        OneShotTimer StatusTimer { get; set; }
 
         public int Selection
         {
@@ -41,6 +45,12 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         public PlayerRegistrationLobby()
         {
+            StatusTimer = new OneShotTimer(5 * 1000 * 1000, false);
+
+            Status = CreateStatusDrawString();
+            Status.Visible = false;
+            Strings.Add(Status);
+
             RegistrationSelection = new RegistrationOptions();
             RegisteredPlayers = new List<PlayerEntry>();
 
@@ -53,6 +63,18 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             UpdateEntryPositions();
 
             Lists.Add(RegistrationSelection);
+        }
+
+        public void SetStatus(string status)
+        {
+            Status.Value = status;
+            Status.Visible = true;
+            StatusTimer.Restart();
+        }
+
+        public void UpdateStatusVisibility()
+        {
+            Status.Visible = StatusTimer == false;
         }
 
         public void OnSelectionKey()
@@ -114,6 +136,11 @@ namespace PingPongClient.VisualizeLayer.Lobbies
                 entry.Position = new Vector2(0, index * 30 + (index == RegistrationSelection.ListEntries.Count - 1 ? 50 : 0));
                 index++;
             }
+        }
+
+        DrawableString CreateStatusDrawString()
+        {
+            return new DrawableString("", new Vector2(100, 350), Color.White);
         }
 
         SelectionEntry CreateAddPlayerStringEntry()

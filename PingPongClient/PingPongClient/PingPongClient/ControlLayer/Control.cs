@@ -148,17 +148,19 @@ namespace PingPongClient
         {
             if(CurrentResponseRequest != null && CurrentResponseRequest.State != ResponseRequest.ResponseState.Pending)
             {
+                GameMode issuer = CurrentResponseRequest.Issuer;
+
                 if (CurrentResponseRequest.State == ResponseRequest.ResponseState.Received)
                 {
                     PackageInterface package = CurrentResponseRequest.ResponsePackage;
                     CurrentResponseRequest = null;
-                    GetSubControl(CurrentResponseRequest.Issuer).ProcessServerResponse(package);
+                    GetSubControl(issuer).ProcessServerResponse(package);
                 }
                 else
                 {
                     PackageType type = CurrentResponseRequest.ResponsePackageType;
                     CurrentResponseRequest = null;
-                    GetSubControl(CurrentResponseRequest.Issuer).HandleResponseTimeout(type);
+                    GetSubControl(issuer).HandleResponseTimeout(type);
                 }
             }
         }

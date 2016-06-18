@@ -8,10 +8,14 @@ namespace NetworkLibrary.Utility
         bool m_timerOverflow;
         long m_timerEnd;
 
-        public OneShotTimer(long microSeconds)
+        public OneShotTimer(long microSeconds, bool start = true)
         {
             m_timerEnd = microSeconds;
-            Restart();
+
+            if (start)
+                Restart();
+            else
+                m_timerOverflow = true;
         }
 
         public void TimerInterval(long microSeconds)
