@@ -12,6 +12,7 @@
         OpenPort,
         ClientInitalizeGamePackage,
         ClientJoinGameRequest,
+        ClientSessionRequest,
 
         ServerData,
         ServerGameControl,

@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NetworkLibrary.DataPackages.ClientSourcePackages
+﻿namespace NetworkLibrary.DataPackages.ClientSourcePackages
 {
     public class ClientJoinGameRequest : ClientRegisteredPackage
     {
         public override PackageType PackageType { get { return PackageType.ClientJoinGameRequest; } }
-
-        public int PlayerCountOfClient { get; set; }
+        public int GamePlayerCount { get; set; }
+        public int[] PlayerTeamwish;
     }
 }
