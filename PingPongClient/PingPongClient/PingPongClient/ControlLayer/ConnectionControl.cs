@@ -23,7 +23,7 @@ namespace PingPongClient.ControlLayer
         public ConnectionControl(Control parent) : base(parent)
         {
             ConnectionLobby = new ConnectLobby();
-            ConnectionLobby.ServerIP = "127.0.0.1";
+            ConnectionLobby.ServerIP = "127.0.0.1"; //213.47.183.165
 
             Visualizer = new LobbyVisualizer(ConnectionLobby);
 
@@ -129,6 +129,8 @@ namespace PingPongClient.ControlLayer
 
         private void ShowReconnectOptions()
         {
+            if (Reconnect != null)
+                ConnectionLobby.SetReconnect(Reconnect.ServerIP.ToString(), Reconnect.SessionID.ToString());
             ConnectionLobby.ConnectOptions.Visible = true;
         }
 

@@ -37,15 +37,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         public int Selection
         {
             get { return StartJoinSelection.Selection; }
-            set
-            {
-                int before = StartJoinSelection.Selection;
-                StartJoinSelection.Selection = value;
-                if (Selection != before)
-                    SwitchMode();
-
-                UpdatePlayerCount();
-            }
+            set { StartJoinSelection.Selection = value; }
         }
 
         DrawableString DrawableStatus;
@@ -65,33 +57,21 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             Lists.Add(StartJoinSelection);
 
             UpdatePlayerCount();
+
+            StartJoinSelection.SelectionChanged += UpdatePlayerCount;
         }
 
         public override Color GetBackgroundColor { get { return Color.Black; } }
 
-        void SwitchMode()
-        {
-            if (SelectedOption == RequestOptions.Start)
-                m_playerCount = 2;
-                
-            else
-                m_playerCount = 1;    
-        }
-
         void UpdatePlayerCount()
         {
+            m_playerCount = Math.Max(2, m_playerCount);
+            m_playerCount = Math.Min(6, m_playerCount);
+
             if (SelectedOption == RequestOptions.Start)
-            {
-                m_playerCount = Math.Max(2, m_playerCount);
-                m_playerCount = Math.Min(6, m_playerCount);
                 DrawablePlayerCount.Value = "Start a new game with a maximum of <" + m_playerCount + "> players.";
-            }
             else
-            {
-                m_playerCount = Math.Max(1, m_playerCount);
-                m_playerCount = Math.Min(3, m_playerCount);
-                DrawablePlayerCount.Value = "Join a game with <" + m_playerCount + "> player/s on this computer.";
-            }
+                DrawablePlayerCount.Value = "Join a game with a maximum of <" + m_playerCount + "> players.";
         } 
     }
 }

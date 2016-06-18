@@ -47,6 +47,7 @@ namespace PingPongClient.NetworkLayer
         {
             ClientInitializeGamePackage package = new ClientInitializeGamePackage();
             package.GamePlayerCount = playerCount;
+            package.PlayerTeamwish = new int[] { 0 };
             SendIDPackageTCP(package);
         }
 
@@ -54,6 +55,7 @@ namespace PingPongClient.NetworkLayer
         {
             ClientJoinGameRequest package = new ClientJoinGameRequest();
             package.GamePlayerCount = playerCount;
+            package.PlayerTeamwish = new int[] { 1 };
             SendIDPackageTCP(package);
         }
 

@@ -6,6 +6,9 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 {
     public abstract class SelectionListInterface : DrawableElement
     {
+        public delegate void SelectionChangedHandler();
+        public event SelectionChangedHandler SelectionChanged;
+
         public Vector2 TopLeft { get; set; }
 
         public Color Background { get; protected set; }
@@ -19,6 +22,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
             get { return m_selected; }
             set
             {
+                int previous = m_selected;
+
                 m_selected = value;
 
                 if (m_selected >= ListEntries.Length)
@@ -26,6 +31,9 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 
                 if (m_selected < 0)
                     m_selected = 0;
+
+                if (m_selected != previous)
+                    RaiseSelectionChangedEvent();
             }
         }
 
@@ -39,8 +47,11 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
         }
 
         protected abstract SelectionEntry[] CreateListEntries();
-        protected virtual void SelectionChanged()
+
+        private void RaiseSelectionChangedEvent()
         {
+            if (SelectionChanged != null)
+                SelectionChanged.Invoke();
         }
 
         public Vector2 GetMeasurements(SpriteFont font)
