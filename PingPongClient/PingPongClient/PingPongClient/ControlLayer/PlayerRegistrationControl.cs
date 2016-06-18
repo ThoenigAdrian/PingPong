@@ -11,12 +11,18 @@ namespace PingPongClient.ControlLayer
     {
         public override GameMode GetMode { get { return GameMode.Registration; } }
 
+        public RequestOptions RequestType { get; set; }
+        public int MaxPlayers { get; set; }
+
         PlayerRegistrationLobby RegistrationLobby { get; set; }
 
         public PlayerRegistrationControl(Control parent) : base(parent)
         {
             RegistrationLobby = new PlayerRegistrationLobby();
+            RegistrationLobby.RegistrationFinishedEvent += OnReady;
             Visualizer = new LobbyVisualizer(RegistrationLobby);
+            RequestType = RequestOptions.Start;
+            MaxPlayers = 2;
         }
 
         public override void HandleInput()
@@ -44,6 +50,25 @@ namespace PingPongClient.ControlLayer
                         RegistrationLobby.OnRight();
                         break;
                 }
+            }
+        }
+
+        private void OnReady()
+        {
+            switch (RequestType)
+            {
+                case RequestOptions.Start:
+                    Network.SendClientStart(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
+                    ParentControl.SwitchMode(GameMode.Game);
+                    break;
+
+                case RequestOptions.Join:
+                    Network.SendClientJoin(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
+                    ParentControl.SwitchMode(GameMode.Game);
+                    break;
+
+                default:
+                    return;
             }
         }
 

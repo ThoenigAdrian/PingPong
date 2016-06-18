@@ -16,7 +16,13 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             set
             {
                 int previous = m_team;
-                m_team = Math.Min(Math.Max(value, 1), 0);
+                m_team = value;
+
+                if (m_team < 0)
+                    m_team = 0;
+
+                if (m_team > 1)
+                    m_team = 1;
 
                 if (m_team != previous)
                     UpdatePlayerString();
@@ -41,7 +47,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         private string CreatePlayerString()
         {
-            return "Player " + Index + " - Team <" + TeamAsString + ">" + "Move with " + GetMovementKeyString() + ".";
+            return "Player " + Index + " - Team<" + TeamAsString + ">  Move with " + GetMovementKeyString() + ".";
         }
 
         private string GetMovementKeyString()

@@ -25,13 +25,34 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             set { RegistrationSelection.Selection = value; }
         }
 
+        public int[] PlayerTeamWishes
+        {
+            get
+            {
+                int[] wishes = new int[RegisteredPlayersCount];
+                for(int i = 0; i < RegisteredPlayersCount; i++)
+                {
+                    wishes[i] = RegisteredPlayers[i].Team;
+                }
+
+                return wishes;
+            }
+        }
+
         public PlayerRegistrationLobby()
         {
             RegistrationSelection = new RegistrationOptions();
             RegisteredPlayers = new List<PlayerEntry>();
 
+            RegistrationSelection.TopLeft = new Vector2(100, 100);
+
             StringAddPlayerEntry = CreateAddPlayerStringEntry();
             RegistrationSelection.ListEntries.Insert(0, StringAddPlayerEntry);
+            OnAddPlayerSelection();
+
+            UpdateEntryPositions();
+
+            Lists.Add(RegistrationSelection);
         }
 
         public void OnSelectionKey()
@@ -70,8 +91,8 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
             DrawableString playerString = new DrawableString("", new Vector2(0, 0), Color.White);
             PlayerEntry entry = new PlayerEntry(RegisteredPlayersCount, playerString);
+            RegistrationSelection.ListEntries.Insert(RegisteredPlayersCount, new SelectionEntry(playerString, new Selector()));
             RegisteredPlayers.Add(entry);
-            RegistrationSelection.ListEntries.Add(new SelectionEntry(playerString, new Selector()));
 
             UpdateAfterAddPlayer();
             UpdateEntryPositions();
@@ -90,7 +111,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             int index = 0;
             foreach (SelectionEntry entry in RegistrationSelection.ListEntries)
             {
-                entry.Position = new Vector2(0, index * 30 + (index > RegisteredPlayersCount ? 50 : 0));
+                entry.Position = new Vector2(0, index * 30 + (index == RegistrationSelection.ListEntries.Count - 1 ? 50 : 0));
                 index++;
             }
         }
@@ -112,7 +133,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         bool SelectionIsReady()
         {
-            return RegistrationSelection.Selection == RegisteredPlayersCount + 1;
+            return RegistrationSelection.Selection == RegistrationSelection.ListEntries.Count - 1;
         }
     }
 
