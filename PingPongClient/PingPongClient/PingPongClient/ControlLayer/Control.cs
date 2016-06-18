@@ -104,15 +104,16 @@ namespace PingPongClient
 
             InputManager.Update();
 
-            DetectExitInput();
-
             CheckResponse();
 
             ActiveControl.Update(gameTime);
 
-            if (IsActive && CurrentResponseRequest == null)
+            if (IsActive)
             {
-                ActiveControl.HandleInput();
+                DetectExitInput();
+
+                if(CurrentResponseRequest == null)
+                    ActiveControl.HandleInput();
             }
 
             base.Update(gameTime);

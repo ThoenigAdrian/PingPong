@@ -18,7 +18,7 @@ namespace PingPongClient.ControlLayer
 
         bool Connecting { get; set; }
 
-        public override GameMode GetMode { get { return GameMode.Lobby; } }
+        public override GameMode GetMode { get { return GameMode.Connect; } }
 
         public ConnectionControl(Control parent) : base(parent)
         {
