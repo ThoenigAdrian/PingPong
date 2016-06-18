@@ -14,6 +14,8 @@ namespace PingPongClient.ControlLayer
 
         LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
 
+        public SessionConnectParameters Reconnect;
+
         bool Connecting { get; set; }
 
         public override GameMode GetMode { get { return GameMode.Lobby; } }
@@ -36,11 +38,11 @@ namespace PingPongClient.ControlLayer
         public override void HandleInput()
         {
             HandleTextInput();
+            HandleSelectionInput();
         }
 
         public override void Update(GameTime gameTime)
         {
-
         }
 
         protected void HandleTextInput()
@@ -51,10 +53,6 @@ namespace PingPongClient.ControlLayer
             {
                 switch (editControl)
                 {
-                    case TextEditInputs.Enter:
-                        InitializeNetwork();
-                        return;
-
                     case TextEditInputs.Delete:
                         if (ConnectionLobby.ServerIP.Length > 0)
                             ConnectionLobby.ServerIP = ConnectionLobby.ServerIP.Substring(0, ConnectionLobby.ServerIP.Length - 1);
@@ -67,7 +65,32 @@ namespace PingPongClient.ControlLayer
             }
         }
 
-        protected void InitializeNetwork()
+        private void HandleSelectionInput()
+        {
+            SelectionInputs selectionInput = Input.GetSelectionInput();
+
+            if (selectionInput != SelectionInputs.NoInput)
+            {
+                if (selectionInput == SelectionInputs.Select)
+                {
+                    InitializeNetwork(ConnectionLobby.ConnectOptions.Selection == 1);
+                }
+                else if (Reconnect != null)
+                {
+                    switch (selectionInput)
+                    {
+                        case SelectionInputs.Up:
+                            ConnectionLobby.ConnectOptions.Selection--;
+                            break;
+                        case SelectionInputs.Down:
+                            ConnectionLobby.ConnectOptions.Selection++;
+                            break;
+                    }
+                }
+            }
+        }
+
+        protected void InitializeNetwork(bool reconnect = false)
         {
             InitializeNetworkHandler networkHandler;
 
@@ -88,13 +111,25 @@ namespace PingPongClient.ControlLayer
                     return;
                 }
 
-                networkHandler = new InitializeNetworkHandler(serverIP, ParentControl.Logger);
+                SessionConnectParameters connectParams;
+
+                if (reconnect)
+                    connectParams = Reconnect;
+                else
+                    connectParams = new SessionConnectParameters(serverIP, ParentControl.NetworkDeathHandler);
+
+                networkHandler = new InitializeNetworkHandler(connectParams, ParentControl.Logger);
                 networkHandler.NetworkInitializingFinished += NetworkHandler_NetworkInitializingFinished;
 
                 Connecting = true;
             }
 
             new Thread(networkHandler.InitializeNetwork).Start();
+        }
+
+        private void ShowReconnectOptions()
+        {
+            ConnectionLobby.ConnectOptions.Visible = true;
         }
 
         private void NetworkHandler_NetworkInitializingFinished(InitializeNetworkHandler handler)
@@ -107,9 +142,12 @@ namespace PingPongClient.ControlLayer
 
                 if (!handler.Error)
                 {
-                    handler.Network.SessionDied += ParentControl.NetworkDeathHandler;
                     Network = handler.Network;
-                    ParentControl.OptionControl.SetServerIP(handler.ServerIP.ToString());
+
+                    Reconnect = new SessionConnectParameters(handler.ConnectParameters.ServerIP, ParentControl.NetworkDeathHandler, Network.ClientSession);
+                    ShowReconnectOptions();
+
+                    ParentControl.OptionControl.SetServerIP(handler.ConnectParameters.ServerIP.ToString());
                     ParentControl.SwitchMode(GameMode.Lobby);
                 }
             }
