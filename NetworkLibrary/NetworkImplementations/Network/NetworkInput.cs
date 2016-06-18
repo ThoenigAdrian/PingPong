@@ -46,7 +46,7 @@ namespace NetworkLibrary.NetworkImplementations
                 foreach (int session in ClientConnections.Keys)
                 {
                     PackageInterface[] sessionPackages = GetAllDataTCP(session);
-                    if (sessionPackages != null)
+                    if (sessionPackages.Length > 0)
                         packages.Add(session, sessionPackages);
                 }
 
