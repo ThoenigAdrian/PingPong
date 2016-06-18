@@ -22,12 +22,13 @@ namespace PingPongServer
 
         private Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private UDPConnection MasterUDPSocket;
-        private List<NetworkConnection> IncomingConnections = new List<NetworkConnection>();
-        private List<NetworkConnection> AcceptedConnections = new List<NetworkConnection>();
+        private SafeList<NetworkConnection> IncomingConnections = new SafeList<NetworkConnection>();
+        private SafeList<NetworkConnection> ConnectionsReadyForJoingAndStartingGames = new SafeList<NetworkConnection>();
+        private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
 
         private LogWriterConsole Logger = new LogWriterConsole();
-        private List<ServerGame> PendingGames = new List<ServerGame>();
-        private List<ServerGame> RunningGames = new List<ServerGame>();
+        private SafeList<ServerGame> PendingGames = new SafeList<ServerGame>();
+        private SafeList<ServerGame> RunningGames = new SafeList<ServerGame>();
         private static List<bool> StateOfRunningGames = new List<bool>();
 
 
@@ -35,7 +36,7 @@ namespace PingPongServer
         {
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterListeningSocket.Listen(1);
-            
+
             MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT), Logger);
             MasterUDPSocket.DataReceivedEvent += MasterUDPSocket_DataReceivedEvent;
         }
@@ -48,78 +49,74 @@ namespace PingPongServer
         public void Run()
         {
             Logger.Log("Starting Connection Acceptor Thread");
-            Thread CollectIncomingConnectionsThread = new Thread(new ThreadStart(CollectIncomingConnections) );
+            Thread CollectIncomingConnectionsThread = new Thread(new ThreadStart(CollectIncomingConnections));
             CollectIncomingConnectionsThread.Start();
             Logger.Log("Starting Game Manager Thread");
-            Thread GameManagerThread = new Thread(new ThreadStart(ManageGames) );
+            Thread GameManagerThread = new Thread(new ThreadStart(ManageGames));
             GameManagerThread.Start();
             Logger.Log("Server is now running\n");
 
-            while(true)
+            while (true)
             {
-                lock(IncomingConnections)
+                foreach (NetworkConnection networkConnection in AcceptedConnections.Entries)
                 {
-                    foreach (NetworkConnection networkConnection in IncomingConnections)
-                    {
-                        PackageInterface newPacket = networkConnection.ReadTCP();
-                        if (newPacket == null)
-                            continue;
-                        Console.Write("Yolo");
-                        if (newPacket.PackageType == PackageType.ClientSessionRequest)
-                        {
-                            ClientSessionRequest packet = (ClientSessionRequest)newPacket;
-                            if (packet.Reconnect)
-                            {
-                                // still need to handle if client requests a session which is already in use
-                                networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
-                                lock (AcceptedConnections)
-                                    AcceptedConnections.Add(networkConnection);
-                            }
-                            else
-                            {
-                                networkConnection.ClientSession = new Session(new Random().Next());
-                                lock (AcceptedConnections)
-                                    AcceptedConnections.Add(networkConnection);
-                            }
-                                
-
-                            ServerSessionResponse response = new ServerSessionResponse();
-                            response.ClientSessionID = networkConnection.ClientSession.SessionID;
-                            networkConnection.SendTCP(response);
-                            
-                        }
-                    }
-                 for (int index = IncomingConnections.Count - 1; index >= 0; index--)
-                 {
-                        if(IncomingConnections[index].ClientSession != null)
-                            IncomingConnections.RemoveAt(index);
-                  }
-                        
-
+                    PackageInterface newPacket = networkConnection.ReadTCP();
+                    if (newPacket == null)
+                        continue;
                     
-                }
-                
+                    if (newPacket.PackageType == PackageType.ClientSessionRequest)
+                    {
+                        ClientSessionRequest packet = (ClientSessionRequest)newPacket;
+                        if (packet.Reconnect)
+                        {
+                            // still need to handle if client requests a session which is already in useLogger.NetworkLog("Network Connection ");
+                            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + networkConnection.ClientSession.SessionID.ToString());
+                            networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
+                            ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
+                            AcceptedConnections.Remove(networkConnection);
+                        }
+                        else
+                        {
+                            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
+                            networkConnection.ClientSession = new Session(new Random().Next());
+                            Logger.NetworkLog("Assigned Session " + networkConnection.ClientSession.SessionID + "to Client " + networkConnection.RemoteEndPoint.ToString());
+                            ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
+                            AcceptedConnections.Remove(networkConnection);
+                        }
+                        
+                        ServerSessionResponse response = new ServerSessionResponse();
+                        response.ClientSessionID = networkConnection.ClientSession.SessionID;
+                        networkConnection.SendTCP(response);
+
+                    }
+                }                
+
+
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
+
+            
         }
+    
+        
         
 
         private void ManageGames()
         {
             while (true)
             {
-                for (int index = PendingGames.Count - 1; index >= 0; index--)
+                foreach(ServerGame game in PendingGames.Entries)
                 {
-                    if (PendingGames[index].GameState == GameStates.Ready)
+                    if (game.GameState == GameStates.Ready)
                     {
-                        Logger.Log("Found a Game which is ready to start \n Starting the Game with index: " + index.ToString());
-                        RunningGames.Add(PendingGames[index]);
-                        PendingGames.RemoveAt(index);
+                        Logger.GameLog("Found a Game which is ready to start \nStarting the Game with index: ");
+                        ThreadPool.QueueUserWorkItem(game.StartGame, new object());
+                        RunningGames.Add(game);                        
+                        PendingGames.Remove(game);
                     }
                 }
 
-                lock (AcceptedConnections)
-                    ServeClientGameRequests();
+                ServeClientGameRequests();
                     
                 
                 Thread.Sleep(10);
@@ -135,14 +132,13 @@ namespace PingPongServer
                 TCPConnection tcp = new TCPConnection(newSocket, null);
                 NetworkConnection newNetworkConnection = new NetworkConnection(tcp);                
 
-                lock (IncomingConnections)
-                    IncomingConnections.Add(newNetworkConnection);
+                AcceptedConnections.Add(newNetworkConnection);
             }
         }
 
         private void ServeClientGameRequests()
         {
-            foreach (NetworkConnection conn in AcceptedConnections)
+            foreach (NetworkConnection conn in ConnectionsReadyForJoingAndStartingGames.Entries)
             {
                 PackageInterface packet = conn.ReadTCP();
                 if (packet == null)
@@ -177,93 +173,64 @@ namespace PingPongServer
         {
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            ServerGame newGame = new ServerGame(newGameNetwork, initPackage.PlayerTeamwish.Length);
-            lock(PendingGames)
-            {
-                PendingGames.Add(newGame);
-                PendingGames[PendingGames.Count - 1].AddClient(conn, initPackage.PlayerTeamwish.Length);
-            }
+            ServerGame newGame = new ServerGame(newGameNetwork, initPackage.GamePlayerCount);
+            newGame.AddClient(conn, initPackage.PlayerTeamwish.Length);
+            PendingGames.Add(newGame);
+            
                 
         }
 
+        // Return true if client could rejoin the game
         private bool RejoinClientToGame(NetworkConnection conn)
         {
-            bool result = false;
-
-            lock(RunningGames)
-            {
-                for (int index = 0; index <= RunningGames.Count; index++)
+            
+           foreach(ServerGame game in RunningGames.Entries)
+           {
+                if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
                 {
-                    if (RunningGames[index].Network.DiedSessions.Contains(conn.ClientSession.SessionID))
-                    {
-                        RunningGames[index].RejoinClient(conn);
-                        result = true;
-                    }
+                    game.RejoinClient(conn);
+                    return false;
                 }
             }
 
-            return result;            
+            return false;           
         }
 
+        // Returns true if client could be added to a game
         private bool JoinClientToGame(NetworkConnection conn, PackageInterface packet)
         {
             ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
 
-            lock(PendingGames)
+            foreach(ServerGame game in PendingGames.Entries)
             {
-                if (PendingGames.Count <= 0)
-                    return false;
-
-                for (int index = 0; index < PendingGames.Count; index++)
-                {
-                    PendingGames[index].AddClient(conn, pack.PlayerTeamwish.Length);
-                }
-
-                for (int index = PendingGames.Count - 1; index <= 0; index--)
-                {
-                    PendingGames[index].AddClient(conn, pack.PlayerTeamwish.Length);
-                    if (PendingGames[index].GameState == GameStates.Ready)
-                    {
-                        RunningGames.Add(PendingGames[index]);
-                        PendingGames.RemoveAt(index);
-                        ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
-                    }                    
-                }
+                if(game.AddClient(conn, pack.PlayerTeamwish.Length))
+                    return true;                             
             }
-
-            return true;
+            return false;
         }
 
         private void RemoveDeadConnections()
         {
-            lock(IncomingConnections)
+            foreach(NetworkConnection networkConnection in AcceptedConnections.Entries)
             {
-                for (int index = IncomingConnections.Count - 1; index >= 0; index--)
+                if (!networkConnection.Connected)
                 {
-                    if (!IncomingConnections[index].Connected)
-                    {
-                        Logger.NetworkLog("Removing disconnected connection from Incoming Connection ( Client :  " + IncomingConnections[index].RemoteEndPoint.ToString() + ")");
-                        IncomingConnections.RemoveAt(index);
-                    }
-
+                    Logger.NetworkLog("Removing disconnected connection from Accepted Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
+                    AcceptedConnections.Remove(networkConnection);
                 }
             }
-                
         }
                 
         private void RemoveFinishedGames()
         {   // We need to do cleanups otherwise the server will run for a few days and be out of memory
-            lock (RunningGames)
+            foreach(ServerGame game in RunningGames.Entries)
             {
-                for (int index = RunningGames.Count - 1; index >= 0; index--)
+                if (game.GameState == GameStates.Finished)
                 {
-                    if (RunningGames[index].GameState == GameStates.Finished)
-                    {
-                        Logger.GameLog("Found a finished Game removing it now" + RunningGames.ToString());
-                        RunningGames.RemoveAt(index);
-                    }
-                        
+                   Logger.GameLog("Found a finished Game removing it now" + RunningGames.ToString());
+                   RunningGames.Remove(game);
                 }
+                                        
             }
         }
         
