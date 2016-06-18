@@ -57,6 +57,9 @@ namespace PingPongServer
 
         public void Close()
         {
+            // hello my friend, it's 4:00AM right now so don't mind any grammatical errors.
+            // Disconnect is essentially the cleanup for the network and is also threadsafe. 
+            // well, at least that's what i believe for now. :P
             Disconnect();
         }
                 
