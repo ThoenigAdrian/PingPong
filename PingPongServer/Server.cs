@@ -23,6 +23,7 @@ namespace PingPongServer
         private Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private UDPConnection MasterUDPSocket;
         private List<NetworkConnection> IncomingConnections = new List<NetworkConnection>();
+        private List<NetworkConnection> AcceptedConnections = new List<NetworkConnection>();
 
         private LogWriterConsole Logger = new LogWriterConsole();
         private List<ServerGame> PendingGames = new List<ServerGame>();
@@ -47,14 +48,22 @@ namespace PingPongServer
         public void Run()
         {
             Logger.Log("Starting Connection Acceptor Thread");
-            Thread ConnectionAcceptorThread = new Thread(new ThreadStart(AcceptIncomingConnections) );
-            ConnectionAcceptorThread.Start();
+            Thread CollectIncomingConnectionsThread = new Thread(new ThreadStart(CollectIncomingConnections) );
+            CollectIncomingConnectionsThread.Start();
             Logger.Log("Starting Game Manager Thread");
             Thread GameManagerThread = new Thread(new ThreadStart(ManageGames) );
             GameManagerThread.Start();
             Logger.Log("Server is now running\n");
+
             while(true)
             {
+                foreach(NetworkConnection networkConnection in IncomingConnections)
+                {
+                    ServerSessionResponse response = new ServerSessionResponse();
+                    response.ClientSessionID = networkConnection.ClientSession.SessionID;
+                    networkConnection.SendTCP(response);
+                    
+                }
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
@@ -66,7 +75,6 @@ namespace PingPongServer
             {
                 for (int index = PendingGames.Count - 1; index >= 0; index--)
                 {
-                    PendingGames[index].Network.receiveUDPTest();
                     if (PendingGames[index].GameState == GameStates.Ready)
                     {
                         Logger.Log("Found a Game which is ready to start \n Starting the Game with index: " + index.ToString());
@@ -75,7 +83,7 @@ namespace PingPongServer
                     }
                 }
 
-                lock (IncomingConnections)
+                lock (AcceptedConnections)
                     ServeClientGameRequests();
                     
                 
@@ -83,7 +91,7 @@ namespace PingPongServer
             }
         }
 
-        private void AcceptIncomingConnections()
+        private void CollectIncomingConnections()
         {
             while (true)
             {
@@ -91,9 +99,7 @@ namespace PingPongServer
                 Logger.NetworkLog("Client connected " + newSocket.RemoteEndPoint.ToString());
                 TCPConnection tcp = new TCPConnection(newSocket, null);
                 NetworkConnection newNetworkConnection = new NetworkConnection(tcp, new Random().Next());
-                ServerSessionResponse response = new ServerSessionResponse();
-                response.ClientSessionID = newNetworkConnection.ClientSession.SessionID;
-                newNetworkConnection.SendTCP(response);
+                
 
                 lock (IncomingConnections)
                     IncomingConnections.Add(newNetworkConnection);
@@ -102,7 +108,7 @@ namespace PingPongServer
 
         private void ServeClientGameRequests()
         {
-            foreach (NetworkConnection conn in IncomingConnections)
+            foreach (NetworkConnection conn in AcceptedConnections)
             {
                 PackageInterface packet = conn.ReadTCP();
                 if (packet == null)
@@ -116,8 +122,14 @@ namespace PingPongServer
                         CreateNewGame(conn, packet);
                         break;
 
+                    case PackageType.ClientSessionReconnect:
+                        if (!RejoinClientToGame(conn))
+                            throw new NotImplementedException(); // Need to have an error handling package for client
+                        break;
+
                     case PackageType.ClientJoinGameRequest:
-                        JoinClientToGame(conn, packet);
+                        if (!JoinClientToGame(conn, packet))
+                            throw new NotImplementedException(); // Need to have an error handling package for client
                         break;
 
                 }
@@ -132,25 +144,60 @@ namespace PingPongServer
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             ServerGame newGame = new ServerGame(newGameNetwork, initPackage.PlayerCount);
-            PendingGames.Add(newGame);
-            PendingGames[0].AddClient(conn);
+            lock(PendingGames)
+            {
+                PendingGames.Add(newGame);
+                PendingGames[PendingGames.Count - 1].AddClient(conn, initPackage.PlayerCount);
+            }
+                
         }
 
-        private void JoinClientToGame(NetworkConnection conn, PackageInterface packet)
+        private bool RejoinClientToGame(NetworkConnection conn)
+        {
+            bool result = false;
+
+            lock(RunningGames)
+            {
+                for (int index = 0; index <= RunningGames.Count; index++)
+                {
+                    if (RunningGames[index].Network.DiedSessions.Contains(conn.ClientSession.SessionID))
+                    {
+                        RunningGames[index].RejoinClient(conn);
+                        result = true;
+                    }
+                }
+            }
+
+            return result;            
+        }
+
+        private bool JoinClientToGame(NetworkConnection conn, PackageInterface packet)
         {
             ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
 
-            if (PendingGames.Count <= 0)
-                return;                
-
-            PendingGames[0].AddClient(conn);
-            if (PendingGames[0].GameState == GameStates.Ready)
+            lock(PendingGames)
             {
-                RunningGames.Add(PendingGames[0]);
-                PendingGames.RemoveAt(0);
+                if (PendingGames.Count <= 0)
+                    return false;
 
-                ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
+                for (int index = 0; index < PendingGames.Count; index++)
+                {
+                    PendingGames[index].AddClient(conn, pack.PlayerCountOfClient);
+                }
+
+                for (int index = PendingGames.Count - 1; index <= 0; index--)
+                {
+                    PendingGames[index].AddClient(conn, pack.PlayerCountOfClient);
+                    if (PendingGames[index].GameState == GameStates.Ready)
+                    {
+                        RunningGames.Add(PendingGames[index]);
+                        PendingGames.RemoveAt(index);
+                        ThreadPool.QueueUserWorkItem(RunningGames[RunningGames.Count - 1].StartGame, new object());
+                    }                    
+                }
             }
+
+            return true;
         }
 
         private void RemoveDeadConnections()

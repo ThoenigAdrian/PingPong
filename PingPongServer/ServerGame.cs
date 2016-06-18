@@ -66,29 +66,54 @@ namespace PingPongServer
             GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
 
-        public void AddClient(NetworkConnection client)
+        public bool AddClient(NetworkConnection client, int playersToAdd)
         {
+            if (GameStructure.MissingPlayers < playersToAdd)
+                return false; 
+
             Network.AddClientConnection(client);
+
             Client newClient = new Client(client.ClientSession.SessionID, GameStructure.PlayersCount, GameStructure.GetFreeTeam());
-            Player p = new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), 50F);
-            newClient.Players.Add(p);
-            GameStructure.AddPlayer(p, GameStructure.GetFreeTeam());
+            for (int index = 0; index < playersToAdd; index++)
+            {
+                float playerPosition = 0;
+
+                if (GameStructure.GetFreeTeam() == 0)
+                    playerPosition = GameInitializers.PLAYER_1_X + GameStructure.GameTeams.Count * 30F;
+                if (GameStructure.GetFreeTeam() == 1)
+                    playerPosition = GameInitializers.PLAYER_2_X - GameStructure.GameTeams.Count * 30F;
+
+                Player newPlayer = new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), playerPosition);
+
+                newClient.Players.Add(new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), 50F));
+                GameStructure.AddPlayer(newPlayer, GameStructure.GetFreeTeam());
+            }
+
             Clients.Add(newClient);
-            packagesForNextFrame.Add(newClient.session, new PackageInterface[0]);
+
+            ReserveEntryInPackagesForNextFrameForClient(newClient);
             
             
             if (GameStructure.PlayersCount == maxPlayers)
                 GameState = GameStates.Ready;
-        }
 
+            return true;
+        }
+        
+        public void RejoinClient(NetworkConnection client)
+        {
+            Network.AddClientConnection(client);
+        }
         
         private void GetAllThe()
         {
             packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
         }
-
-              
-        
+                              
+        private void ReserveEntryInPackagesForNextFrameForClient(Client client)
+        {
+            packagesForNextFrame.Add(client.session, new PackageInterface[0]);
+        }
 
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
@@ -168,7 +193,8 @@ namespace PingPongServer
                 this.session = sessionID;
                 Players.Add(new Player(FirstPlayerID, FirstPlayerTeam, GameInitializers.PLAYER_1_X));
 
-            }         
+            }
+            
 
             
         }        
