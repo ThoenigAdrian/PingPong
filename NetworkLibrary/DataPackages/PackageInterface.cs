@@ -13,6 +13,7 @@
         ClientInitalizeGamePackage,
         ClientJoinGameRequest,
         ClientSessionRequest,
+        ClientRejoinGamePackage,
 
         ServerData,
         ServerGameControl,

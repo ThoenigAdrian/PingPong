@@ -47,6 +47,7 @@
     <Compile Include="DataPackages\ClientSourcePackages\ClientInitializeGamePackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientJoinGameRequest.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientRegisteredPackage.cs" />
+    <Compile Include="DataPackages\ClientSourcePackages\ClientRejoinGamePackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientSessionRequest.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\PlayerMovementPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientControlPackage.cs" />
