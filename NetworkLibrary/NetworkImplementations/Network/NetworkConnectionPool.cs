@@ -18,5 +18,7 @@ namespace NetworkLibrary.NetworkImplementations.Network
             else
                 return null;
         }
+
+        public int[] GetSessionIDs { get { return Keys.ToArray(); } }
     }
 }
