@@ -1,4 +1,5 @@
-﻿using NetworkLibrary.DataPackages.ServerSourcePackages;
+﻿using NetworkLibrary.DataPackages.ClientSourcePackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
@@ -9,6 +10,8 @@ namespace PingPongClient.NetworkLayer
 {
     class ServerSessionResponseHandler
     {
+        public SessionConnectParameters ConnectParameters { get; set; }
+
         EventWaitHandle ReceivedEvent { get; set; }
 
         public LogWriter Logger { get; set; }
@@ -46,7 +49,15 @@ namespace PingPongClient.NetworkLayer
             {
                 ReceivedEvent = new EventWaitHandle(false, EventResetMode.ManualReset);
 
+                ClientSessionRequest sessionRequest;
+                if (ConnectParameters.Reconnect)
+                    sessionRequest = new ClientSessionRequest(ConnectParameters.SessionID);
+                else
+                    sessionRequest = new ClientSessionRequest();
+
+
                 tcpConnection = new TCPConnection(AcceptedSocket, Logger);
+                tcpConnection.Send(Adapter.CreateNetworkDataFromPackage(sessionRequest));
                 tcpConnection.DataReceivedEvent += ReadIDResponse;
                 tcpConnection.InitializeReceiving();
 

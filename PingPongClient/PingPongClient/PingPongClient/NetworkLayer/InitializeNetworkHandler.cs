@@ -11,7 +11,8 @@ namespace PingPongClient.NetworkLayer
         public delegate void NetworkInitializedCallback(InitializeNetworkHandler handler);
         public event NetworkInitializedCallback NetworkInitializingFinished;
 
-        public IPAddress ServerIP { get; private set; }
+        public SessionConnectParameters ConnectParameters { get; private set; }
+
         LogWriter Logger;
 
         public bool Error { get; private set; }
@@ -19,12 +20,12 @@ namespace PingPongClient.NetworkLayer
        
         public ClientNetwork Network { get; private set; }
 
-        public InitializeNetworkHandler(IPAddress serverIP, LogWriter logger)
+        public InitializeNetworkHandler(SessionConnectParameters connectParams, LogWriter logger)
         {
+            ConnectParameters = connectParams;
+
             Error = false;
             Message = "";
-
-            ServerIP = serverIP;
             Logger = logger;
         }
 
@@ -38,7 +39,7 @@ namespace PingPongClient.NetworkLayer
 
         private void Connect()
         {
-            IPEndPoint server = new IPEndPoint(ServerIP, NetworkConstants.SERVER_PORT);
+            IPEndPoint server = new IPEndPoint(ConnectParameters.ServerIP, NetworkConstants.SERVER_PORT);
             Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try
@@ -55,7 +56,8 @@ namespace PingPongClient.NetworkLayer
                 }
 
                 Network = new ClientNetwork(connectionSocket, Logger);
-                Error = !Network.GetServerSessionResponse();
+                Network.SessionDied += ConnectParameters.SessionDeathHandler;
+                Error = !Network.GetServerFreshSessionResponse(ConnectParameters);
 
                 if (Error)
                     Message = "Server session response error!";

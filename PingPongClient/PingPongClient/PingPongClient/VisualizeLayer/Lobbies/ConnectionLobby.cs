@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using PingPongClient.VisualizeLayer.Lobbies.SelectionLists;
+using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 
 namespace PingPongClient.VisualizeLayer.Lobbies
 {
@@ -23,6 +25,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         DrawableString DrawableServerIP;
         DrawableString DrawableStatus;
+        public ConnectOptions ConnectOptions;
 
         public ConnectLobby()
         {
@@ -31,6 +34,12 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
             Strings.Add(DrawableServerIP);
             Strings.Add(DrawableStatus);
+
+            ConnectOptions = new ConnectOptions();
+            ConnectOptions.Visible = false;
+            ConnectOptions.TopLeft = new Vector2(100, 250);
+
+            Lists.Add(ConnectOptions);
         }
 
         public override Color GetBackgroundColor { get { return Color.Black; } }
