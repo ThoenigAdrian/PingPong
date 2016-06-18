@@ -57,7 +57,7 @@ namespace PingPongServer
 
         public void Close()
         {
-            CloseNetwork();
+            Disconnect();
         }
                 
         public void BroadcastGenericPackage(PackageInterface package, SocketType type)

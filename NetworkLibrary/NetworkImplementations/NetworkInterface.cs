@@ -68,11 +68,18 @@ namespace NetworkLibrary.NetworkImplementations
             ClientConnections.Add(clientConnection);
         }
 
-        public void CloseNetwork()
+        public void Disconnect()
         {
-            // Hello Dave this is not working as expected only the first connections get's closed. It looks like it breaks out of the for loop
-            for (int index = 0; index < ClientConnections.Count; index++)
-                ClientConnections[index].CloseConnection();
+            m_keepAlive = false;
+
+            foreach (NetworkConnection clientCon in ClientConnections.Entries)
+            {
+                clientCon.ConnectionDiedEvent -= ConnectionDiedHandler;
+                clientCon.CloseConnection();
+            }
+
+            UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
+            UdpConnection.Disconnect();
         }
 
         protected PackageInterface GetDataTCP(int session)
@@ -270,20 +277,6 @@ namespace NetworkLibrary.NetworkImplementations
 
             if (deadConnection != null)
                 deadConnection.CloseConnection();
-        }
-
-        public void Disconnect()
-        {
-            m_keepAlive = false;
-
-            foreach (NetworkConnection clientCon in ClientConnections.Entries)
-            {
-                clientCon.ConnectionDiedEvent -= ConnectionDiedHandler;
-                clientCon.CloseConnection();
-            }
-
-            UdpConnection.ReceiveErrorEvent -= HandleUDPReceiveError;
-            UdpConnection.Disconnect();
         }
 
         protected void Log(string text)
