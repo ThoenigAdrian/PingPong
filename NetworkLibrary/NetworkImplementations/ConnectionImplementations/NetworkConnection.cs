@@ -32,15 +32,19 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         SafeList<ResponseRequest> m_openResponses;
 
-        public NetworkConnection(TCPConnection tcpConnection, int sessionID) : this(tcpConnection, sessionID, new JSONAdapter()) { }
-        public NetworkConnection(TCPConnection tcpConnection, int sessionID, PackageAdapter adapter)
+        public NetworkConnection(TCPConnection tcpConnection) : this(tcpConnection, null) { }
+        public NetworkConnection(TCPConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
+        public NetworkConnection(TCPConnection tcpConnection, ResponseRequest responseRequest, PackageAdapter adapter)
         {
             Adapter = adapter;
 
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();
 
-            ClientSession = new Session(sessionID);
+            if (responseRequest != null)
+                m_openResponses.Add(responseRequest);
+
+            ClientSession = null;
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;

@@ -49,6 +49,9 @@ namespace NetworkLibrary.NetworkImplementations
 
         public void AddClientConnection(NetworkConnection clientConnection)
         {
+            if (clientConnection.ClientSession == null)
+                throw new ConnectionException("Connection does not have an ID!");
+
             int sessionID = clientConnection.ClientSession.SessionID;
             if (ClientConnections[sessionID] != null)
                 throw new ConnectionException("Connection with this session ID is already in the network!");

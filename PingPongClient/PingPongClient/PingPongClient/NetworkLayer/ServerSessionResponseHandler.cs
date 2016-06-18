@@ -52,7 +52,8 @@ namespace PingPongClient.NetworkLayer
 
                 if (ReceivedEvent.WaitOne(5000) && !Error)
                 {
-                    ServerConnection = new NetworkConnection(tcpConnection, SessionID);
+                    ServerConnection = new NetworkConnection(tcpConnection);
+                    ServerConnection.ClientSession = new Session(SessionID);
                     Connected = true;
                     return;
                 }
