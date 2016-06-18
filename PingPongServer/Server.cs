@@ -59,6 +59,24 @@ namespace PingPongServer
             {
                 foreach(NetworkConnection networkConnection in IncomingConnections)
                 {
+                    PackageInterface newPacket = networkConnection.ReadTCP();
+                    if (newPacket == null)
+                        continue;
+                    if (newPacket.PackageType == PackageType.ClientSessionRequest)
+                    {
+                        ClientSessionRequest packet = (ClientSessionRequest)newPacket;
+                        if (packet.Reconnect)
+                        {
+                            // still need to handle if client requests a session which is already in use
+                            networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
+                            lock(AcceptedConnections)
+                                AcceptedConnections.Add(networkConnection);
+                        }
+                        else
+                            networkConnection.ClientSession = new Session(new Random().Next());
+                            
+                    }
+                        
                     ServerSessionResponse response = new ServerSessionResponse();
                     response.ClientSessionID = networkConnection.ClientSession.SessionID;
                     networkConnection.SendTCP(response);
@@ -98,8 +116,7 @@ namespace PingPongServer
                 Socket newSocket = MasterListeningSocket.Accept();
                 Logger.NetworkLog("Client connected " + newSocket.RemoteEndPoint.ToString());
                 TCPConnection tcp = new TCPConnection(newSocket, null);
-                NetworkConnection newNetworkConnection = new NetworkConnection(tcp, new Random().Next());
-                
+                NetworkConnection newNetworkConnection = new NetworkConnection(tcp);                
 
                 lock (IncomingConnections)
                     IncomingConnections.Add(newNetworkConnection);
@@ -143,11 +160,11 @@ namespace PingPongServer
         {
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            ServerGame newGame = new ServerGame(newGameNetwork, initPackage.PlayerCount);
+            ServerGame newGame = new ServerGame(newGameNetwork, initPackage.PlayerTeamwish.Length);
             lock(PendingGames)
             {
                 PendingGames.Add(newGame);
-                PendingGames[PendingGames.Count - 1].AddClient(conn, initPackage.PlayerCount);
+                PendingGames[PendingGames.Count - 1].AddClient(conn, initPackage.PlayerTeamwish.Length);
             }
                 
         }
@@ -182,12 +199,12 @@ namespace PingPongServer
 
                 for (int index = 0; index < PendingGames.Count; index++)
                 {
-                    PendingGames[index].AddClient(conn, pack.PlayerCountOfClient);
+                    PendingGames[index].AddClient(conn, pack.PlayerTeamwish.Length);
                 }
 
                 for (int index = PendingGames.Count - 1; index <= 0; index--)
                 {
-                    PendingGames[index].AddClient(conn, pack.PlayerCountOfClient);
+                    PendingGames[index].AddClient(conn, pack.PlayerTeamwish.Length);
                     if (PendingGames[index].GameState == GameStates.Ready)
                     {
                         RunningGames.Add(PendingGames[index]);
