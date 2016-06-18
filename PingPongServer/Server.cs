@@ -74,12 +74,13 @@ namespace PingPongServer
                         }
                         else
                             networkConnection.ClientSession = new Session(new Random().Next());
-                            
+
+                        ServerSessionResponse response = new ServerSessionResponse();
+                        response.ClientSessionID = networkConnection.ClientSession.SessionID;
+                        networkConnection.SendTCP(response);
                     }
                         
-                    ServerSessionResponse response = new ServerSessionResponse();
-                    response.ClientSessionID = networkConnection.ClientSession.SessionID;
-                    networkConnection.SendTCP(response);
+                    
                     
                 }
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
