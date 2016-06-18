@@ -68,7 +68,8 @@ namespace ConnectionTesting
             {
                 Logger.Log("Client connected.");
                 int sessionID = m_sessionPool.GetSessionID;
-                NetworkConnection clientConnection = new NetworkConnection(new TCPConnection(acceptedSocket), sessionID);
+                NetworkConnection clientConnection = new NetworkConnection(new TCPConnection(acceptedSocket));
+                clientConnection.ClientSession = new Session(sessionID);
                 m_network.AddClientConnection(clientConnection);
                 ServerSessionResponse response = new ServerSessionResponse();
                 response.ClientSessionID = sessionID;

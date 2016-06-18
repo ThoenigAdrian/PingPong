@@ -15,32 +15,32 @@ namespace ConnectionTesting
 
         public void SendPositionDataUDP(ServerDataPackage package)
         {
-            BroadCastUDP(package);
+            Out.BroadCastUDP(package);
         }
 
         public void SendPositionDataTCP(ServerDataPackage package)
         {
-            BroadCastTCP(package);
+            Out.BroadCastTCP(package);
         }
 
         public PackageInterface[] ReceivePackageTCP(int session)
         {
-            return GetAllDataTCP(session);
+            return In.GetAllDataTCP(session);
         }
 
         public PackageInterface ReceivePackageUDP(int session)
         {
-            return GetDataUDP(session);
+            return In.GetDataUDP(session);
         }
 
         public Dictionary<int, PackageInterface[]> CollectDataTCP()
         {
-            return GetDataFromEverySessionTCP();
+            return In.GetDataFromEverySessionTCP();
         }
 
         public Dictionary<int, PackageInterface> CollectDataUDP()
         {
-            return GetDataFromEverySessionUDP();
+            return In.GetDataFromEverySessionUDP();
         }
     }
 }

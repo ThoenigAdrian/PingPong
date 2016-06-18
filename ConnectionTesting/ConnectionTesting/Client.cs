@@ -58,13 +58,14 @@ namespace ConnectionTesting
 
             try
             {
+                SessionConnectParameters connectParams = new SessionConnectParameters(m_target, ConnectionDied);
                 m_disconnectLock.WaitOne();
-                Logger.Log("Connecting to " + m_target.ToString());
+                Logger.Log("Connecting to " + connectParams.ServerIP.ToString());
                 Socket connectSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                connectSocket.Connect(new IPEndPoint(m_target, 4200));
+                connectSocket.Connect(new IPEndPoint(connectParams.ServerIP, 4200));
 
                 m_network = new ClientNetwork(connectSocket, Logger);
-                m_network.GetServerSessionResponse();
+                m_network.GetServerFreshSessionResponse(connectParams);
                 m_network.SessionDied += ConnectionDied;
                 Logger.Log("Connected with session ID " + m_network.ClientSession);
                 m_disconnectLock.Release();

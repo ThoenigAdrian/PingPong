@@ -53,6 +53,8 @@
     <Compile Include="Server.cs" />
     <Compile Include="ServerNetwork.cs" />
     <Compile Include="ServerSessionResponseHandler.cs" />
+    <Compile Include="SessionReconnect.cs" />
+    <Compile Include="SubControlResponseRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
