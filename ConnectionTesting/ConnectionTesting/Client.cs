@@ -221,21 +221,15 @@ namespace ConnectionTesting
         private void ReceiveData()
         {
             Dictionary<int, PackageInterface[]> tcpPackages = m_network.CollectDataTCP();
-            if (tcpPackages != null)
+            foreach (KeyValuePair<int, PackageInterface[]> entry in tcpPackages)
             {
-                foreach (KeyValuePair<int, PackageInterface[]> entry in tcpPackages)
-                {
-                    Logger.Log("Received " + entry.Value.Length + " TCP packages from session " + entry.Key + ".");
-                }
+                Logger.Log("Received " + entry.Value.Length + " TCP packages from session " + entry.Key + ".");
             }
 
             Dictionary<int, PackageInterface> udpPackages = m_network.CollectDataUDP();
-            if (udpPackages != null)
+            foreach (KeyValuePair<int, PackageInterface> entry in udpPackages)
             {
-                foreach (KeyValuePair<int, PackageInterface> entry in udpPackages)
-                {
-                    Logger.Log("Received UDP package from session " + entry.Key + ".");
-                }
+                Logger.Log("Received UDP package from session " + entry.Key + ".");
             }
         }
 
