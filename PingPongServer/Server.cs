@@ -150,8 +150,6 @@ namespace PingPongServer
             }
         }
 
-        
-
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)
         {
             Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
@@ -169,8 +167,6 @@ namespace PingPongServer
             ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
         }
-
-        
 
         private void StartGame(ServerGame game)
         {
@@ -192,6 +188,19 @@ namespace PingPongServer
                 
         }
 
+        // Returns true if client could be added to a game
+        private bool JoinClientToGame(NetworkConnection conn, PackageInterface packet)
+        {
+            ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
+
+            foreach (ServerGame game in PendingGames.Entries)
+            {
+                if (game.AddClient(conn, pack.PlayerTeamwish.Length))
+                    return true;
+            }
+            return false;
+        }
+
         // Return true if client could rejoin the game
         private bool RejoinClientToGame(NetworkConnection conn)
         {
@@ -207,19 +216,7 @@ namespace PingPongServer
 
             return false;           
         }
-
-        // Returns true if client could be added to a game
-        private bool JoinClientToGame(NetworkConnection conn, PackageInterface packet)
-        {
-            ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
-
-            foreach(ServerGame game in PendingGames.Entries)
-            {
-                if(game.AddClient(conn, pack.PlayerTeamwish.Length))
-                    return true;                             
-            }
-            return false;
-        }
+        
 
         private void RemoveDeadConnections()
         {
