@@ -17,9 +17,6 @@ namespace PingPongClient.ControlLayer
         public LobbyControl(Control parent) : base(parent)
         {
             RequestLobby = new RequestLobby();
-
-            Input.AddPlayerInput(0, 0);
-
             Visualizer = new LobbyVisualizer(RequestLobby);
         }
 

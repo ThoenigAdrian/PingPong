@@ -4,6 +4,7 @@ using NetworkLibrary.DataPackages;
 using PingPongClient.VisualizeLayer.Visualizers;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.InputLayer.KeyboardInputs;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 
 namespace PingPongClient.ControlLayer
 {
@@ -59,12 +60,11 @@ namespace PingPongClient.ControlLayer
             {
                 case RequestOptions.Start:
                     Network.SendClientStart(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
-                    ParentControl.SwitchMode(GameMode.Game);
+                    IssueServerResponse(PackageType.ServerPlayerIDResponse);
                     break;
 
                 case RequestOptions.Join:
                     Network.SendClientJoin(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
-                    ParentControl.SwitchMode(GameMode.Game);
                     break;
 
                 default:
@@ -78,7 +78,19 @@ namespace PingPongClient.ControlLayer
 
         protected override void ServerResponseActions(PackageInterface responsePackage)
         {
-            base.ServerResponseActions(responsePackage);
+            ServerPlayerIDResponse response = responsePackage as ServerPlayerIDResponse;
+            if (response == null)
+                throw new Exception("Response reader failed to read package!");
+
+            Input.ClearPlayerInput();
+
+            int index = 0;
+            foreach (int ID in response.m_playerIDs)
+            {
+                Input.AddPlayerInput(ID, index);
+            }
+
+            ParentControl.SwitchMode(GameMode.Game);
         }
 
         protected override void ResponseTimeoutActions(PackageType requestedPackageType)

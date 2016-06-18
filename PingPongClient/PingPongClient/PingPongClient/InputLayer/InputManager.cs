@@ -43,6 +43,11 @@ namespace PingPongClient.InputLayer
             PlayerInputs.Add(new PlayerInput(KeyboardAdapter, playerID, playerIndex));
         }
 
+        public void ClearPlayerInput()
+        {
+            PlayerInputs.Clear();
+        }
+
         public PlayerInputs[] GetMovementInput()
         {
             List<PlayerInputs> allPlayerInputs = new List<PlayerInputs>();
