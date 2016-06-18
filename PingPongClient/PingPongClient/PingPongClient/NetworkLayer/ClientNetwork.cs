@@ -45,7 +45,7 @@ namespace PingPongClient.NetworkLayer
         public void SendClientStart(int playerCount)
         {
             ClientInitializeGamePackage package = new ClientInitializeGamePackage();
-            package.PlayerCount = playerCount;
+            package.GamePlayerCount = playerCount;
             SendIDPackageTCP(package);
         }
 
