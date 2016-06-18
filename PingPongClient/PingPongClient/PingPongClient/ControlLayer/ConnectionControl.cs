@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using System.Net;
 using PingPongClient.VisualizeLayer.Lobbies;
@@ -110,7 +109,7 @@ namespace PingPongClient.ControlLayer
                 {
                     handler.Network.SessionDied += ParentControl.NetworkDeathHandler;
                     Network = handler.Network;
-                    ParentControl.LobbyControl.SetServerIP(handler.ServerIP.ToString());
+                    ParentControl.OptionControl.SetServerIP(handler.ServerIP.ToString());
                     ParentControl.SwitchMode(GameMode.Lobby);
                 }
             }

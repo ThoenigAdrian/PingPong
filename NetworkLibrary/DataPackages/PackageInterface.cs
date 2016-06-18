@@ -13,12 +13,14 @@
         ClientInitalizeGamePackage,
         ClientJoinGameRequest,
         ClientSessionReconnect,
+        ClientSessionRequest,
 
         ServerData,
         ServerGameControl,
         ServerAddPlayerResponsePackage,
         ServerJoinGameResponsePackage,
-        ServerSessionResponse
+        ServerSessionResponse,
+        ServerPlayerIDResponse
     }
 
     public enum Result

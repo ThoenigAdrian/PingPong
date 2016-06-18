@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
-using NetworkLibrary.Utility;
 using PingPongClient.InputLayer;
 using PingPongClient.NetworkLayer;
 using PingPongClient.VisualizeLayer.Visualizers;
@@ -29,10 +28,10 @@ namespace PingPongClient.ControlLayer
 
         public abstract GameMode GetMode { get; }
 
-        protected void IssueServerResponse(ResponseRequest responseRequest)
+        protected void IssueServerResponse(PackageType responseType)
         {
             WaitingForResponse = true;
-            ParentControl.IssueServerResponse(responseRequest);
+            ParentControl.IssueServerResponse(new SubControlResponseRequest(GetMode, responseType, 5000));
         }
 
         public void ProcessServerResponse(PackageInterface responsePackage)

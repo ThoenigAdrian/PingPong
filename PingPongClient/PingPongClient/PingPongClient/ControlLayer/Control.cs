@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using PingPongClient.VisualizeLayer.Visualizers;
 using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.DataPackages;
+using System.Collections.Generic;
 
 namespace PingPongClient
 {
@@ -24,30 +25,17 @@ namespace PingPongClient
         public GameMode Mode
         {
             get { return ActiveControl.GetMode; }
-            private set
-            {
-                switch(value)
-                {
-                    case GameMode.Connect:
-                        ActiveControl = ConnectionControl;
-                        break;
-                    case GameMode.Lobby:
-                        ActiveControl = LobbyControl;
-                        break;
-                    case GameMode.Game:
-                        ActiveControl = GameControl;
-                        break;
-                }
-            }
+            private set { ActiveControl = GetSubControl(value); }
         }
-
+        
+        Dictionary<GameMode, SubControlInterface> SubControls { get; set; }
         SubControlInterface ActiveControl { get; set; }
 
-        private ResponseRequest CurrentResponseRequest { get; set; }
-
         public ConnectionControl ConnectionControl { get; set; }
-        public LobbyControl LobbyControl { get; set; }
+        public LobbyControl OptionControl { get; set; }
         public GameControl GameControl { get; set; }
+
+        private SubControlResponseRequest CurrentResponseRequest { get; set; }
 
         public ClientNetwork Network { get; set; }
         public InputManager InputManager { get; set; }
@@ -63,11 +51,17 @@ namespace PingPongClient
             InputManager = new InputManager();
             GraphicsManager = new GraphicsDeviceManager(this);
 
+            SubControls = new Dictionary<GameMode, SubControlInterface>();
+
             ConnectionControl = new ConnectionControl(this);
-            LobbyControl = new LobbyControl(this);
+            OptionControl = new LobbyControl(this);
             GameControl = new GameControl(this);
 
-            ActiveControl = ConnectionControl;
+            SubControls.Add(GameMode.Connect, ConnectionControl);
+            SubControls.Add(GameMode.Lobby, OptionControl);
+            SubControls.Add(GameMode.Game, GameControl);
+
+            ActiveControl = GetSubControl(GameMode.Connect);
 
             m_networkDied = false;
         }
@@ -87,9 +81,10 @@ namespace PingPongClient
             initData.GraphicManager = GraphicsManager;
             initData.SpriteBatch = new SpriteBatch(GraphicsManager.GraphicsDevice);
 
-            ConnectionControl.InitializeVisualizer(initData);
-            LobbyControl.InitializeVisualizer(initData);
-            GameControl.InitializeVisualizer(initData);
+            foreach (SubControlInterface subControl in SubControls.Values)
+            {
+                subControl.InitializeVisualizer(initData);
+            }
 
             base.LoadContent();
         }
@@ -121,7 +116,7 @@ namespace PingPongClient
                 Exit();
         }
 
-        public bool IssueServerResponse(ResponseRequest responseRequest)
+        public bool IssueServerResponse(SubControlResponseRequest responseRequest)
         {
             if (Network == null || CurrentResponseRequest != null)
                 return false;
@@ -139,15 +134,24 @@ namespace PingPongClient
                 {
                     PackageInterface package = CurrentResponseRequest.ResponsePackage;
                     CurrentResponseRequest = null;
-                    ActiveControl.ProcessServerResponse(package);
+                    GetSubControl(CurrentResponseRequest.Issuer).ProcessServerResponse(package);
                 }
                 else
                 {
                     PackageType type = CurrentResponseRequest.ResponsePackageType;
                     CurrentResponseRequest = null;
-                    ActiveControl.HandleResponseTimeout(type);
+                    GetSubControl(CurrentResponseRequest.Issuer).HandleResponseTimeout(type);
                 }
             }
+        }
+
+        public SubControlInterface GetSubControl(GameMode mode)
+        {
+            SubControlInterface subControl;
+            if (!SubControls.TryGetValue(mode, out subControl))
+                throw new Exception("SubControl not found!");
+
+            return subControl;
         }
 
         public void SwitchMode(GameMode mode)

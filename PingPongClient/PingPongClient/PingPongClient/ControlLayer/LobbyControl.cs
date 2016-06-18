@@ -37,10 +37,7 @@ namespace PingPongClient.ControlLayer
 
         public override void Update(GameTime gameTime)
         {
-            if (Network != null)
-                Network.UpdateConnections();
         }
-
 
         private void HandleSelectInput()
         {
@@ -82,8 +79,6 @@ namespace PingPongClient.ControlLayer
                 default:
                     return;
             }
-
-            IssueServerResponse(new ResponseRequest(PackageType.ServerData, 5000));
         }
 
         protected override void ServerResponseActions(PackageInterface responsePackage)
