@@ -88,6 +88,17 @@ namespace NetworkLibrary.NetworkImplementations
             }
 
             UdpConnection.ReceiveErrorEvent -= ErrorHandling.HandleUDPReceiveError;
+            PostDisconnectActions();
+        }
+
+        protected virtual void PostDisconnectActions()
+        {
+            // Add what you wanna do after a disconnect in the override of this function
+        }
+
+        protected void TerminateUDPConnection()
+        {
+            UdpConnection.ReceiveErrorEvent -= ErrorHandling.HandleUDPReceiveError;
             UdpConnection.Disconnect();
         }
 

@@ -88,5 +88,10 @@ namespace PingPongClient.NetworkLayer
         {
             return In.GetDataUDP(ClientSession) as ServerDataPackage;
         }
+
+        protected override void PostDisconnectActions()
+        {
+            TerminateUDPConnection();
+        }
     }
 }
