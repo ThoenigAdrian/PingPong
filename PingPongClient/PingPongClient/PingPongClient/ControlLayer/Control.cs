@@ -17,6 +17,7 @@ namespace PingPongClient
     {
         Connect,
         Lobby,
+        Registration,
         Game
     }
 
@@ -33,6 +34,7 @@ namespace PingPongClient
 
         public ConnectionControl ConnectionControl { get; set; }
         public LobbyControl OptionControl { get; set; }
+        public PlayerRegistrationControl RegistrationControl { get; set; }
         public GameControl GameControl { get; set; }
 
         private SubControlResponseRequest CurrentResponseRequest { get; set; }
@@ -55,11 +57,14 @@ namespace PingPongClient
 
             ConnectionControl = new ConnectionControl(this);
             OptionControl = new LobbyControl(this);
+            RegistrationControl = new PlayerRegistrationControl(this);
             GameControl = new GameControl(this);
 
             SubControls.Add(GameMode.Connect, ConnectionControl);
             SubControls.Add(GameMode.Lobby, OptionControl);
+            SubControls.Add(GameMode.Registration, RegistrationControl);
             SubControls.Add(GameMode.Game, GameControl);
+            
 
             ActiveControl = GetSubControl(GameMode.Connect);
 
@@ -92,7 +97,10 @@ namespace PingPongClient
         protected override void Update(GameTime gameTime)
         {
             if (m_networkDied)
+            {
+                ConnectionControl.SetStatus("Connection died.");
                 CleanUpNetwork();
+            }
 
             InputManager.Update();
 
@@ -113,7 +121,16 @@ namespace PingPongClient
         protected void DetectExitInput()
         {
             if (InputManager.GetControlInput() == ControlInputs.Quit)
-                Exit();
+            {
+                if (Mode == GameMode.Connect)
+                {
+                    Exit();
+                }
+                else
+                {
+                    Disonnect();
+                }
+            }
         }
 
         public bool IssueServerResponse(SubControlResponseRequest responseRequest)
@@ -176,11 +193,22 @@ namespace PingPongClient
             m_networkDied = true;
         }
 
+        void Disonnect()
+        {
+            if (Network != null)
+            {
+                Network.SessionDied -= NetworkDeathHandler;
+                Network.Disconnect();
+                ConnectionControl.SetStatus("Disconnected.");
+            }
+
+            CleanUpNetwork();
+        }
+
         void CleanUpNetwork()
         {
             Network = null;
             CurrentResponseRequest = null;
-            ConnectionControl.SetStatus("Connection died.");
             Mode = GameMode.Connect;
             m_networkDied = false;
         }
