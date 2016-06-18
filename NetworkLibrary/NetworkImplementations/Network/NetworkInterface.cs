@@ -61,6 +61,22 @@ namespace NetworkLibrary.NetworkImplementations
                 throw new ConnectionException("Adding the connection failed!");
         }
 
+        public void UpdateConnections()
+        {
+            List<NetworkConnection> deadCons = new List<NetworkConnection>();
+
+            foreach (NetworkConnection clientCon in ClientConnections.Values)
+            {
+                if (!clientCon.Connected)
+                    deadCons.Add(clientCon);
+            }
+
+            foreach (NetworkConnection deadCon in deadCons)
+            {
+                deadCon.CloseConnection();
+            }
+        }
+
         public void Disconnect()
         {
             m_keepAlive = false;
@@ -75,15 +91,6 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection.Disconnect();
         }
 
-        private void KeepAliveLoop()
-        {
-            while (m_keepAlive)
-            {
-                Out.BroadCastKeepAlive();
-                Thread.Sleep(KeepAliveInterval);
-            }
-        }
-
         protected void IssueResponse(ResponseRequest responseRequest, int session)
         {
             NetworkConnection connection = ClientConnections[session];
@@ -91,19 +98,12 @@ namespace NetworkLibrary.NetworkImplementations
                 connection.IssueResponse(responseRequest);
         }
 
-        public void UpdateConnections()
+        private void KeepAliveLoop()
         {
-            List<NetworkConnection> deadCons = new List<NetworkConnection>();
-
-            foreach (NetworkConnection clientCon in ClientConnections.Values)
+            while (m_keepAlive)
             {
-                if (!clientCon.Connected)
-                    deadCons.Add(clientCon);
-            }
-
-            foreach (NetworkConnection deadCon in deadCons)
-            {
-                deadCon.CloseConnection();
+                Out.BroadCastKeepAlive();
+                Thread.Sleep(KeepAliveInterval);
             }
         }
 
