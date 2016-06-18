@@ -11,6 +11,8 @@ namespace NetworkLibrary.NetworkImplementations
         public delegate void SessionDeathHandler(NetworkInterface sender, int sessionID);
         public event SessionDeathHandler SessionDied;
 
+        public int[] GetSessionIDs { get { return ClientConnections.GetSessionIDs; } }
+
         public int ClientCount { get { return ClientConnections.Count; } }
 
         protected int KeepAliveInterval { get; set; } // Milliseconds

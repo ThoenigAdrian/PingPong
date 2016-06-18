@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using PingPongClient.VisualizeLayer.Lobbies.SelectionLists;
+using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 using System.Collections.Generic;
 
 namespace PingPongClient.VisualizeLayer.Lobbies
@@ -20,33 +19,5 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         }
 
         public abstract Color GetBackgroundColor { get; }
-    }
-
-
-    public class DrawableString
-    {
-        public Color StringColor = Color.Red;
-        public string Value;
-        public Vector2 Postion;
-
-        public DrawableString(string value) : this (value, Vector2.Zero)
-        {
-        }
-
-        public DrawableString(string value, Vector2 position) : this (value, position, Color.Red)
-        {
-        }
-
-        public DrawableString(string value, Vector2 postion, Color color)
-        {
-            Value = value;
-            Postion = postion;
-            StringColor = color;
-        }
-
-        public Vector2 GetMeasurements(SpriteFont font)
-        {
-            return font.MeasureString(Value);
-        }
     }
 }

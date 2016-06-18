@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 
 namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
 {
@@ -13,8 +14,8 @@ namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
         protected override SelectionEntry[] CreateListEntries()
         {
             SelectionEntry[] entries = new SelectionEntry[2];
-            entries[0] = new SelectionEntry(new DrawableString("Start a new game", new Vector2(0, 0), Color.White), new Selector(Color.Green, new Vector2(12,12)));
-            entries[1] = new SelectionEntry(new DrawableString("Join an existing game", new Vector2(0, 30), Color.White), new Selector(Color.Green, new Vector2(12, 12)));
+            entries[0] = new SelectionEntry(new DrawableString("Start a new game", new Vector2(0, 0), Color.White), new Selector());
+            entries[1] = new SelectionEntry(new DrawableString("Join an existing game", new Vector2(0, 30), Color.White), new Selector());
             return entries;
         }
     }

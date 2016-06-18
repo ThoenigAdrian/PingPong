@@ -96,6 +96,7 @@
     <Compile Include="NetworkLayer\ClientNetwork.cs" />
     <Compile Include="NetworkLayer\InitializeNetworkHandler.cs" />
     <Compile Include="NetworkLayer\ServerSessionResponseHandler.cs" />
+    <Compile Include="NetworkLayer\SessionReconnect.cs" />
     <Compile Include="NetworkLayer\SubControlResponseRequest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -103,7 +104,10 @@
     <Compile Include="VisualizeLayer\Lobbies\ConnectionLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\LobbyInterface.cs" />
     <Compile Include="VisualizeLayer\Lobbies\RequestLobby.cs" />
-    <Compile Include="VisualizeLayer\Lobbies\SelectionLists\SelectionListInterface.cs" />
+    <Compile Include="VisualizeLayer\Lobbies\SelectionLists\ConnectOptions.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\DrawableElement.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\DrawableString.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\SelectionListInterface.cs" />
     <Compile Include="VisualizeLayer\Lobbies\SelectionLists\StartJoinSelection.cs" />
     <Compile Include="VisualizeLayer\Visualizers\LobbyVisualizer.cs" />
     <Compile Include="VisualizeLayer\Visualizers\VisualizerInterface.cs" />

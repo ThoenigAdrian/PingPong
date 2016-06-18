@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using PingPongClient.VisualizeLayer.Lobbies.SelectionLists;
+using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 using System;
 
 namespace PingPongClient.VisualizeLayer.Lobbies

@@ -22,8 +22,9 @@ namespace PingPongClient.NetworkLayer
             ResponseHandler = new ServerSessionResponseHandler(connectedSocket, new JSONAdapter(), logger);
         }
 
-        public bool GetServerSessionResponse()
+        public bool GetServerFreshSessionResponse(SessionConnectParameters connectParams)
         {
+            ResponseHandler.ConnectParameters = connectParams;
             bool response = ResponseHandler.GetResponse();
             if (response)
             {
@@ -52,7 +53,7 @@ namespace PingPongClient.NetworkLayer
         public void SendClientJoin(int playerCount)
         {
             ClientJoinGameRequest package = new ClientJoinGameRequest();
-            package.PlayerCountOfClient = playerCount;
+            package.GamePlayerCount = playerCount;
             SendIDPackageTCP(package);
         }
 
