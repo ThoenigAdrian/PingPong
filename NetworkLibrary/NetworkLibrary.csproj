@@ -52,6 +52,7 @@
     <Compile Include="DataPackages\PackageInterface.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerAddPlayerResponsePackage.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerJoinGameResponsePackage.cs" />
+    <Compile Include="DataPackages\ServerSourcePackages\ServerPlayerIDResponse.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerSessionResponse.cs" />
     <Compile Include="NetworkImplementations\ConnectionImplementations\NetworkConnection.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerGameControlPackage.cs" />
