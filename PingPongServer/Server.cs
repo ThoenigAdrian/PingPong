@@ -57,32 +57,48 @@ namespace PingPongServer
 
             while(true)
             {
-                foreach(NetworkConnection networkConnection in IncomingConnections)
+                lock(IncomingConnections)
                 {
-                    PackageInterface newPacket = networkConnection.ReadTCP();
-                    if (newPacket == null)
-                        continue;
-                    if (newPacket.PackageType == PackageType.ClientSessionRequest)
+                    foreach (NetworkConnection networkConnection in IncomingConnections)
                     {
-                        ClientSessionRequest packet = (ClientSessionRequest)newPacket;
-                        if (packet.Reconnect)
+                        PackageInterface newPacket = networkConnection.ReadTCP();
+                        if (newPacket == null)
+                            continue;
+                        Console.Write("Yolo");
+                        if (newPacket.PackageType == PackageType.ClientSessionRequest)
                         {
-                            // still need to handle if client requests a session which is already in use
-                            networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
-                            lock(AcceptedConnections)
-                                AcceptedConnections.Add(networkConnection);
-                        }
-                        else
-                            networkConnection.ClientSession = new Session(new Random().Next());
+                            ClientSessionRequest packet = (ClientSessionRequest)newPacket;
+                            if (packet.Reconnect)
+                            {
+                                // still need to handle if client requests a session which is already in use
+                                networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
+                                lock (AcceptedConnections)
+                                    AcceptedConnections.Add(networkConnection);
+                            }
+                            else
+                            {
+                                networkConnection.ClientSession = new Session(new Random().Next());
+                                lock (AcceptedConnections)
+                                    AcceptedConnections.Add(networkConnection);
+                            }
+                                
 
-                        ServerSessionResponse response = new ServerSessionResponse();
-                        response.ClientSessionID = networkConnection.ClientSession.SessionID;
-                        networkConnection.SendTCP(response);
+                            ServerSessionResponse response = new ServerSessionResponse();
+                            response.ClientSessionID = networkConnection.ClientSession.SessionID;
+                            networkConnection.SendTCP(response);
+                            
+                        }
                     }
+                 for (int index = IncomingConnections.Count - 1; index >= 0; index--)
+                 {
+                        if(IncomingConnections[index].ClientSession != null)
+                            IncomingConnections.RemoveAt(index);
+                  }
                         
-                    
+
                     
                 }
+                
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
@@ -140,10 +156,10 @@ namespace PingPongServer
                         CreateNewGame(conn, packet);
                         break;
 
-                    case PackageType.ClientSessionReconnect:
+                    /*case PackageType.ClientSessionReconnect:
                         if (!RejoinClientToGame(conn))
                             throw new NotImplementedException(); // Need to have an error handling package for client
-                        break;
+                        break;*/
 
                     case PackageType.ClientJoinGameRequest:
                         if (!JoinClientToGame(conn, packet))
@@ -220,15 +236,19 @@ namespace PingPongServer
 
         private void RemoveDeadConnections()
         {
-            for (int index = IncomingConnections.Count - 1; index >= 0; index--)
+            lock(IncomingConnections)
             {
-                if (!IncomingConnections[index].Connected)
+                for (int index = IncomingConnections.Count - 1; index >= 0; index--)
                 {
-                    Logger.NetworkLog("Removing disconnected connection from Incoming Connection ( Client :  " + IncomingConnections[index].RemoteEndPoint.ToString() + ")");
-                    IncomingConnections.RemoveAt(index);
+                    if (!IncomingConnections[index].Connected)
+                    {
+                        Logger.NetworkLog("Removing disconnected connection from Incoming Connection ( Client :  " + IncomingConnections[index].RemoteEndPoint.ToString() + ")");
+                        IncomingConnections.RemoveAt(index);
+                    }
+
                 }
-                    
             }
+                
         }
                 
         private void RemoveFinishedGames()
@@ -238,8 +258,11 @@ namespace PingPongServer
                 for (int index = RunningGames.Count - 1; index >= 0; index--)
                 {
                     if (RunningGames[index].GameState == GameStates.Finished)
+                    {
                         Logger.GameLog("Found a finished Game removing it now" + RunningGames.ToString());
                         RunningGames.RemoveAt(index);
+                    }
+                        
                 }
             }
         }

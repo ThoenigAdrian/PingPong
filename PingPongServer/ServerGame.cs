@@ -74,7 +74,7 @@ namespace PingPongServer
             Network.AddClientConnection(client);
 
             Client newClient = new Client(client.ClientSession.SessionID, GameStructure.PlayersCount, GameStructure.GetFreeTeam());
-            for (int index = 0; index < playersToAdd; index++)
+            for (int index = 1; index < playersToAdd; index++)
             {
                 float playerPosition = 0;
 
