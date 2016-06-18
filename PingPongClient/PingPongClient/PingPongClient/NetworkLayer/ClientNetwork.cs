@@ -69,24 +69,24 @@ namespace PingPongClient.NetworkLayer
         private void SendIDPackageTCP(ClientRegisteredPackage package)
         {
             package.SessionID = ClientSession;
-            SendDataTCP(package, ClientSession);
+            Out.SendDataTCP(package, ClientSession);
         }
 
         private void SendIDPackageUDP(ClientRegisteredPackage package)
         {
             package.SessionID = ClientSession;
-            SendDataUDP(package, ClientSession);
+            Out.SendDataUDP(package, ClientSession);
         }
 
         public void SendUDPTestData(PlayerMovementPackage package)
         {
             package.SessionID = ClientSession;
-            SendDataUDP(package, ClientSession);
+            Out.SendDataUDP(package, ClientSession);
         }
 
         public ServerDataPackage GetServerData()
         {
-            return GetDataUDP(ClientSession) as ServerDataPackage;
+            return In.GetDataUDP(ClientSession) as ServerDataPackage;
         }
     }
 }
