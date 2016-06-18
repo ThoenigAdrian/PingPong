@@ -66,32 +66,32 @@ namespace PingPongServer
             GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
 
-        public bool AddClient(NetworkConnection client, int playersToAdd)
+        public bool AddClient(NetworkConnection client, int[] playerTeamWish)
         {
-            if (GameStructure.MissingPlayers < playersToAdd)
+            if (GameStructure.MissingPlayers < playerTeamWish.Length)
                 return false; 
 
             Network.AddClientConnection(client);            
-            Client newClient = new Client(GameStructure, GameStructure.GetFreeTeam());
+            Client newClient = new Client(GameStructure, client.ClientSession.SessionID);
             
-            for (int index = 0; index < playersToAdd; index++)
+            for (int index = 0; index < playerTeamWish.Length; index++)
             {
                 float playerPosition = 0;
-
-                if (GameStructure.GetFreeTeam() == 0)
+                                
+                if (playerTeamWish[index] == 0 && GameStructure.GameTeams[playerTeamWish[index]].Count - GameStructure.maxPlayers / 2 >= 1)
                     playerPosition = GameInitializers.PLAYER_1_X + GameStructure.GameTeams.Count * 30F;
-                if (GameStructure.GetFreeTeam() == 1)
+                else if (playerTeamWish[index] == 1 && GameStructure.GameTeams[playerTeamWish[index]].Count - GameStructure.maxPlayers/2 >= 1)
                     playerPosition = GameInitializers.PLAYER_2_X - GameStructure.GameTeams.Count * 30F;
+                                
 
                 Player newPlayer = new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), playerPosition);
 
                 newClient.AddPlayer(newPlayer, GameStructure);
             }
-            Clients.Add(newClient);
-
-
-            //ReserveEntryInPackagesForNextFrameForClient(newClient);
-            
+            ServerPlayerIDResponse packet = new ServerPlayerIDResponse();
+            packet.m_playerIDs = playerTeamWish; // give him exactly what he wants ... for now
+            Network.SendTCPPackageToClient(packet, client.ClientSession.SessionID);
+            Clients.Add(newClient);                       
             
             if (GameStructure.PlayersCount == maxPlayers)
                 GameState = GameStates.Ready;
@@ -109,11 +109,6 @@ namespace PingPongServer
             packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
         }
         
-        /*                      
-        private void ReserveEntryInPackagesForNextFrameForClient(Client client)
-        {
-            packagesForNextFrame.Add(client.session, new PackageInterface[0]);
-        }*/
 
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {

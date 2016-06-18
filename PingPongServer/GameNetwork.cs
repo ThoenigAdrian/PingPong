@@ -26,16 +26,11 @@ namespace PingPongServer
         {
             DiedSessions.Add(sessionID);
         }
-
-        public void receiveUDPTest()
+        
+        public void SendTCPPackageToClient(PackageInterface packet , int sessionID)
         {
-            if(In.GetDataFromEverySessionUDP()!=null)
-            {
-                Console.Write("empfangen");
-            }
-            
+            Out.SendDataTCP(packet, sessionID);
         }
-
         
         public void AddClient(NetworkConnection connection)
         {

@@ -54,5 +54,14 @@ namespace NetworkLibrary.Utility
         {
             return timer != val;
         }
+        
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
+        public override bool Equals(object o)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

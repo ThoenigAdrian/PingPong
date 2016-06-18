@@ -182,7 +182,7 @@ namespace PingPongServer
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             ServerGame newGame = new ServerGame(newGameNetwork, initPackage.GamePlayerCount);
-            newGame.AddClient(conn, initPackage.PlayerTeamwish.Length);
+            newGame.AddClient(conn, initPackage.PlayerTeamwish);
             PendingGames.Add(newGame);
             return true;
                 
@@ -195,7 +195,7 @@ namespace PingPongServer
 
             foreach (ServerGame game in PendingGames.Entries)
             {
-                if (game.AddClient(conn, pack.PlayerTeamwish.Length))
+                if (game.AddClient(conn, pack.PlayerTeamwish))
                     return true;
             }
             return false;
