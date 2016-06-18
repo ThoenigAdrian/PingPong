@@ -43,19 +43,19 @@ namespace PingPongClient.NetworkLayer
             IssueResponse(responseRequest, ClientSession);
         }
 
-        public void SendClientStart(int playerCount)
+        public void SendClientStart(int playerCount, int[] playerTeamWish)
         {
             ClientInitializeGamePackage package = new ClientInitializeGamePackage();
             package.GamePlayerCount = playerCount;
-            package.PlayerTeamwish = new int[] { 0 };
+            package.PlayerTeamwish = playerTeamWish;
             SendIDPackageTCP(package);
         }
 
-        public void SendClientJoin(int playerCount)
+        public void SendClientJoin(int playerCount, int[] playerTeamWish)
         {
             ClientJoinGameRequest package = new ClientJoinGameRequest();
             package.GamePlayerCount = playerCount;
-            package.PlayerTeamwish = new int[] { 1 };
+            package.PlayerTeamwish = playerTeamWish;
             SendIDPackageTCP(package);
         }
 

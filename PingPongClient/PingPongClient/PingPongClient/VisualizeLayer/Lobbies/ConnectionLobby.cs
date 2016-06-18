@@ -36,7 +36,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         public ConnectLobby()
         {
             DrawableServerIP = new DrawableString(CreateIPString(""), new Vector2(117, 200), Color.White);
-            DrawableStatus = new DrawableString("", new Vector2(117, 250), Color.White);
+            DrawableStatus = new DrawableString("", new Vector2(117, 300), Color.White);
 
             Strings.Add(DrawableServerIP);
             Strings.Add(DrawableStatus);

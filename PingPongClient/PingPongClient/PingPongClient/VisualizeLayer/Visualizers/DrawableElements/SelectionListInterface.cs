@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 
 namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 {
@@ -12,7 +13,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
         public Vector2 TopLeft { get; set; }
 
         public Color Background { get; protected set; }
-        public SelectionEntry[] ListEntries { get; private set; }
+        public List<SelectionEntry> ListEntries { get; private set; }
 
         public Selector Selector { get; protected set; }
 
@@ -26,8 +27,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 
                 m_selected = value;
 
-                if (m_selected >= ListEntries.Length)
-                    m_selected = ListEntries.Length - 1;
+                if (m_selected >= ListEntries.Count)
+                    m_selected = ListEntries.Count - 1;
 
                 if (m_selected < 0)
                     m_selected = 0;
@@ -41,12 +42,12 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
         {
             TopLeft = Vector2.Zero;
             Background = Color.Transparent;
-            ListEntries = CreateListEntries();
+            ListEntries = new List<SelectionEntry>(CreateInitialListEntries());
 
             Selection = 0;
         }
 
-        protected abstract SelectionEntry[] CreateListEntries();
+        protected abstract SelectionEntry[] CreateInitialListEntries();
 
         private void RaiseSelectionChangedEvent()
         {
@@ -73,7 +74,12 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
     {
         public Selector Selector { get; set; }
         public DrawableString DrawString { get; set; }
-        public Vector2 Position { get { return DrawString.Postion; } }
+        public Vector2 Position
+        {
+            get { return DrawString.Postion; }
+            set { DrawString.Postion = value; }
+        }
+
         protected float SpaceSelectorToString { get; set; }
 
         public SelectionEntry(DrawableString drawString, Selector selector)

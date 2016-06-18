@@ -5,14 +5,14 @@ using System;
 
 namespace PingPongClient.VisualizeLayer.Lobbies
 {
+    public enum RequestOptions
+    {
+        Start,
+        Join
+    }
+
     class RequestLobby : LobbyInterface
     {
-        public enum RequestOptions
-        {
-            Start,
-            Join
-        }
-
         public RequestOptions SelectedOption { get { return (RequestOptions)Selection; } }
 
         public string Status

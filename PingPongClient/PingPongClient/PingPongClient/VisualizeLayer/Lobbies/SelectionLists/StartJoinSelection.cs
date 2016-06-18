@@ -11,7 +11,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
             Background = Color.Black;
         }
 
-        protected override SelectionEntry[] CreateListEntries()
+        protected override SelectionEntry[] CreateInitialListEntries()
         {
             SelectionEntry[] entries = new SelectionEntry[2];
             entries[0] = new SelectionEntry(new DrawableString("Start a new game", new Vector2(0, 0), Color.White), new Selector());
