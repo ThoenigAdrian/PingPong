@@ -54,7 +54,7 @@ namespace PingPongServer
             while (GameState == GameStates.Running)
             {
                 i++;
-                if (i == 1000)
+                if (i == 10000)
                     break;
                 ServerPackage = CalculateFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
