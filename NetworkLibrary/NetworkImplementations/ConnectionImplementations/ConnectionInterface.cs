@@ -31,27 +31,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             get
             {
                 SocketLock.WaitOne();
-                try
-                {
-                    if (Disconnecting || !ConnectionSocket.Connected)
-                        return false;
-
-                    bool connected = true;
-                    if (ConnectionSocket.Poll(0, SelectMode.SelectRead))
-                    {
-                        byte[] data = new byte[1];
-                        connected = ConnectionSocket.Receive(data, SocketFlags.Peek) != 0;
-                    }
-
-                    return connected;
-                }
-                catch (SocketException) { }
-                finally
-                {
-                    SocketLock.Release();
-                }
-
-                return false;
+                try { return (!Disconnecting && ConnectionSocket.Connected); }
+                finally { SocketLock.Release(); }
             }
         }
 
@@ -93,16 +74,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             ConnectionEndpoint = new IPEndPoint(remote.Address, remote.Port);
             InitializeSocket(connectionSocket);
-        }
-
-
-        public void RestartConnection(Socket socket)
-        {
-            Disconnect();
-            WaitForDisconnect();
-
-            InitializeSocket(socket);
-            InitializeReceiving();
         }
 
         public void InitializeReceiving()
@@ -172,6 +143,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             Receiving = false;
         }
 
+        protected abstract void ReceiveFromSocket();
+
         protected void ReceiveErrorHandling(IPEndPoint source)
         {
             ReceiveErrorHandler threadCopy = ReceiveErrorEvent;
@@ -188,8 +161,18 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             Array.Copy(data, 0, returnData, 0, size);
             return returnData;
         }
+        
+        public bool ConnectionPolling()
+        {
+            bool connected = true;
+            if (ConnectionSocket.Poll(0, SelectMode.SelectRead))
+            {
+                byte[] data = new byte[1];
+                connected = ConnectionSocket.Receive(data, SocketFlags.Peek) != 0;
+            }
 
-        protected abstract void ReceiveFromSocket();
+            return connected;
+        }
 
         public void Disconnect()
         {
