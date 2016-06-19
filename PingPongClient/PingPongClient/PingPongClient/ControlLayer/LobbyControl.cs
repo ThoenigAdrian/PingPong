@@ -62,6 +62,7 @@ namespace PingPongClient.ControlLayer
         {
             ParentControl.RegistrationControl.MaxPlayers = RequestLobby.PlayerCount;
             ParentControl.RegistrationControl.RequestType = RequestLobby.SelectedOption;
+            ParentControl.RegistrationControl.ResetSelection();
             ParentControl.SwitchMode(GameMode.Registration);
         }
 

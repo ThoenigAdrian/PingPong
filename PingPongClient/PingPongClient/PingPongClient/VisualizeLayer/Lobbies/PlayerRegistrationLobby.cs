@@ -2,6 +2,7 @@
 using NetworkLibrary.Utility;
 using PingPongClient.VisualizeLayer.Lobbies.SelectionLists;
 using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
+using System;
 using System.Collections.Generic;
 
 namespace PingPongClient.VisualizeLayer.Lobbies
@@ -22,6 +23,31 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         DrawableString Status { get; set; }
         OneShotTimer StatusTimer { get; set; }
+
+        int m_maxPlayers;
+        public int MaxPlayers
+        {
+            get { return m_maxPlayers; }
+            set
+            {
+                m_maxPlayers = value;
+
+                if (MaxLocalPlayers > RegisteredPlayersCount)
+                {
+                    InsertAddPlayerString();
+                }
+                else
+                {
+                    while (RegisteredPlayersCount > MaxLocalPlayers)
+                        OnDeleteKey();
+                }
+
+                UpdateAfterAddPlayer();
+                UpdateEntryPositions();
+            }
+        }
+
+        int MaxLocalPlayers { get { return Math.Min(m_maxPlayers, 3); } }
 
         public int Selection
         {
@@ -46,6 +72,8 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         public PlayerRegistrationLobby()
         {
             StatusTimer = new OneShotTimer(5 * 1000 * 1000, false);
+
+            m_maxPlayers = 2;
 
             Status = CreateStatusDrawString();
             Status.Visible = false;
@@ -101,7 +129,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             RegisteredPlayers.RemoveAt(removedIndex);
             RegistrationSelection.ListEntries.RemoveAt(removedIndex);
 
-            if (RegisteredPlayersCount == 2)
+            if (RegisteredPlayersCount == MaxLocalPlayers - 1)
                 InsertAddPlayerString();
             else if (Selection > 0 && !(Selection < removedIndex))
                 Selection--;
@@ -127,7 +155,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         void OnAddPlayerSelection()
         {
-            if (RegisteredPlayersCount > 2)
+            if (RegisteredPlayersCount >= MaxLocalPlayers)
                 return;
 
             DrawableString playerString = new DrawableString("", new Vector2(0, 0), Color.White);
@@ -141,12 +169,13 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         void InsertAddPlayerString()
         {
-            RegistrationSelection.ListEntries.Insert(RegisteredPlayersCount, StringAddPlayerEntry);
+            if(!RegistrationSelection.ListEntries.Contains(StringAddPlayerEntry))
+                RegistrationSelection.ListEntries.Insert(RegisteredPlayersCount, StringAddPlayerEntry);
         }
 
         void UpdateAfterAddPlayer()
         {
-            if (RegisteredPlayersCount > 2)
+            if (RegisteredPlayersCount >= MaxLocalPlayers)
             {
                 RegistrationSelection.ListEntries.Remove(StringAddPlayerEntry);
             }

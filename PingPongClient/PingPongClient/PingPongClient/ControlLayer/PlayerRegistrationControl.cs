@@ -13,17 +13,26 @@ namespace PingPongClient.ControlLayer
         public override GameMode GetMode { get { return GameMode.Registration; } }
 
         public RequestOptions RequestType { get; set; }
-        public int MaxPlayers { get; set; }
-
+        public int MaxPlayers
+        {
+            get { return RegistrationLobby.MaxPlayers; }
+            set { RegistrationLobby.MaxPlayers = value; }
+        }
+        
         PlayerRegistrationLobby RegistrationLobby { get; set; }
 
         public PlayerRegistrationControl(Control parent) : base(parent)
         {
             RegistrationLobby = new PlayerRegistrationLobby();
             RegistrationLobby.RegistrationFinishedEvent += OnReady;
+            ResetSelection();
             Visualizer = new LobbyVisualizer(RegistrationLobby);
             RequestType = RequestOptions.Start;
-            MaxPlayers = 2;
+        }
+
+        public void ResetSelection()
+        {
+            RegistrationLobby.Selection = 0;
         }
 
         public override void HandleInput()
