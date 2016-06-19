@@ -32,6 +32,11 @@ namespace PingPongServer
         // Logging
         private LogWriterConsole Logger = new LogWriterConsole();
 
+        /////////////////////////sleep alternative/////////////////////////////
+        EventWaitHandle ConnectionsAvailableEvent = new EventWaitHandle(false, EventResetMode.ManualReset);
+        bool m_shuttingDown = false;
+        /////////////////////////sleep alternative/////////////////////////////
+
         public Server()
         {
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
@@ -53,7 +58,29 @@ namespace PingPongServer
                     ProcessClientSessionRequest(networkConnection);
 
                 RemoveDeadConnections();
-                Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
+
+                /////////////////////////sleep alternative/////////////////////////////
+                lock (AcceptedConnections)
+                {
+                    if (m_shuttingDown)
+                        return;
+
+                    if (AcceptedConnections.Count < 1)
+                        ConnectionsAvailableEvent.Reset();
+                }
+
+                ConnectionsAvailableEvent.WaitOne();
+                /////////////////////////sleep alternative/////////////////////////////
+
+                /*Thread.Sleep(1000);*/ // Sleep so we don't hog CPU Resources 
+            }
+        }
+
+        public void Shutdown()
+        {
+            lock (AcceptedConnections)
+            {
+                m_shuttingDown = true;
             }
         }
 
@@ -81,6 +108,14 @@ namespace PingPongServer
                 NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
 
                 AcceptedConnections.Add(newNetworkConnection);
+
+                /////////////////////////sleep alternative/////////////////////////////
+                lock (AcceptedConnections)
+                {
+                    if (AcceptedConnections.Count > 0)
+                        ConnectionsAvailableEvent.Set();
+                }
+                /////////////////////////sleep alternative/////////////////////////////
             }
         }
 
@@ -155,8 +190,12 @@ namespace PingPongServer
             Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
             networkConnection.ClientSession = new Session(new Random().Next());
             Logger.NetworkLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
+
+            /////////////////////////Dual state/////////////////////////////
             ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
+            ////////////////////////////////////////////////////////////////
+
         }
 
         private void ReconnectClientWithPreviousSession(NetworkConnection networkConnection, ClientSessionRequest packet)
@@ -164,8 +203,11 @@ namespace PingPongServer
             // still need to handle if client requests a session which is already in use
             Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + networkConnection.ClientSession.SessionID.ToString());
             networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
+
+            /////////////////////////Dual state/////////////////////////////
             ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
+            ////////////////////////////////////////////////////////////////
         }
 
         private void StartGame(ServerGame game)
@@ -216,12 +258,13 @@ namespace PingPongServer
 
             return false;           
         }
-        
 
+        // probably better to just use the event for it - can happen from another thread though so be careful about protecting your memory
+        // NetworkConnection.ConnectionDiedEvent += RemoveDeadConnections;
         private void RemoveDeadConnections()
         {
             foreach(NetworkConnection networkConnection in AcceptedConnections.Entries)
-            {
+            {           
                 if (!networkConnection.Connected)
                 {
                     Logger.NetworkLog("Removing disconnected connection from Accepted Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
@@ -230,6 +273,7 @@ namespace PingPongServer
             }
         }
                 
+        // this screams event handling as well
         private void RemoveFinishedGames()
         {   
             foreach(ServerGame game in RunningGames.Entries)
