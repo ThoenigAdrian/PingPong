@@ -49,16 +49,13 @@ namespace PingPongClient.NetworkLayer
             {
                 ReceivedEvent = new EventWaitHandle(false, EventResetMode.ManualReset);
 
-                ClientSessionRequest sessionRequest;
-                if (ConnectParameters.Reconnect)
-                    sessionRequest = new ClientSessionRequest(ConnectParameters.SessionID);
-                else
-                    sessionRequest = new ClientSessionRequest();
-
+                ClientSessionRequest sessionRequest = new ClientSessionRequest();
+                sessionRequest.Reconnect = ConnectParameters.Reconnect;
+                sessionRequest.ReconnectSessionID = ConnectParameters.SessionID;
 
                 tcpConnection = new TCPConnection(AcceptedSocket, Logger);
-                tcpConnection.Send(Adapter.CreateNetworkDataFromPackage(sessionRequest));
                 tcpConnection.DataReceivedEvent += ReadIDResponse;
+                tcpConnection.Send(Adapter.CreateNetworkDataFromPackage(sessionRequest));
                 tcpConnection.InitializeReceiving();
 
                 if (ReceivedEvent.WaitOne(5000) && !Error)
