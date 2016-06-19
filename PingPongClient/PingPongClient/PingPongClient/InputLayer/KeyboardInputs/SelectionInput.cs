@@ -7,6 +7,7 @@ namespace PingPongClient.InputLayer.KeyboardInputs
     public enum SelectionInputs
     {
         Select,
+        Delete,
         Up,
         Down,
         Left,

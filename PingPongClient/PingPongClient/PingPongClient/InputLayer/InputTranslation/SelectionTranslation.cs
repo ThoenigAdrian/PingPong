@@ -11,6 +11,8 @@ namespace PingPongClient.InputLayer.InputTranslation
             {
                 case SelectionInputs.Select:
                     return Keys.Enter;
+                case SelectionInputs.Delete:
+                    return Keys.Delete;
                 case SelectionInputs.Up:
                     return Keys.Up;
                 case SelectionInputs.Down:

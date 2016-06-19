@@ -1,4 +1,5 @@
-﻿using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
+﻿using Microsoft.Xna.Framework;
+using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 using System;
 
 namespace PingPongClient.VisualizeLayer.Lobbies
@@ -33,6 +34,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         public PlayerEntry(int index, DrawableString playerString)
         {
             PlayerString = playerString;
+            playerString.StringColor = Color.Yellow;
 
             Index = index;
             m_team = 0;

@@ -37,7 +37,9 @@ namespace PingPongClient.ControlLayer
                     case SelectionInputs.Select:
                         RegistrationLobby.OnSelectionKey();
                         break;
-
+                    case SelectionInputs.Delete:
+                        RegistrationLobby.OnDeleteKey();
+                        break;
                     case SelectionInputs.Up:
                         RegistrationLobby.Selection--;
                         break;
