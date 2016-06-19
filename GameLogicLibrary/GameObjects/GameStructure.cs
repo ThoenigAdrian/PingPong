@@ -58,6 +58,17 @@ namespace GameLogicLibrary.GameObjects
             Ball.PositionX += Ball.DirectionX * timePassedInMilliseconds;
             Ball.PositionY += Ball.DirectionY * timePassedInMilliseconds;
 
+            foreach(KeyValuePair<int, List<Player>> Team in GameTeams)
+            {
+                foreach(Player player in Team.Value)
+                {
+                    if (player.PlayerBar.PositionY >= GameInitializers.BORDER_HEIGHT - player.PlayerBar.Height / 2)
+                        player.PlayerBar.PositionY = GameInitializers.BORDER_HEIGHT - player.PlayerBar.Height / 2;
+                    if (player.PlayerBar.PositionY <= 0)
+                        player.PlayerBar.PositionY = 0;
+                }
+            }
+
             if (Ball.PositionX > GameField.Width)
             {
                 Ball.PositionX = GameField.Width - (Ball.PositionX - GameField.Width);
@@ -80,28 +91,82 @@ namespace GameLogicLibrary.GameObjects
                 Ball.PositionY = Ball.PositionY * -1;
                 Ball.DirectionY = Ball.DirectionY * -1;
             }
+
+            DetectCollisions();
         }
 
-        private void CollisionDetection()
+        private void DetectCollisions()
         {
             foreach (KeyValuePair<int, List<Player>> t in GameTeams)
             {
                 foreach (Player p in t.Value)
                 {
-                    CircleInRectangular(p);
+                    if (CircleInRectangular(p))
+                    {
+                        Ball.DirectionX = Ball.DirectionX * -1;
+                        return; // assuming only one player can touch the ball
+                    }
+                        
                 }
             }
         }
 
         private bool CircleInRectangular(Player p)
         {
-            /*
-            Tuple<float,float> a = Tuple.Create(Ball.PositionY, p.PlayerBar.PositionY);
-            if (Max(a) - Min(a) <= Ball.Radius)
+            float minimumDistanceForCollision = (float)Math.Sqrt((Math.Pow(p.PlayerBar.Height / 2, 2) + Math.Pow(p.PlayerBar.Width / 2, 2))) + Ball.Radius;
+
+            Tuple<float, float> PlayerBallYPositionTuple = Tuple.Create(Ball.PositionY, p.PlayerBar.PositionY);
+            float yDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
+
+            Tuple<float, float> PlayerBallXPositionTuple = Tuple.Create(Ball.PositionX, p.PlayerBar.PositionX);
+            float xDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
+
+            float actualDistance = (float)Math.Sqrt(Math.Pow(yDistance,2) + Math.Pow(xDistance,2 ));
+
+            if (actualDistance > minimumDistanceForCollision)
+                return false;                 
+            
+            if (actualDistance <= Ball.Radius)
                 return true; // this is a special case the return true has to be substituted by a deeper looking algorithm which checks if those two are colliding
-            if (Ball.PositionY + Ball.Radius --- Ball.PositionY - Ball.Radius p.PlayerBar.Height + p.PlayerBar.PositionY --- p.PlayerBar.Height - p.PlayerBar.PositionY)
-            Ball.PositionY + Ball.Radius (Ball.PositionY - Ball.Radius) ||*/
-            return false; //will be implemented later
+                             // XXX
+                             //XX  XX
+                             // XXX+ --+
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     |  |
+                             //     +--+    //will be implemented later
+
+            if (actualDistance < minimumDistanceForCollision)
+            {
+                if (p.PlayerBar.PositionX >= GameInitializers.BORDER_WIDTH / 2)
+                {
+                    if (Ball.PositionX >= p.PlayerBar.PositionX)
+                    {
+                        Ball.DirectionX = Ball.DirectionX * -1;
+                        return true;
+                    }
+                        
+                }
+                if (p.PlayerBar.PositionX <= GameInitializers.BORDER_WIDTH / 2)
+                {
+                    if (Ball.PositionX <= p.PlayerBar.PositionX)
+                    {
+                        Ball.DirectionX = Ball.DirectionX * -1;
+                        return true;
+                    }
+
+                }
+            }
+                
+            
+            return false;
         }
         
         private float Max(Tuple<float,float> t)
