@@ -162,7 +162,7 @@ namespace PingPongServer
         private void ReconnectClientWithPreviousSession(NetworkConnection networkConnection, ClientSessionRequest packet)
         {
             // still need to handle if client requests a session which is already in use
-            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + networkConnection.ClientSession.SessionID.ToString());
+            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + packet.ReconnectSessionID.ToString());
             networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
             ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
