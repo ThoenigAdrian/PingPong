@@ -5,6 +5,8 @@ using PingPongClient.VisualizeLayer.Visualizers;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.InputLayer.KeyboardInputs;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
+using GameLogicLibrary.GameObjects;
+using GameLogicLibrary;
 
 namespace PingPongClient.ControlLayer
 {
@@ -30,6 +32,28 @@ namespace PingPongClient.ControlLayer
             RequestType = RequestOptions.Start;
         }
 
+        public bool Hack()
+        {
+            ControlInputs hackInput = Input.GetControlInput();
+
+            if (hackInput == ControlInputs.Pause)
+            {
+                Network.SendClientStart(2, new int[] { 0, 1 });
+
+                Player[] players = new Player[2];
+                players[0] = new Player(0, 0, GameInitializers.PLAYER_1_X);
+                players[1] = new Player(1, 1, GameInitializers.PLAYER_2_X);
+
+                ParentControl.GameControl.InitializeGame(players, new GameField(), new Ball());
+
+                ParentControl.SwitchMode(GameMode.Game);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public void ResetSelection()
         {
             RegistrationLobby.Selection = 0;
@@ -37,6 +61,9 @@ namespace PingPongClient.ControlLayer
 
         public override void HandleInput()
         {
+            if (Hack())
+                return;
+
             SelectionInputs selectionInput = Input.GetSelectionInput();
 
             if (selectionInput != SelectionInputs.NoInput)
@@ -89,25 +116,24 @@ namespace PingPongClient.ControlLayer
 
         protected override void ServerResponseActions(PackageInterface responsePackage)
         {
-            ServerPlayerIDResponse response = responsePackage as ServerPlayerIDResponse;
+            ServerInitializeGameResponse response = responsePackage as ServerInitializeGameResponse;
             if (response == null)
                 throw new Exception("Response reader failed to read package!");
 
-            Input.ClearPlayerInput();
-
-            int index = 0;
-            foreach (int ID in response.m_playerIDs)
+            if(response.m_players == null || response.m_ball == null || response.m_field == null)
             {
-                Input.AddPlayerInput(ID, index);
+                RegistrationLobby.SetStatus("Server response invalid!");
+                return;
             }
+
+            ParentControl.GameControl.InitializeGame(response.m_players, response.m_field, response.m_ball);
 
             ParentControl.SwitchMode(GameMode.Game);
         }
 
         protected override void ResponseTimeoutActions(PackageType requestedPackageType)
         {
-            RegistrationLobby.SetStatus("Server response timeout.");
-            ParentControl.SwitchMode(GameMode.Game);
+            RegistrationLobby.SetStatus("Server response timeout!");
         }
     }
 }

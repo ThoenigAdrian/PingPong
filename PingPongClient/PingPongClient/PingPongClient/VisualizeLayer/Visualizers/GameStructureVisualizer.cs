@@ -1,20 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
 using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace PingPongClient.VisualizeLayer.Visualizers
 {
     class GameStructureVisualizer : VisualizerInterface
     {
-        GameStructure Structure { get; set; }
-        Player[] Players { get { return Structure.GetAllPlayers(); } }
-        PlayBall Ball { get { return Structure.Ball; } }
+        BasicStructure Structure { get; set; }
+        List<Player> Players { get { return Structure.Players; } }
+        Ball Ball { get { return Structure.Ball; } }
 
         Texture2D FieldTexture;
         Texture2D BallTexture;
         Texture2D PlayerTexture;
 
-        public Vector2 FieldSize { get { return new Vector2(Structure.GameField.Width, Structure.GameField.Height); } }
+        public Vector2 FieldSize { get { return new Vector2(Structure.Field.Width, Structure.Field.Height); } }
 
 
         DrawingOffsetTranslation DrawingTranslation;
@@ -25,7 +26,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
             DrawingTranslation = new DrawingOffsetTranslation();
         }
 
-        public void SetGameStructure(GameStructure structure)
+        public void SetGameStructure(BasicStructure structure)
         {
             Structure = structure;
 
@@ -39,8 +40,6 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         protected override void PostInitializing()
         {
             CreateObjectTextures();
-
-            ApplyResize();
         }
 
         public void ApplyResize()
@@ -71,7 +70,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
             
             foreach(Player player in Players)
             {
-                DrawPlayer(player.PlayerBar);
+                DrawPlayer(player);
             }
         }
 
@@ -101,7 +100,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
                 Color.White);
         }
 
-        protected void DrawPlayer(PlayerBar player)
+        protected void DrawPlayer(Player player)
         {
             int playerPosX = (int)DrawingTranslation.GetAbsoluteX(player.PositionX);
             int playerPosY = (int)DrawingTranslation.GetAbsoluteY(player.PositionY);
