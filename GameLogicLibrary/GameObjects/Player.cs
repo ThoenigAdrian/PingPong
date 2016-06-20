@@ -1,18 +1,38 @@
 ﻿namespace GameLogicLibrary.GameObjects
 {
-    public class Player
+    public class RawPlayer
     {
-        public PlayerBar PlayerBar { get; set; }
-        public ClientMovement PlayerMovement { get; set; }
+        public int ID { get; set; }
 
-        private int TeamNumber;
-        private int PlayerID { get; set; }
+        public float PositionX { get; set; }
+        public float PositionY { get; set; }
+
+        public float DirectionY { get; set; }
+    }
+
+
+    public class Player : RawPlayer
+    {
+        public int Team { get; set; }
         
-        public Player(int PlayerID, int TeamNumber, float PositionX)
+        public float Height { get; set; }
+        public float Width { get; set; }
+
+        public float Speed { get; set; }
+
+        public Player(int playerID, int team, float positionX)
         {
-            this.PlayerID = PlayerID;
-            this.TeamNumber = TeamNumber;
-            PlayerBar = new PlayerBar(PositionX);
+            ID = playerID;
+            Team = team;
+
+            PositionX = positionX;
+            PositionY = GameInitializers.PLAYER_Y;
+
+            Height = GameInitializers.PLAYER_HEIGHT;
+            Width = GameInitializers.PLAYER_WIDTH;
+
+            DirectionY = 0;
+            Speed = GameInitializers.PLAYER_SPEED;
         }
-     }
+    }
 }
