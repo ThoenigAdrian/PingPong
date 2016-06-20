@@ -94,7 +94,7 @@ namespace GameLogicLibrary.GameObjects
             {
                 foreach (Player p in t.Value)
                 {
-                    if (CircleInRect(p.PlayerBar, Ball))
+                    if (CircleInRect(p, Ball))
                     {
                         Ball.DirectionX = Ball.DirectionX * -1;
                         return; // assuming only one player can touch the ball
@@ -172,13 +172,13 @@ namespace GameLogicLibrary.GameObjects
             return Math.Min(t.Item1, t.Item2);
         }
 
-        private bool PointInRectangular(Tuple<float, float> point, PlayerBar pb)
+        private bool PointInRectangular(Tuple<float, float> point, Player pb)
         {
             bool betweenXLine = (pb.PositionX <= point.Item1) && (point.Item1 <= pb.PositionX + pb.Width);
             bool betweenYLine = (pb.PositionY <= point.Item2) && (point.Item2 <= pb.PositionY + pb.Height);
             return betweenXLine && betweenXLine;
         }
-        private bool CircleInRect(PlayerBar p, PlayBall b)
+        private bool CircleInRect(Player p, Ball b)
         {
             Tuple<float, float> lefmost = Tuple.Create<float, float>(b.PositionX - b.Radius, b.PositionY);
             Tuple<float, float> rightmost = Tuple.Create<float, float>(b.PositionX + b.Radius, b.PositionY);
