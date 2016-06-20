@@ -89,7 +89,7 @@ namespace NetworkLibrary.PackageAdapters
                 case PackageType.ClientRejoinGamePackage:
                     return JsonConvert.DeserializeObject<ClientRejoinGamePackage>(jsonString);
                 case PackageType.ServerPlayerIDResponse:
-                    return JsonConvert.DeserializeObject<ServerPlayerIDResponse>(jsonString);
+                    return JsonConvert.DeserializeObject<ServerInitializeGameResponse>(jsonString);
             }
 
             return null;

@@ -1,9 +1,15 @@
-﻿namespace NetworkLibrary.DataPackages.ServerSourcePackages
+﻿using GameLogicLibrary.GameObjects;
+
+namespace NetworkLibrary.DataPackages.ServerSourcePackages
 {
-    public class ServerPlayerIDResponse : PackageInterface
+    public class ServerInitializeGameResponse : PackageInterface
     {
         public override PackageType PackageType { get { return PackageType.ServerPlayerIDResponse; } }
 
-        public int[] m_playerIDs;
+        public GameField m_field;
+
+        public Ball m_ball;
+
+        public Player[] m_players;
     }
 }
