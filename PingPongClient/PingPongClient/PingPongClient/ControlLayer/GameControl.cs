@@ -6,14 +6,16 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using PingPongClient.InputLayer;
 using PingPongClient.InputLayer.KeyboardInputs;
 using PingPongClient.VisualizeLayer.Visualizers;
+using System.Collections.Generic;
 
 namespace PingPongClient.ControlLayer
 {
     public class GameControl : SubControlInterface
     {
-        GameStructure Structure { get; set; }
-        PlayBall Ball { get { return Structure.Ball; } }
-        GameField Field { get { return Structure.GameField; } }
+        BasicStructure Structure { get; set; }
+        Ball Ball { get { return Structure.Ball; } }
+        GameField Field { get { return Structure.Field; } }
+        List<Player> Players { get { return Structure.Players; } }
 
         Interpolation Interpolation { get; set; }
 
@@ -23,8 +25,8 @@ namespace PingPongClient.ControlLayer
         public GameControl(Control parent) : base(parent)
         {
             Visualizer = new GameStructureVisualizer();
-            Structure = new GameStructure();
-            Interpolation = new Interpolation(Structure);
+            Structure = null;
+            Interpolation = new Interpolation();
 
             (Visualizer as GameStructureVisualizer).SetGameStructure(Structure);
         }
@@ -44,6 +46,28 @@ namespace PingPongClient.ControlLayer
                 ApplyServerPositions();
 
             Interpolation.Interpolate(gameTime);
+        }
+
+        public void InitializeGame(Player[] players, GameField field, Ball ball)
+        {
+            Structure = new BasicStructure(field, ball);
+
+            Input.ClearPlayerInput();
+
+            int index = 0;
+            foreach (Player player in players)
+            {
+                AddPlayer(player, index++);
+            }
+            
+
+            (Visualizer as GameStructureVisualizer).SetGameStructure(Structure);
+        }
+
+        public void AddPlayer(Player player, int index)
+        {
+            Structure.Players.Add(player);
+            Input.AddPlayerInput(player.ID, index++);
         }
 
         protected void SendMovementInputs()
@@ -84,17 +108,31 @@ namespace PingPongClient.ControlLayer
             if (data == null)
                 return;
 
-            for (int i = 0; i < data.PlayerList.Count; i++)
+            for (int i = 0; i < data.Players.Count; i++)
             {
-                //if (i >= Structure..Count)
-                //    break;
+                Player localPlayer;
+                RawPlayer serverPlayer = data.Players[i];
 
-                //Structure.m_players[i].PosX = data.PlayerList[i].PositionX;
-                //Structure.m_players[i].PosY = data.PlayerList[i].PositionY;
+                if ((localPlayer = GetPlayerWithID(serverPlayer.ID)) == null)
+                    continue;
+
+                localPlayer.PositionX = serverPlayer.PositionX;
+                localPlayer.PositionY = serverPlayer.PositionY;
             }
 
             Structure.Ball.PositionX = data.Ball.PositionX;
             Structure.Ball.PositionY = data.Ball.PositionY;
+        }
+
+        private Player GetPlayerWithID(int ID)
+        {
+            foreach (Player player in Players)
+            {
+                if (player.ID == ID)
+                    return player;
+            }
+
+            return null;
         }
 
         protected void SendClientCommandos()

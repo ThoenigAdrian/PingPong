@@ -6,9 +6,13 @@ namespace PingPongClient.ControlLayer
 {
     class Interpolation
     {
-        GameStructure m_structure;
+        BasicStructure m_structure;
 
-        public Interpolation(GameStructure structure)
+        public Interpolation()
+        {
+        }
+
+        public void SetStructure(BasicStructure structure)
         {
             m_structure = structure;
         }
@@ -20,7 +24,6 @@ namespace PingPongClient.ControlLayer
 
         public void Interpolate(GameTime gameTime)
         {
-
         }
     }
 }

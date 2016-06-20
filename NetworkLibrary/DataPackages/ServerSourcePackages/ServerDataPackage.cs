@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GameLogicLibrary.GameObjects;
+using System.Collections.Generic;
 
 namespace NetworkLibrary.DataPackages.ServerSourcePackages
 {
@@ -9,26 +10,13 @@ namespace NetworkLibrary.DataPackages.ServerSourcePackages
             get { return PackageType.ServerData; }
         }
 
-        public List<Player> PlayerList = new List<Player>();
-        public PingPongBall Ball = new PingPongBall();
-
-        public class Player
+        public ServerDataPackage()
         {
-            public float PositionX { get; set; }
-            public float PositionY { get; set; }
-            public float DirectionX { get; set; }
-            public float DirectionY { get; set; }
-
+            Players = new List<RawPlayer>();
         }
-              
 
-        public class PingPongBall
-        {
-            public float PositionX { get; set; }
-            public float PositionY { get; set; }
-            public float DirectionX { get; set; }
-            public float DirectionY { get; set; }
-        }
-        
+        public List<RawPlayer> Players { get; set; }
+        public RawBall Ball { get; set; }
+
     }
 }

@@ -5,11 +5,14 @@ namespace GameLogicLibrary.GameObjects
 {
     public class GameStructure
     {
-        public GameField GameField;
-        public PlayBall Ball;
+        BasicStructure Structure { get; set; }
+        GameField GameField { get { return Structure.Field; } }
+        Ball Ball { get { return Structure.Ball; } }
+        List<Player> Players { get { return Structure.Players; } }
+
         public Dictionary<int,List<Player>> GameTeams = new Dictionary<int, List<Player>>();
-        public int numberOfTeams = 2; // restrict to two teams for now
-        public int maxPlayers { get; set; }
+        public const int TEAM_COUNT = 2; // restrict to two teams for now
+        public int maxPlayers;
 
         public int PlayersCount
         {
@@ -32,22 +35,12 @@ namespace GameLogicLibrary.GameObjects
             }
         }
 
-        public GameStructure()
-        {
-            this.maxPlayers = 2;
-            GameField = new GameField();
-            GameTeams.Add(0, new List<Player>());
-            GameTeams.Add(1, new List<Player>());
-            Ball = new PlayBall();
-        }
-
         public GameStructure(int maxPlayers)
         {
+            Structure = new BasicStructure(new GameField(), new Ball());
             this.maxPlayers = maxPlayers;
-            GameField = new GameField();
             GameTeams.Add(0, new List<Player>());
             GameTeams.Add(1, new List<Player>());
-            Ball = new PlayBall();
         }
 
         public void CalculateFrame(long timePassedInMilliseconds)
@@ -62,10 +55,10 @@ namespace GameLogicLibrary.GameObjects
             {
                 foreach(Player player in Team.Value)
                 {
-                    if (player.PlayerBar.PositionY >= GameInitializers.BORDER_HEIGHT - player.PlayerBar.Height / 2)
-                        player.PlayerBar.PositionY = GameInitializers.BORDER_HEIGHT - player.PlayerBar.Height / 2;
-                    if (player.PlayerBar.PositionY <= 0)
-                        player.PlayerBar.PositionY = 0;
+                    if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height / 2)
+                        player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height / 2;
+                    if (player.PositionY <= 0)
+                        player.PositionY = 0;
                 }
             }
 
@@ -113,12 +106,12 @@ namespace GameLogicLibrary.GameObjects
 
         private bool CircleInRectangular(Player p)
         {
-            float minimumDistanceForCollision = (float)Math.Sqrt((Math.Pow(p.PlayerBar.Height / 2, 2) + Math.Pow(p.PlayerBar.Width / 2, 2))) + Ball.Radius;
+            float minimumDistanceForCollision = (float)Math.Sqrt((Math.Pow(p.Height / 2, 2) + Math.Pow(p.Width / 2, 2))) + Ball.Radius;
 
-            Tuple<float, float> PlayerBallYPositionTuple = Tuple.Create(Ball.PositionY, p.PlayerBar.PositionY);
+            Tuple<float, float> PlayerBallYPositionTuple = Tuple.Create(Ball.PositionY, p.PositionY);
             float yDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
 
-            Tuple<float, float> PlayerBallXPositionTuple = Tuple.Create(Ball.PositionX, p.PlayerBar.PositionX);
+            Tuple<float, float> PlayerBallXPositionTuple = Tuple.Create(Ball.PositionX, p.PositionX);
             float xDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
 
             float actualDistance = (float)Math.Sqrt(Math.Pow(yDistance,2) + Math.Pow(xDistance,2 ));
@@ -145,18 +138,18 @@ namespace GameLogicLibrary.GameObjects
 
             if (actualDistance < minimumDistanceForCollision)
             {
-                if (p.PlayerBar.PositionX >= GameInitializers.BORDER_WIDTH / 2)
+                if (p.PositionX >= GameInitializers.BORDER_WIDTH / 2)
                 {
-                    if (Ball.PositionX >= p.PlayerBar.PositionX)
+                    if (Ball.PositionX >= p.PositionX)
                     {
                         Ball.DirectionX = Ball.DirectionX * -1;
                         return true;
                     }
                         
                 }
-                if (p.PlayerBar.PositionX <= GameInitializers.BORDER_WIDTH / 2)
+                if (p.PositionX <= GameInitializers.BORDER_WIDTH / 2)
                 {
-                    if (Ball.PositionX <= p.PlayerBar.PositionX)
+                    if (Ball.PositionX <= p.PositionX)
                     {
                         Ball.DirectionX = Ball.DirectionX * -1;
                         return true;
@@ -226,7 +219,7 @@ namespace GameLogicLibrary.GameObjects
         {
             foreach (KeyValuePair<int, List<Player>> entry in GameTeams)
             {
-                if (entry.Value.Count < maxPlayers / numberOfTeams)
+                if (entry.Value.Count < maxPlayers / TEAM_COUNT)
                     return entry.Key;
             }
             return 0;
