@@ -101,7 +101,7 @@ namespace GameLogicLibrary.GameObjects
             {
                 foreach (Player p in t.Value)
                 {
-                    if (CircleInRectangular(p))
+                    if (CircleInRect(p.PlayerBar, Ball))
                     {
                         Ball.DirectionX = Ball.DirectionX * -1;
                         return; // assuming only one player can touch the ball
@@ -178,6 +178,36 @@ namespace GameLogicLibrary.GameObjects
         {
             return Math.Min(t.Item1, t.Item2);
         }
+
+        private bool PointInRectangular(Tuple<float, float> point, PlayerBar pb)
+        {
+            bool betweenXLine = (pb.PositionX <= point.Item1) && (point.Item1 <= pb.PositionX + pb.Width);
+            bool betweenYLine = (pb.PositionY <= point.Item2) && (point.Item2 <= pb.PositionY + pb.Height);
+            return betweenXLine && betweenXLine;
+        }
+        private bool CircleInRect(PlayerBar p, PlayBall b)
+        {
+            Tuple<float, float> lefmost = Tuple.Create<float, float>(b.PositionX - b.Radius, b.PositionY);
+            Tuple<float, float> rightmost = Tuple.Create<float, float>(b.PositionX + b.Radius, b.PositionY);
+
+            Tuple<float, float> topmost = Tuple.Create<float, float>(b.PositionX, b.PositionY - b.Radius);
+            Tuple<float, float> bottommost = Tuple.Create<float, float>(b.PositionX, b.PositionY + b.Radius);
+
+            List<Tuple<float, float>> list = new List<Tuple<float, float>>();
+            list.Add(lefmost);
+            list.Add(rightmost);
+            list.Add(topmost);
+            list.Add(bottommost);
+
+            foreach (Tuple<float, float> point in list)
+            {
+                if (PointInRectangular(point, p))
+                    return true;
+            }
+
+            return false;
+        }
+
 
         public void AddPlayer(Player Player, int Team)
         {
