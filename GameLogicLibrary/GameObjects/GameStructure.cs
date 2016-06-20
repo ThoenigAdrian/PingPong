@@ -7,7 +7,7 @@ namespace GameLogicLibrary.GameObjects
     {
         BasicStructure Structure { get; set; }
         GameField GameField { get { return Structure.Field; } }
-        Ball Ball { get { return Structure.Ball; } }
+        public Ball Ball { get { return Structure.Ball; } }
         List<Player> Players { get { return Structure.Players; } }
 
         public Dictionary<int,List<Player>> GameTeams = new Dictionary<int, List<Player>>();

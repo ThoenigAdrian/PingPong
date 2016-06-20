@@ -88,8 +88,13 @@ namespace PingPongServer
 
                 newClient.AddPlayer(newPlayer, GameStructure);
             }
-            ServerPlayerIDResponse packet = new ServerPlayerIDResponse();
-            packet.m_playerIDs = playerTeamWish; // give him exactly what he wants ... for now
+            ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
+            packet.m_field = new GameField();
+            packet.m_ball = new Ball();
+            packet.m_players = new Player[2];
+            packet.m_players[0] = new Player(0, 0, GameInitializers.PLAYER_1_X);
+            packet.m_players[1] = new Player(1, 1, GameInitializers.PLAYER_2_X);
+
             Network.SendTCPPackageToClient(packet, client.ClientSession.SessionID);
             Clients.Add(newClient);                       
             
@@ -136,8 +141,8 @@ namespace PingPongServer
             {
                 foreach(Player p in a.Value)
                 {
-                    p.PlayerBar.PositionX = (p.PlayerBar.PositionX + 0.2F) % GameInitializers.BORDER_WIDTH;
-                    p.PlayerBar.PositionY = (p.PlayerBar.PositionY + 0.2F) % GameInitializers.BORDER_HEIGHT;
+                    p.PositionX = (p.PositionX + 0.2F) % GameInitializers.BORDER_WIDTH;
+                    p.PositionY = (p.PositionY + 0.2F) % GameInitializers.BORDER_HEIGHT;
                 }                
             }
             return NextFrame;
