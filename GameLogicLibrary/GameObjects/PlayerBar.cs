@@ -2,6 +2,7 @@
 {
     public class PlayerBar
     {
+        // X, Y Position represents the top left corner
         public float PositionX { get; set; }
         public float PositionY { get; set; }
 
