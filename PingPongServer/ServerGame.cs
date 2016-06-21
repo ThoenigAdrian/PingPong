@@ -56,9 +56,10 @@ namespace PingPongServer
                 i++;
                 if (i == 10000)
                     break;
+                GetAllThe();
                 ServerPackage = CalculateFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(10);
+                Thread.Sleep(5);
             }
             Logger.GameLog("Game finished");
             Logger.NetworkLog("Tearing Down Network");
@@ -78,9 +79,9 @@ namespace PingPongServer
             {
                 float playerPosition = 0;
                                 
-                if (playerTeamWish[index] == 0 && GameStructure.GameTeams[playerTeamWish[index]].Count - GameStructure.maxPlayers / 2 >= 1)
+                if (playerTeamWish[index] == 0 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].Count >= 1)
                     playerPosition = GameInitializers.PLAYER_1_X + GameStructure.GameTeams.Count * 30F;
-                else if (playerTeamWish[index] == 1 && GameStructure.GameTeams[playerTeamWish[index]].Count - GameStructure.maxPlayers/2 >= 1)
+                else if (playerTeamWish[index] == 1 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].Count>= 1)
                     playerPosition = GameInitializers.PLAYER_2_X - GameStructure.GameTeams.Count * 30F;
                                 
 
@@ -118,12 +119,17 @@ namespace PingPongServer
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
             List<PackageInterface> ps = new List<PackageInterface>();
-            if (packagesForNextFrame[sessionID] == null)
+
+            if (!packagesForNextFrame.ContainsKey(sessionID))
                 return new PackageInterface[0];
+
             foreach (PackageInterface p in packagesForNextFrame[sessionID])
             {
-                ps.Add(p);
+                    ps.Add(p);
             }
+            
+            
+            
             return ps.ToArray();
         }
         
@@ -141,10 +147,14 @@ namespace PingPongServer
             {
                 foreach(Player p in a.Value)
                 {
-                    p.PositionX = (p.PositionX + 0.2F) % GameInitializers.BORDER_WIDTH;
-                    p.PositionY = (p.PositionY + 0.2F) % GameInitializers.BORDER_HEIGHT;
+                    if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
+                        p.PositionY += 5;
+                    if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Up)
+                        p.PositionY -= 5;
+                    NextFrame.Players.Add(p);
                 }                
             }
+            
             return NextFrame;
         }
 
@@ -157,7 +167,7 @@ namespace PingPongServer
                 PackageInterface[] ps = getAllDataRelatedToClient(c.session);
                 foreach(PackageInterface p in ps)
                 {
-                    if (p == null || p.PackageType == PackageType.ClientControl)
+                    if (p == null || p.PackageType != PackageType.ClientControl)
                         continue;
                     cc.Add((ClientControlPackage)p);
                 }
@@ -174,11 +184,13 @@ namespace PingPongServer
                 PackageInterface[] ps = getAllDataRelatedToClient(c.session);
                 foreach (PackageInterface p in ps)
                 {
-                    if (p == null || p.PackageType == PackageType.ClientPlayerMovement)
+                    if (p == null || p.PackageType != PackageType.ClientPlayerMovement)
                         continue;
                     cc.Add((PlayerMovementPackage)p);
                 }
             }
+            if (cc.Count == 0)
+                return ClientMovement.NoInput;
             return cc[cc.Count - 1].PlayerMovement;
         }
 

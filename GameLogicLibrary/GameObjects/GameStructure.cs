@@ -55,20 +55,20 @@ namespace GameLogicLibrary.GameObjects
             {
                 foreach(Player player in Team.Value)
                 {
-                    if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height / 2)
-                        player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height / 2;
+                    if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height)
+                        player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height;
                     if (player.PositionY <= 0)
                         player.PositionY = 0;
                 }
             }
 
-            if (Ball.PositionX > GameField.Width)
+            if (Ball.PositionX + Ball.Radius > GameField.Width)
             {
                 Ball.PositionX = GameField.Width - (Ball.PositionX - GameField.Width);
                 Ball.DirectionX = Ball.DirectionX * -1;
             }
                 
-            if (Ball.PositionY > GameField.Height)
+            if (Ball.PositionY + Ball.Radius > GameField.Height)
             {
                 Ball.PositionY = GameField.Height - (Ball.PositionY - GameField.Height);
                 Ball.DirectionY = Ball.DirectionY * -1;
@@ -176,7 +176,7 @@ namespace GameLogicLibrary.GameObjects
         {
             bool betweenXLine = (pb.PositionX <= point.Item1) && (point.Item1 <= pb.PositionX + pb.Width);
             bool betweenYLine = (pb.PositionY <= point.Item2) && (point.Item2 <= pb.PositionY + pb.Height);
-            return betweenXLine && betweenXLine;
+            return betweenXLine && betweenYLine;
         }
         private bool CircleInRect(Player p, Ball b)
         {
