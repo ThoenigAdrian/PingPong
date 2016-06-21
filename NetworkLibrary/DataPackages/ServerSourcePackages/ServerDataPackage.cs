@@ -13,6 +13,7 @@ namespace NetworkLibrary.DataPackages.ServerSourcePackages
         public ServerDataPackage()
         {
             Players = new List<RawPlayer>();
+            Ball = new RawBall();
         }
 
         public List<RawPlayer> Players { get; set; }
