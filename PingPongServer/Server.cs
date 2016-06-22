@@ -12,6 +12,8 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 using GameLogicLibrary;
+using PingPongServer.ServerGame;
+using PingPongServer;
 
 
 namespace PingPongServer
@@ -25,11 +27,12 @@ namespace PingPongServer
         private SafeList<NetworkConnection> ConnectionsReadyForJoingAndStartingGames = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
         // Game
-        private SafeList<ServerGame> PendingGames = new SafeList<ServerGame>();
-        private SafeList<ServerGame> RunningGames = new SafeList<ServerGame>();
+        private SafeList<Game> PendingGames = new SafeList<Game>();
+        private SafeList<Game> RunningGames = new SafeList<Game>();
         private static List<bool> StateOfRunningGames = new List<bool>();
         // Logging
-        private LogWriterConsole Logger = new LogWriterConsole();
+        private LogWriterConsole Logger = new LogWriterConsole();        
+        
 
         public Server()
         {
@@ -109,7 +112,7 @@ namespace PingPongServer
         {
             while (true)
             {
-                foreach (ServerGame game in PendingGames.Entries)
+                foreach (Game game in PendingGames.Entries)
                 {
                     if (game.GameState == GameStates.Ready)
                         StartGame(game);
@@ -167,10 +170,10 @@ namespace PingPongServer
             AcceptedConnections.Remove(networkConnection);
         }
 
-        private void StartGame(ServerGame game)
+        private void StartGame(Game game)
         {
             Logger.GameLog("Found a Game which is ready to start");
-            ThreadPool.QueueUserWorkItem(game.StartGame, new object());
+            ThreadPool.QueueUserWorkItem(game.StartGame, this);
             RunningGames.Add(game);
             PendingGames.Remove(game);
         }
@@ -180,7 +183,7 @@ namespace PingPongServer
         {
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            ServerGame newGame = new ServerGame(newGameNetwork, initPackage.GamePlayerCount);
+            Game newGame = new Game(newGameNetwork, initPackage.GamePlayerCount);
             newGame.AddClient(conn, initPackage.PlayerTeamwish);
             ConnectionsReadyForJoingAndStartingGames.Remove(conn);
             PendingGames.Add(newGame);
@@ -193,7 +196,7 @@ namespace PingPongServer
         {
             ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
 
-            foreach (ServerGame game in PendingGames.Entries)
+            foreach (Game game in PendingGames.Entries)
             {
                 if (game.AddClient(conn, pack.PlayerTeamwish))
                 {
@@ -210,7 +213,7 @@ namespace PingPongServer
         {
             bool couldRejoin = false;
 
-           foreach(ServerGame game in RunningGames.Entries)
+           foreach(Game game in RunningGames.Entries)
            {
                 if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
                 {
@@ -237,10 +240,15 @@ namespace PingPongServer
                 }
             }
         }
+
+        public void OnGameFinished(object sender, EventArgs e)
+        {
+            RemoveFinishedGames();
+        }
                 
         private void RemoveFinishedGames()
         {   
-            foreach(ServerGame game in RunningGames.Entries)
+            foreach(Game game in RunningGames.Entries)
             {
                 if (game.GameState == GameStates.Finished)
                 {

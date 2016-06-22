@@ -43,7 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ServerGame.cs" />
+    <Compile Include="ServerGame\ServerGameObjects\Client.cs" />
+    <Compile Include="ServerGame\ServerGame.cs" />
     <Compile Include="GameNetwork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Main.cs" />

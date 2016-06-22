@@ -2,6 +2,10 @@
 using System.Threading;
 using System.Collections.Generic;
 
+
+using PingPongServer.ServerGame;
+using PingPongServer.ServerGame.ServerGameObjects;
+
 using GameLogicLibrary;
 using GameLogicLibrary.GameObjects;
 
@@ -10,9 +14,9 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 
-namespace PingPongServer
+namespace PingPongServer.ServerGame
 {
-    public class ServerGame
+    public class Game
     {
         public GameStates GameState { get; private set; }
         List<Client> Clients = new List<Client>();
@@ -26,11 +30,14 @@ namespace PingPongServer
         public GameStructure GameStructure;
         private LogWriterConsole Logger = new LogWriterConsole();
 
+        public delegate void GameFinishedEventHandler(object sender, EventArgs e);
+        public event GameFinishedEventHandler GameFinished;
 
 
-        public ServerGame(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
+
+        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
-            Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + "");
+            Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
             this.Network = Network;            
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
@@ -45,24 +52,22 @@ namespace PingPongServer
             return "Game with " + GameStructure.PlayersCount.ToString() + " Players " + "and Score" + GameStructure.GameTeams.ToString();
         }
 
-        public void StartGame(object justToMatchSignatureForThreadPool)
+        // Caller will be notified via Event when Game is finished
+        public void StartGame(object caller)
         {
-            ServerDataPackage ServerPackage = new ServerDataPackage();
+            ServerDataPackage ServerPackage = new ServerDataPackage();            
+            GameFinished += (GameFinishedEventHandler)((Server)caller).OnGameFinished;
             GameState = GameStates.Running;
             Logger.GameLog("Game started");
-            int i = 0;
+
             while (GameState == GameStates.Running)
             {
-                i++;
-                if (i == 10000)
-                    break;
-                GetAllThe();
+                GetNetworkDataForNextFrame();
                 ServerPackage = CalculateFrame();
                 Network.BroadcastFramesToClients(ServerPackage);
                 Thread.Sleep(5);
             }
-            Logger.GameLog("Game finished");
-            Logger.NetworkLog("Tearing Down Network");
+            OnGameFinished();
             Network.Close();
             GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
         }
@@ -110,11 +115,19 @@ namespace PingPongServer
             Network.AddClientConnection(client);
         }
         
-        private void GetAllThe()
+        private void GetNetworkDataForNextFrame()
         {
             packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
         }
         
+        protected virtual void OnGameFinished()
+        {
+            Logger.GameLog("Game finished");
+            Logger.NetworkLog("Tearing Down Network");
+
+            if (GameFinished != null)
+                GameFinished(this, EventArgs.Empty);
+        }
 
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
@@ -124,9 +137,7 @@ namespace PingPongServer
                 return new PackageInterface[0];
 
             foreach (PackageInterface p in packagesForNextFrame[sessionID])
-            {
-                    ps.Add(p);
-            }
+                ps.Add(p);
             
             
             
@@ -144,20 +155,11 @@ namespace PingPongServer
                 foreach (Player p in a.Value)
                 {
                     if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
-                    {
                         p.DirectionY = p.Speed;
-                        Logger.Log("Received DOWN");
-                    }
                     else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Up)
-                    {
                         p.DirectionY = -p.Speed;
-                        Logger.Log("Received UP");
-                    }
                     else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.StopMoving)
-                    {
                         p.DirectionY = 0;
-                        Logger.Log("Received STOP");
-                    }
 
                     NextFrame.Players.Add(p);
                 }
@@ -208,29 +210,7 @@ namespace PingPongServer
             if (cc.Count == 0)
                 return ClientMovement.NoInput;
             return cc[cc.Count - 1].PlayerMovement;
-        }
-
-        public class Client
-        {
-            public int ClientID;
-            public int session;
-            public List<Player> Players = new List<Player>();
-
-            public Client(GameStructure gameStructure, int sessionID)
-            {
-                this.session = sessionID;
-
-            }
-
-            public void AddPlayer(Player player, GameStructure GameStructure)
-            {
-                Players.Add(player);
-                GameStructure.AddPlayer(player, GameStructure.GetFreeTeam());
-            }
-            
-
-            
-        }        
+        }              
                         
     }
 }
