@@ -144,11 +144,20 @@ namespace PingPongServer
                 foreach (Player p in a.Value)
                 {
                     if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
+                    {
                         p.DirectionY = p.Speed;
+                        Logger.Log("Received DOWN");
+                    }
                     else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Up)
+                    {
                         p.DirectionY = -p.Speed;
+                        Logger.Log("Received UP");
+                    }
                     else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.StopMoving)
+                    {
                         p.DirectionY = 0;
+                        Logger.Log("Received STOP");
+                    }
 
                     NextFrame.Players.Add(p);
                 }
@@ -187,9 +196,13 @@ namespace PingPongServer
                 PackageInterface[] ps = getAllDataRelatedToClient(c.session);
                 foreach (PackageInterface p in ps)
                 {
-                    if (p == null || p.PackageType != PackageType.ClientPlayerMovement)
+                    PlayerMovementPackage movementPackage = p as PlayerMovementPackage;
+
+                    if (movementPackage == null || movementPackage.PackageType != PackageType.ClientPlayerMovement)
                         continue;
-                    cc.Add((PlayerMovementPackage)p);
+
+                    if(movementPackage.PlayerID == playerID)
+                        cc.Add((PlayerMovementPackage)p);
                 }
             }
             if (cc.Count == 0)
