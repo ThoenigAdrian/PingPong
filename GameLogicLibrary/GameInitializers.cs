@@ -16,6 +16,6 @@
         public const int PLAYER_Y = BORDER_HEIGHT / 2 - PLAYER_HEIGHT / 2;
         public const int PLAYER_1_X = 30;
         public const int PLAYER_2_X = BORDER_WIDTH - PLAYER_1_X - PLAYER_WIDTH;
-        public const float PLAYER_SPEED = 10;
+        public const float PLAYER_SPEED = 2;
     }
 }

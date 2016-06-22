@@ -139,22 +139,25 @@ namespace PingPongServer
         {
             NextFrame = new ServerDataPackage();
 
+            foreach (KeyValuePair<int, List<Player>> a in GameStructure.GameTeams)
+            {
+                foreach (Player p in a.Value)
+                {
+                    if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
+                        p.DirectionY = p.Speed;
+                    else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Up)
+                        p.DirectionY = -p.Speed;
+                    else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.StopMoving)
+                        p.DirectionY = 0;
+
+                    NextFrame.Players.Add(p);
+                }
+            }
+
             GameStructure.CalculateFrame(10);
             NextFrame.Ball.PositionX = GameStructure.Ball.PositionX;
             NextFrame.Ball.PositionY = GameStructure.Ball.PositionY;
 
-            foreach (KeyValuePair<int, List<Player>> a in GameStructure.GameTeams)
-            {
-                foreach(Player p in a.Value)
-                {
-                    if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
-                        p.PositionY += 5;
-                    if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Up)
-                        p.PositionY -= 5;
-                    NextFrame.Players.Add(p);
-                }                
-            }
-            
             return NextFrame;
         }
 

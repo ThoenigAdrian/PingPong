@@ -55,6 +55,8 @@ namespace GameLogicLibrary.GameObjects
             {
                 foreach(Player player in Team.Value)
                 {
+                    player.PositionY += player.DirectionY;
+
                     if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height)
                         player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height;
                     if (player.PositionY <= 0)
