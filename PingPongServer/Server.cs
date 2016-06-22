@@ -22,7 +22,6 @@ namespace PingPongServer
         // Network 
         private Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private UDPConnection MasterUDPSocket;
-        private SafeList<NetworkConnection> IncomingConnections = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> ConnectionsReadyForJoingAndStartingGames = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
         // Game
@@ -176,13 +175,14 @@ namespace PingPongServer
             PendingGames.Remove(game);
         }
         
-        // return true if the Game was valid and could be created
+        // Returns true if the Game was valid and could be created
         private bool CreateNewGame(NetworkConnection conn, PackageInterface packet)
         {
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             ServerGame newGame = new ServerGame(newGameNetwork, initPackage.GamePlayerCount);
             newGame.AddClient(conn, initPackage.PlayerTeamwish);
+            ConnectionsReadyForJoingAndStartingGames.Remove(conn);
             PendingGames.Add(newGame);
             return true;
                 
@@ -196,7 +196,11 @@ namespace PingPongServer
             foreach (ServerGame game in PendingGames.Entries)
             {
                 if (game.AddClient(conn, pack.PlayerTeamwish))
+                {
+                    ConnectionsReadyForJoingAndStartingGames.Remove(conn);
                     return true;
+                }
+                    
             }
             return false;
         }
@@ -204,17 +208,21 @@ namespace PingPongServer
         // Return true if client could rejoin the game
         private bool RejoinClientToGame(NetworkConnection conn)
         {
-            
+            bool couldRejoin = false;
+
            foreach(ServerGame game in RunningGames.Entries)
            {
                 if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
                 {
                     game.RejoinClient(conn);
-                    return false;
+                    ConnectionsReadyForJoingAndStartingGames.Remove(conn);
+                    couldRejoin = true;
+                    break;
                 }
+                 
             }
 
-            return false;           
+            return couldRejoin;           
         }
         
 
