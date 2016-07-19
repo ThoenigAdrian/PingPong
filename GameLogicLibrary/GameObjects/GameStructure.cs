@@ -13,6 +13,7 @@ namespace GameLogicLibrary.GameObjects
         public Dictionary<int,List<Player>> GameTeams = new Dictionary<int, List<Player>>();
         public const int TEAM_COUNT = 2; // restrict to two teams for now
         public int maxPlayers;
+        public bool friendlyFire = false;
 
         public int PlayersCount
         {
@@ -96,14 +97,60 @@ namespace GameLogicLibrary.GameObjects
             {
                 foreach (Player p in t.Value)
                 {
+                    if (Ball.LastTouchedTeam == p.Team && !friendlyFire)
+                        continue;
                     if (CircleInRect(p, Ball))
                     {
-                        Ball.DirectionX = Ball.DirectionX * -1;
+                        Ball.LastTouchedTeam = p.Team;
+                        float Angle = GetNewAngle(p);
+                        ChangeDirection(Angle);
                         return; // assuming only one player can touch the ball
                     }
                         
                 }
             }
+        }
+
+        private float GetNewAngle(Player p)
+        {
+            return GameInitializers.MAXIMUM_ANGLE_RAD * GetRelativeDistanceFromMiddlePoint(p);
+        }
+
+        private float GetRelativeDistanceFromMiddlePoint(Player p)
+        {
+            float relativeDistance = (Ball.PositionY - (p.PositionY + p.Height/2) ) / (p.Height/2);
+            // temporary fix for corner special case 
+            if (relativeDistance < -1)
+                relativeDistance = -1;
+            if (relativeDistance > 1)
+                relativeDistance = 1;
+            // ----------------------------------------
+            return relativeDistance;
+        }
+
+        private void ChangeDirection(float Angle)
+        {
+            if (Ball.DirectionX > 0)
+            {
+                ChangeAngle(Angle);
+                Ball.DirectionX *= -1;
+            }
+            else
+            {
+                ChangeAngle(Angle);
+            }
+                
+
+            //if (Ball.PositionX > GameInitializers.BORDER_WIDTH / 2)
+            //    Ball.DirectionX *= -1;
+
+        }
+
+        private void ChangeAngle(float Angle)
+        {
+            float speed = Ball.Speed;
+            Ball.DirectionX = (float)Math.Cos(Angle) * speed;
+            Ball.DirectionY = (float)Math.Sin(Angle) * speed;
         }
 
         private bool CircleInRectangular(Player p)

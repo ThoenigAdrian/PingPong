@@ -1,4 +1,6 @@
-﻿namespace GameLogicLibrary
+﻿using System;
+
+namespace GameLogicLibrary
 {
     public class GameInitializers
     {
@@ -16,6 +18,11 @@
         public const int PLAYER_Y = BORDER_HEIGHT / 2 - PLAYER_HEIGHT / 2;
         public const int PLAYER_1_X = 30;
         public const int PLAYER_2_X = BORDER_WIDTH - PLAYER_1_X - PLAYER_WIDTH;
-        public const float PLAYER_SPEED = 2;
+        public const float PLAYER_SPEED = 1.5F;
+        public const float MAXIMUM_ANGLE_DEGREE = 70;
+        public const float MAXIMUM_ANGLE_RAD = (float) (Math.PI * MAXIMUM_ANGLE_DEGREE / 180);
+        
     }
+
+    
 }
