@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Threading;
 
 namespace GameLogicLibrary.GameObjects
 {
@@ -10,10 +11,13 @@ namespace GameLogicLibrary.GameObjects
         public Ball Ball { get { return Structure.Ball; } }
         List<Player> Players { get { return Structure.Players; } }
 
-        public Dictionary<int,List<Player>> GameTeams = new Dictionary<int, List<Player>>();
+        public Dictionary<int,GameTeam> GameTeams = new Dictionary<int, GameTeam>();
         public const int TEAM_COUNT = 2; // restrict to two teams for now
         public int maxPlayers;
         public bool friendlyFire = false;
+
+        public delegate void TeamScoredEventHandler(object sender, EventArgs e);
+        public event TeamScoredEventHandler TeamScored;
 
         public int PlayersCount
         {
@@ -21,8 +25,8 @@ namespace GameLogicLibrary.GameObjects
             {
                 int PlayersCount = 0;
 
-                foreach(KeyValuePair<int, List<Player>> entry in GameTeams)
-                    PlayersCount += entry.Value.Count;
+                foreach(KeyValuePair<int, GameTeam> entry in GameTeams)
+                    PlayersCount += entry.Value.PlayerList.Count;
                 
                 return PlayersCount;
             }
@@ -40,8 +44,8 @@ namespace GameLogicLibrary.GameObjects
         {
             Structure = new BasicStructure(new GameField(), new Ball());
             this.maxPlayers = maxPlayers;
-            GameTeams.Add(0, new List<Player>());
-            GameTeams.Add(1, new List<Player>());
+            GameTeams.Add(0, new GameTeam());
+            GameTeams.Add(1, new GameTeam());
         }
 
         public void CalculateFrame(long timePassedInMilliseconds)
@@ -52,9 +56,9 @@ namespace GameLogicLibrary.GameObjects
             Ball.PositionX += Ball.DirectionX * timePassedInMilliseconds;
             Ball.PositionY += Ball.DirectionY * timePassedInMilliseconds;
 
-            foreach(KeyValuePair<int, List<Player>> Team in GameTeams)
+            foreach(KeyValuePair<int, GameTeam> Team in GameTeams)
             {
-                foreach(Player player in Team.Value)
+                foreach(Player player in Team.Value.PlayerList)
                 {
                     player.PositionY += player.DirectionY;
 
@@ -65,26 +69,33 @@ namespace GameLogicLibrary.GameObjects
                 }
             }
 
-            if (Ball.PositionX + Ball.Radius > GameField.Width)
+            if (Ball.PositionX >= GameField.Width - Ball.Radius)
             {
-                Ball.PositionX = GameField.Width - (Ball.PositionX - GameField.Width);
-                Ball.DirectionX = Ball.DirectionX * -1;
+                GameTeams[0].score++;
+                OnTeamScored();
+                // Uncomment this Line if you wan't to allow Back Windows To Reflect aka. no scoring
+                //Ball.PositionX = (GameField.Width - Ball.Radius) - (Ball.PositionX - (GameField.Width - Ball.Radius));
+                //Ball.DirectionX = Ball.DirectionX * -1;
             }
                 
-            if (Ball.PositionY + Ball.Radius > GameField.Height)
+            if (Ball.PositionY >= GameField.Height - Ball.Radius)
             {
-                Ball.PositionY = GameField.Height - (Ball.PositionY - GameField.Height);
+                Ball.PositionY = (GameField.Height - Ball.Radius) - (Ball.PositionY - (GameField.Height - Ball.Radius));
                 Ball.DirectionY = Ball.DirectionY * -1;
             }
-            if (Ball.PositionX < 0)
+            if (Ball.PositionX <= Ball.Radius)
             {
-                Ball.PositionX = Ball.PositionX * -1;
-                Ball.DirectionX = Ball.DirectionX * -1;
+                GameTeams[1].score++;
+                OnTeamScored();
+                // Uncomment this Line if you wan't to allow Back Windows To Reflect aka. no scoring
+                // Ball.PositionX = (GameField.Width - Ball.Radius) - (Ball.PositionX - (GameField.Width - Ball.Radius));
+                // Ball.PositionX = Ball.PositionX * -1;
+                // Ball.DirectionX = Ball.DirectionX * -1;
             }
 
-            if (Ball.PositionY < 0)
+            if (Ball.PositionY <= Ball.Radius)
             {
-                Ball.PositionY = Ball.PositionY * -1;
+                Ball.PositionY = Ball.Radius + (Ball.Radius - Ball.PositionY);
                 Ball.DirectionY = Ball.DirectionY * -1;
             }
 
@@ -93,9 +104,9 @@ namespace GameLogicLibrary.GameObjects
 
         private void DetectCollisions()
         {
-            foreach (KeyValuePair<int, List<Player>> t in GameTeams)
+            foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
             {
-                foreach (Player p in t.Value)
+                foreach (Player p in Team.Value.PlayerList)
                 {
                     if (Ball.LastTouchedTeam == p.Team && !friendlyFire)
                         continue;
@@ -221,6 +232,25 @@ namespace GameLogicLibrary.GameObjects
             return Math.Min(t.Item1, t.Item2);
         }
 
+        private void OnTeamScored()
+        {
+            ResetBall();
+
+            if (TeamScored != null)
+                TeamScored(this, EventArgs.Empty);
+        }
+
+        private void ResetBall()
+        {
+            Ball.PositionX = GameInitializers.BALL_POSX;
+            Ball.PositionY = GameInitializers.BALL_POSY;
+            Ball.DirectionX = GameInitializers.BALL_DIRX;
+            Ball.DirectionY = GameInitializers.BALL_DIRY;
+            Ball.LastTouchedTeam = -1;
+
+            Thread.Sleep(1000); // After score give the Player some Time to relax
+        }
+
         private bool PointInRectangular(Tuple<float, float> point, Player pb)
         {
             bool betweenXLine = (pb.PositionX <= point.Item1) && (point.Item1 <= pb.PositionX + pb.Width);
@@ -255,21 +285,21 @@ namespace GameLogicLibrary.GameObjects
         {
             try
             {
-                GameTeams[Team].Add(Player);
+                GameTeams[Team].PlayerList.Add(Player);
             }
             catch(KeyNotFoundException)
             {
-                GameTeams.Add(Team, new List<Player>());
-                GameTeams[Team].Add(Player);
+                GameTeams.Add(Team, new GameTeam());
+                GameTeams[Team].PlayerList.Add(Player);
             }                            
         }
 
         public int GetFreeTeam()
         {
-            foreach (KeyValuePair<int, List<Player>> entry in GameTeams)
+            foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
             {
-                if (entry.Value.Count < maxPlayers / TEAM_COUNT)
-                    return entry.Key;
+                if (Team.Value.PlayerList.Count < maxPlayers / TEAM_COUNT)
+                    return Team.Key;
             }
             return 0;
         }
@@ -278,13 +308,25 @@ namespace GameLogicLibrary.GameObjects
         {
             List<Player> allPlayers = new List<Player>();
 
-            foreach (KeyValuePair<int, List<Player>> entry in GameTeams)
+            foreach (KeyValuePair<int, GameTeam> entry in GameTeams)
             {
-                foreach (Player player in entry.Value)
+                foreach (Player player in entry.Value.PlayerList)
                     allPlayers.Add(player);
             }
 
             return allPlayers.ToArray();
+        }
+
+        public class GameTeam
+        {
+            public int score;
+            public List<Player> PlayerList;
+
+            public GameTeam()
+            {
+                score = 0;
+                PlayerList = new List<Player>();
+            }
         }
 
     }

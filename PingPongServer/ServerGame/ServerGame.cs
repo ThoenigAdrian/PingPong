@@ -33,8 +33,7 @@ namespace PingPongServer.ServerGame
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
         public event GameFinishedEventHandler GameFinished;
 
-
-
+        
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
             Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
@@ -42,8 +41,15 @@ namespace PingPongServer.ServerGame
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
-            maxPlayers = NeededNumberOfPlayersForGameToStart;            
+            maxPlayers = NeededNumberOfPlayersForGameToStart;
+            GameStructure.TeamScored += OnTeamScored;
 
+        }
+
+        private void OnTeamScored(object sender, EventArgs e)
+        {
+            Logger.GameLog("Team Scored");
+            Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
         }
 
         public override string ToString()
@@ -84,9 +90,9 @@ namespace PingPongServer.ServerGame
             {
                 float playerPosition = 0;
                                 
-                if (playerTeamWish[index] == 0 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].Count >= 1)
+                if (playerTeamWish[index] == 0 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].PlayerList.Count >= 1)
                     playerPosition = GameInitializers.PLAYER_1_X + GameStructure.GameTeams.Count * 30F;
-                else if (playerTeamWish[index] == 1 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].Count>= 1)
+                else if (playerTeamWish[index] == 1 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].PlayerList.Count >= 1)
                     playerPosition = GameInitializers.PLAYER_2_X - GameStructure.GameTeams.Count * 30F;
                                 
 
@@ -129,6 +135,7 @@ namespace PingPongServer.ServerGame
                 GameFinished(this, EventArgs.Empty);
         }
 
+
         private PackageInterface[] getAllDataRelatedToClient(int sessionID)
         {
             List<PackageInterface> ps = new List<PackageInterface>();
@@ -150,9 +157,9 @@ namespace PingPongServer.ServerGame
         {
             NextFrame = new ServerDataPackage();
 
-            foreach (KeyValuePair<int, List<Player>> a in GameStructure.GameTeams)
+            foreach (KeyValuePair<int, GameStructure.GameTeam> Team in GameStructure.GameTeams)
             {
-                foreach (Player p in a.Value)
+                foreach (Player p in Team.Value.PlayerList)
                 {
                     if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
                         p.DirectionY = p.Speed;
