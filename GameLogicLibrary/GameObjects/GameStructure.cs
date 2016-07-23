@@ -15,6 +15,7 @@ namespace GameLogicLibrary.GameObjects
         public const int TEAM_COUNT = 2; // restrict to two teams for now
         public int maxPlayers;
         public bool friendlyFire = false;
+        public bool scoring = true;
 
         public delegate void TeamScoredEventHandler(object sender, EventArgs e);
         public event TeamScoredEventHandler TeamScored;
@@ -50,34 +51,39 @@ namespace GameLogicLibrary.GameObjects
 
         public void CalculateFrame(long timePassedInMilliseconds)
         {
-            float oldBallPositionX = Ball.PositionX;
-            float oldBallPositionY = Ball.PositionY;
 
             Ball.PositionX += Ball.DirectionX * timePassedInMilliseconds;
             Ball.PositionY += Ball.DirectionY * timePassedInMilliseconds;
 
-            foreach(KeyValuePair<int, GameTeam> Team in GameTeams)
+            foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
             {
-                foreach(Player player in Team.Value.PlayerList)
+                foreach (Player player in Team.Value.PlayerList)
                 {
-                    player.PositionY += player.DirectionY;
-
-                    if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height)
-                        player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height;
-                    if (player.PositionY <= 0)
-                        player.PositionY = 0;
+                    CalculatePlayerPosition(player);
                 }
-            }
+            }          
 
+            CalculateCollisions();
+        }
+
+        private void CalculateWallCollisions()
+        {
             if (Ball.PositionX >= GameField.Width - Ball.Radius)
             {
-                GameTeams[0].score++;
-                OnTeamScored();
-                // Uncomment this Line if you wan't to allow Back Windows To Reflect aka. no scoring
-                //Ball.PositionX = (GameField.Width - Ball.Radius) - (Ball.PositionX - (GameField.Width - Ball.Radius));
-                //Ball.DirectionX = Ball.DirectionX * -1;
+                if (scoring)
+                {
+                    GameTeams[0].score++;
+                    OnTeamScored();
+                }
+
+                else
+                {
+                    Ball.PositionX = (GameField.Width - Ball.Radius) - (Ball.PositionX - (GameField.Width - Ball.Radius));
+                    Ball.DirectionX = Ball.DirectionX * -1;
+                }
+
             }
-                
+
             if (Ball.PositionY >= GameField.Height - Ball.Radius)
             {
                 Ball.PositionY = (GameField.Height - Ball.Radius) - (Ball.PositionY - (GameField.Height - Ball.Radius));
@@ -85,12 +91,17 @@ namespace GameLogicLibrary.GameObjects
             }
             if (Ball.PositionX <= Ball.Radius)
             {
-                GameTeams[1].score++;
-                OnTeamScored();
-                // Uncomment this Line if you wan't to allow Back Windows To Reflect aka. no scoring
-                // Ball.PositionX = (GameField.Width - Ball.Radius) - (Ball.PositionX - (GameField.Width - Ball.Radius));
-                // Ball.PositionX = Ball.PositionX * -1;
-                // Ball.DirectionX = Ball.DirectionX * -1;
+                if (scoring)
+                {
+                    GameTeams[1].score++;
+                    OnTeamScored();
+                }
+
+                else
+                {
+                    Ball.PositionX = Ball.PositionX * -1;
+                    Ball.DirectionX = Ball.DirectionX * -1;
+                }
             }
 
             if (Ball.PositionY <= Ball.Radius)
@@ -98,31 +109,55 @@ namespace GameLogicLibrary.GameObjects
                 Ball.PositionY = Ball.Radius + (Ball.Radius - Ball.PositionY);
                 Ball.DirectionY = Ball.DirectionY * -1;
             }
-
-            DetectCollisions();
         }
 
-        private void DetectCollisions()
+        private void CalculatePlayerPosition(Player player)
+        {
+            player.PositionY += player.DirectionY;
+
+            if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height)
+                player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height;
+            if (player.PositionY <= 0)
+                player.PositionY = 0;
+        }
+
+        private void CalculateCollisions()
+        {
+            CalculatePlayerBallCollisions();
+            CalculateWallCollisions();
+        }
+
+        private void CalculatePlayerBallCollisions()
         {
             foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
             {
-                foreach (Player p in Team.Value.PlayerList)
+                foreach (Player player in Team.Value.PlayerList)
                 {
-                    if (Ball.LastTouchedTeam == p.Team && !friendlyFire)
+                    if ( (Ball.LastTouchedTeam == player.Team) && !friendlyFire)
                         continue;
-                    if (CircleInRect(p, Ball))
+                    if (BallInPlayerBar(player))
                     {
-                        Ball.LastTouchedTeam = p.Team;
-                        float Angle = GetNewAngle(p);
-                        ChangeDirection(Angle);
-                        return; // assuming only one player can touch the ball
+                        Ball.LastTouchedTeam = player.Team;
+                        float Angle = GetNewAngleOfBall(player);
+                        ChangeDirectionOfBall(Angle);
+                        return; // ASSUMING ONLY ONE PLAYER CAN TOUCH THE BALL !
                     }
-                        
+
                 }
             }
         }
+        
+        public Rectangle RectangleOfPlayer(Player player)
+        {
+            return new Rectangle(player.PositionX, player.PositionY, player.Height, player.Width);
+        }
 
-        private float GetNewAngle(Player p)
+        public Circle CircleOfBall(Ball ball)
+        {
+            return new Circle(ball.PositionX, ball.PositionY, ball.Radius);
+        }
+
+        private float GetNewAngleOfBall(Player p)
         {
             return GameInitializers.MAXIMUM_ANGLE_RAD * GetRelativeDistanceFromMiddlePoint(p);
         }
@@ -139,7 +174,7 @@ namespace GameLogicLibrary.GameObjects
             return relativeDistance;
         }
 
-        private void ChangeDirection(float Angle)
+        private void ChangeDirectionOfBall(float Angle)
         {
             if (Ball.DirectionX > 0)
             {
@@ -150,10 +185,6 @@ namespace GameLogicLibrary.GameObjects
             {
                 ChangeAngle(Angle);
             }
-                
-
-            //if (Ball.PositionX > GameInitializers.BORDER_WIDTH / 2)
-            //    Ball.DirectionX *= -1;
 
         }
 
@@ -164,7 +195,8 @@ namespace GameLogicLibrary.GameObjects
             Ball.DirectionY = (float)Math.Sin(Angle) * speed;
         }
 
-        private bool CircleInRectangular(Player p)
+        /*
+        private bool CircleInRectangle(Player p)
         {
             float minimumDistanceForCollision = (float)Math.Sqrt((Math.Pow(p.Height / 2, 2) + Math.Pow(p.Width / 2, 2))) + Ball.Radius;
 
@@ -221,15 +253,16 @@ namespace GameLogicLibrary.GameObjects
             
             return false;
         }
+        */
         
-        private float Max(Tuple<float,float> t)
+        private float Max(Tuple<float,float> floatTuple)
         {
-            return Math.Max(t.Item1, t.Item2);
+            return Math.Max(floatTuple.Item1, floatTuple.Item2);
         }
 
-        private float Min(Tuple<float, float> t)
+        private float Min(Tuple<float, float> floatTuple)
         {
-            return Math.Min(t.Item1, t.Item2);
+            return Math.Min(floatTuple.Item1, floatTuple.Item2);
         }
 
         private void OnTeamScored()
@@ -251,29 +284,37 @@ namespace GameLogicLibrary.GameObjects
             Thread.Sleep(1000); // After score give the Player some Time to relax
         }
 
-        private bool PointInRectangular(Tuple<float, float> point, Player pb)
+        private bool PointInRectangular(Tuple<float, float> point, Rectangle rectangle)
         {
-            bool betweenXLine = (pb.PositionX <= point.Item1) && (point.Item1 <= pb.PositionX + pb.Width);
-            bool betweenYLine = (pb.PositionY <= point.Item2) && (point.Item2 <= pb.PositionY + pb.Height);
+            bool betweenXLine = (rectangle.PositionX <= point.Item1) && (point.Item1 <= rectangle.PositionX + rectangle.Width);
+            bool betweenYLine = (rectangle.PositionY <= point.Item2) && (point.Item2 <= rectangle.PositionY + rectangle.Height);
             return betweenXLine && betweenYLine;
         }
-        private bool CircleInRect(Player p, Ball b)
+
+        private bool BallInPlayerBar(Player player)
         {
-            Tuple<float, float> lefmost = Tuple.Create<float, float>(b.PositionX - b.Radius, b.PositionY);
-            Tuple<float, float> rightmost = Tuple.Create<float, float>(b.PositionX + b.Radius, b.PositionY);
+            Circle circle = new Circle(Ball.PositionX, Ball.PositionY, Ball.Radius);
+            Rectangle rectangle = new Rectangle(player.PositionX, player.PositionY, player.Height, player.Width);
+            return CircleInRect(circle, rectangle);
+        }
 
-            Tuple<float, float> topmost = Tuple.Create<float, float>(b.PositionX, b.PositionY - b.Radius);
-            Tuple<float, float> bottommost = Tuple.Create<float, float>(b.PositionX, b.PositionY + b.Radius);
+        private bool CircleInRect(Circle circle, Rectangle rectangle)
+        {
+            Tuple<float, float> lefmost = Tuple.Create<float, float>(circle.PositionX - circle.Radius, circle.PositionY);
+            Tuple<float, float> rightmost = Tuple.Create<float, float>(circle.PositionX + circle.Radius, circle.PositionY);
 
-            List<Tuple<float, float>> list = new List<Tuple<float, float>>();
-            list.Add(lefmost);
-            list.Add(rightmost);
-            list.Add(topmost);
-            list.Add(bottommost);
+            Tuple<float, float> topmost = Tuple.Create<float, float>(circle.PositionX, circle.PositionY - circle.Radius);
+            Tuple<float, float> bottommost = Tuple.Create<float, float>(circle.PositionX, circle.PositionY + circle.Radius);
 
-            foreach (Tuple<float, float> point in list)
+            List<Tuple<float, float>> cornerPoints = new List<Tuple<float, float>>();
+            cornerPoints.Add(lefmost);
+            cornerPoints.Add(rightmost);
+            cornerPoints.Add(topmost);
+            cornerPoints.Add(bottommost);
+
+            foreach (Tuple<float, float> point in cornerPoints)
             {
-                if (PointInRectangular(point, p))
+                if (PointInRectangular(point, rectangle))
                     return true;
             }
 
@@ -315,6 +356,49 @@ namespace GameLogicLibrary.GameObjects
             }
 
             return allPlayers.ToArray();
+        }
+
+        public class Circle
+        {
+            public float PositionX;
+            public float PositionY;
+            public float Radius;
+
+            public Circle(float PositionX, float PositionY, float Radius)
+            {
+                this.PositionX = PositionX;
+                this.PositionY = PositionY;
+                this.Radius = Radius;
+            }
+        }
+
+        public class Rectangle
+        {
+            public float PositionX;
+            public float PositionY;
+            public float Height;
+            public float Width;
+
+            public Rectangle(float PositionX, float PositionY, float Height, float Width)
+            {
+                this.PositionX = PositionX;
+                this.PositionY = PositionY;
+                this.Height = Height;
+                this.Width = Width;
+
+            }
+        }
+        
+        public class Point
+        {
+            public float PositionX;
+            public float PositionY;
+            
+            public Point(float PositionX, float PositionY)
+            {
+                this.PositionX = PositionX;
+                this.PositionY = PositionY;
+            }
         }
 
         public class GameTeam
