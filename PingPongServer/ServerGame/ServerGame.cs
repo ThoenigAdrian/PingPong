@@ -28,6 +28,7 @@ namespace PingPongServer.ServerGame
         public ServerDataPackage NextFrame;
         public Dictionary<int, PackageInterface[]> packagesForNextFrame = new Dictionary<int, PackageInterface[]>();
         public GameStructure GameStructure;
+        public GameEngine GameEngine;
         private LogWriterConsole Logger = new LogWriterConsole();
 
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
@@ -40,9 +41,10 @@ namespace PingPongServer.ServerGame
             this.Network = Network;            
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
+            GameEngine = new GameEngine(GameStructure);
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;
-            GameStructure.TeamScored += OnTeamScored;
+            GameEngine.TeamScored += OnTeamScored;
 
         }
 
@@ -80,7 +82,7 @@ namespace PingPongServer.ServerGame
 
         public bool AddClient(NetworkConnection client, int[] playerTeamWish)
         {
-            if (GameStructure.MissingPlayers < playerTeamWish.Length)
+            if (GameStructure.MissingPlayersCount < playerTeamWish.Length)
                 return false; 
 
             Network.AddClientConnection(client);            
@@ -172,7 +174,7 @@ namespace PingPongServer.ServerGame
                 }
             }
 
-            GameStructure.CalculateFrame(10);
+            GameEngine.CalculateFrame(10);
             NextFrame.Ball.PositionX = GameStructure.Ball.PositionX;
             NextFrame.Ball.PositionY = GameStructure.Ball.PositionY;
 
