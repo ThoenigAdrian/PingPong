@@ -7,7 +7,7 @@ namespace GameLogicLibrary.GameObjects
     public class GameStructure
     {
         BasicStructure Structure { get; set; }
-        GameField GameField { get { return Structure.Field; } }
+        public GameField GameField { get { return Structure.Field; } }
         public Ball Ball { get { return Structure.Ball; } }
         List<Player> Players { get { return Structure.Players; } }
 
@@ -17,8 +17,7 @@ namespace GameLogicLibrary.GameObjects
         public bool friendlyFire = false;
         public bool scoring = true;
 
-        public delegate void TeamScoredEventHandler(object sender, EventArgs e);
-        public event TeamScoredEventHandler TeamScored;
+        
 
         public int PlayersCount
         {
@@ -33,7 +32,7 @@ namespace GameLogicLibrary.GameObjects
             }
         }
 
-        public int MissingPlayers
+        public int MissingPlayersCount
         {
             get
             {
@@ -49,277 +48,7 @@ namespace GameLogicLibrary.GameObjects
             GameTeams.Add(1, new GameTeam());
         }
 
-        public void CalculateFrame(long timePassedInMilliseconds)
-        {
-
-            Ball.PositionX += Ball.DirectionX * timePassedInMilliseconds;
-            Ball.PositionY += Ball.DirectionY * timePassedInMilliseconds;
-
-            foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
-            {
-                foreach (Player player in Team.Value.PlayerList)
-                {
-                    CalculatePlayerPosition(player);
-                }
-            }          
-
-            CalculateCollisions();
-        }
-
-        private void CalculateWallCollisions()
-        {
-            if (Ball.PositionX >= GameField.Width - Ball.Radius)
-            {
-                if (scoring)
-                {
-                    GameTeams[0].score++;
-                    OnTeamScored();
-                }
-
-                else
-                {
-                    Ball.PositionX = (GameField.Width - Ball.Radius) - (Ball.PositionX - (GameField.Width - Ball.Radius));
-                    Ball.DirectionX = Ball.DirectionX * -1;
-                }
-
-            }
-
-            if (Ball.PositionY >= GameField.Height - Ball.Radius)
-            {
-                Ball.PositionY = (GameField.Height - Ball.Radius) - (Ball.PositionY - (GameField.Height - Ball.Radius));
-                Ball.DirectionY = Ball.DirectionY * -1;
-            }
-            if (Ball.PositionX <= Ball.Radius)
-            {
-                if (scoring)
-                {
-                    GameTeams[1].score++;
-                    OnTeamScored();
-                }
-
-                else
-                {
-                    Ball.PositionX = Ball.PositionX * -1;
-                    Ball.DirectionX = Ball.DirectionX * -1;
-                }
-            }
-
-            if (Ball.PositionY <= Ball.Radius)
-            {
-                Ball.PositionY = Ball.Radius + (Ball.Radius - Ball.PositionY);
-                Ball.DirectionY = Ball.DirectionY * -1;
-            }
-        }
-
-        private void CalculatePlayerPosition(Player player)
-        {
-            player.PositionY += player.DirectionY;
-
-            if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height)
-                player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height;
-            if (player.PositionY <= 0)
-                player.PositionY = 0;
-        }
-
-        private void CalculateCollisions()
-        {
-            CalculatePlayerBallCollisions();
-            CalculateWallCollisions();
-        }
-
-        private void CalculatePlayerBallCollisions()
-        {
-            foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
-            {
-                foreach (Player player in Team.Value.PlayerList)
-                {
-                    if ( (Ball.LastTouchedTeam == player.Team) && !friendlyFire)
-                        continue;
-                    if (BallInPlayerBar(player))
-                    {
-                        Ball.LastTouchedTeam = player.Team;
-                        float Angle = GetNewAngleOfBall(player);
-                        ChangeDirectionOfBall(Angle);
-                        return; // ASSUMING ONLY ONE PLAYER CAN TOUCH THE BALL !
-                    }
-
-                }
-            }
-        }
-        
-        public Rectangle RectangleOfPlayer(Player player)
-        {
-            return new Rectangle(player.PositionX, player.PositionY, player.Height, player.Width);
-        }
-
-        public Circle CircleOfBall(Ball ball)
-        {
-            return new Circle(ball.PositionX, ball.PositionY, ball.Radius);
-        }
-
-        private float GetNewAngleOfBall(Player p)
-        {
-            return GameInitializers.MAXIMUM_ANGLE_RAD * GetRelativeDistanceFromMiddlePoint(p);
-        }
-
-        private float GetRelativeDistanceFromMiddlePoint(Player p)
-        {
-            float relativeDistance = (Ball.PositionY - (p.PositionY + p.Height/2) ) / (p.Height/2);
-            // temporary fix for corner special case 
-            if (relativeDistance < -1)
-                relativeDistance = -1;
-            if (relativeDistance > 1)
-                relativeDistance = 1;
-            // ----------------------------------------
-            return relativeDistance;
-        }
-
-        private void ChangeDirectionOfBall(float Angle)
-        {
-            if (Ball.DirectionX > 0)
-            {
-                ChangeAngle(Angle);
-                Ball.DirectionX *= -1;
-            }
-            else
-            {
-                ChangeAngle(Angle);
-            }
-
-        }
-
-        private void ChangeAngle(float Angle)
-        {
-            float speed = Ball.Speed;
-            Ball.DirectionX = (float)Math.Cos(Angle) * speed;
-            Ball.DirectionY = (float)Math.Sin(Angle) * speed;
-        }
-
-        /*
-        private bool CircleInRectangle(Player p)
-        {
-            float minimumDistanceForCollision = (float)Math.Sqrt((Math.Pow(p.Height / 2, 2) + Math.Pow(p.Width / 2, 2))) + Ball.Radius;
-
-            Tuple<float, float> PlayerBallYPositionTuple = Tuple.Create(Ball.PositionY, p.PositionY);
-            float yDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
-
-            Tuple<float, float> PlayerBallXPositionTuple = Tuple.Create(Ball.PositionX, p.PositionX);
-            float xDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
-
-            float actualDistance = (float)Math.Sqrt(Math.Pow(yDistance,2) + Math.Pow(xDistance,2 ));
-
-            if (actualDistance > minimumDistanceForCollision)
-                return false;                 
-            
-            if (actualDistance <= Ball.Radius)
-                return true; // this is a special case the return true has to be substituted by a deeper looking algorithm which checks if those two are colliding
-                             // XXX
-                             //XX  XX
-                             // XXX+ --+
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     +--+    //will be implemented later
-
-            if (actualDistance < minimumDistanceForCollision)
-            {
-                if (p.PositionX >= GameInitializers.BORDER_WIDTH / 2)
-                {
-                    if (Ball.PositionX >= p.PositionX)
-                    {
-                        Ball.DirectionX = Ball.DirectionX * -1;
-                        return true;
-                    }
-                        
-                }
-                if (p.PositionX <= GameInitializers.BORDER_WIDTH / 2)
-                {
-                    if (Ball.PositionX <= p.PositionX)
-                    {
-                        Ball.DirectionX = Ball.DirectionX * -1;
-                        return true;
-                    }
-
-                }
-            }
-                
-            
-            return false;
-        }
-        */
-        
-        private float Max(Tuple<float,float> floatTuple)
-        {
-            return Math.Max(floatTuple.Item1, floatTuple.Item2);
-        }
-
-        private float Min(Tuple<float, float> floatTuple)
-        {
-            return Math.Min(floatTuple.Item1, floatTuple.Item2);
-        }
-
-        private void OnTeamScored()
-        {
-            ResetBall();
-
-            if (TeamScored != null)
-                TeamScored(this, EventArgs.Empty);
-        }
-
-        private void ResetBall()
-        {
-            Ball.PositionX = GameInitializers.BALL_POSX;
-            Ball.PositionY = GameInitializers.BALL_POSY;
-            Ball.DirectionX = GameInitializers.BALL_DIRX;
-            Ball.DirectionY = GameInitializers.BALL_DIRY;
-            Ball.LastTouchedTeam = -1;
-
-            Thread.Sleep(1000); // After score give the Player some Time to relax
-        }
-
-        private bool PointInRectangular(Point point, Rectangle rectangle)
-        {
-            bool betweenXLine = (rectangle.PositionX <= point.PositionX) && (point.PositionX <= rectangle.PositionX + rectangle.Width);
-            bool betweenYLine = (rectangle.PositionY <= point.PositionY) && (point.PositionY <= rectangle.PositionY + rectangle.Height);
-            return betweenXLine && betweenYLine;
-        }
-
-        private bool BallInPlayerBar(Player player)
-        {
-            Circle circle = new Circle(Ball.PositionX, Ball.PositionY, Ball.Radius);
-            Rectangle rectangle = new Rectangle(player.PositionX, player.PositionY, player.Height, player.Width);
-            return CircleInRect(circle, rectangle);
-        }
-
-        private bool CircleInRect(Circle circle, Rectangle rectangle)
-        {
-            Point lefmost = new Point(circle.PositionX - circle.Radius, circle.PositionY);
-            Point rightmost = new Point(circle.PositionX + circle.Radius, circle.PositionY);
-            Point topmost = new Point(circle.PositionX, circle.PositionY - circle.Radius);
-            Point bottommost = new Point(circle.PositionX, circle.PositionY + circle.Radius);
-
-            List<Point> cornerPoints = new List<Point>();
-            cornerPoints.Add(lefmost);
-            cornerPoints.Add(rightmost);
-            cornerPoints.Add(topmost);
-            cornerPoints.Add(bottommost);
-
-            foreach (Point point in cornerPoints)
-            {
-                if (PointInRectangular(point, rectangle))
-                    return true;
-            }
-
-            return false;
-        }
-
+                                
 
         public void AddPlayer(Player Player, int Team)
         {
