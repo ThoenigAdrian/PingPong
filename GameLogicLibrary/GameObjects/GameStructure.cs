@@ -284,10 +284,10 @@ namespace GameLogicLibrary.GameObjects
             Thread.Sleep(1000); // After score give the Player some Time to relax
         }
 
-        private bool PointInRectangular(Tuple<float, float> point, Rectangle rectangle)
+        private bool PointInRectangular(Point point, Rectangle rectangle)
         {
-            bool betweenXLine = (rectangle.PositionX <= point.Item1) && (point.Item1 <= rectangle.PositionX + rectangle.Width);
-            bool betweenYLine = (rectangle.PositionY <= point.Item2) && (point.Item2 <= rectangle.PositionY + rectangle.Height);
+            bool betweenXLine = (rectangle.PositionX <= point.PositionX) && (point.PositionX <= rectangle.PositionX + rectangle.Width);
+            bool betweenYLine = (rectangle.PositionY <= point.PositionY) && (point.PositionY <= rectangle.PositionY + rectangle.Height);
             return betweenXLine && betweenYLine;
         }
 
@@ -300,19 +300,18 @@ namespace GameLogicLibrary.GameObjects
 
         private bool CircleInRect(Circle circle, Rectangle rectangle)
         {
-            Tuple<float, float> lefmost = Tuple.Create<float, float>(circle.PositionX - circle.Radius, circle.PositionY);
-            Tuple<float, float> rightmost = Tuple.Create<float, float>(circle.PositionX + circle.Radius, circle.PositionY);
+            Point lefmost = new Point(circle.PositionX - circle.Radius, circle.PositionY);
+            Point rightmost = new Point(circle.PositionX + circle.Radius, circle.PositionY);
+            Point topmost = new Point(circle.PositionX, circle.PositionY - circle.Radius);
+            Point bottommost = new Point(circle.PositionX, circle.PositionY + circle.Radius);
 
-            Tuple<float, float> topmost = Tuple.Create<float, float>(circle.PositionX, circle.PositionY - circle.Radius);
-            Tuple<float, float> bottommost = Tuple.Create<float, float>(circle.PositionX, circle.PositionY + circle.Radius);
-
-            List<Tuple<float, float>> cornerPoints = new List<Tuple<float, float>>();
+            List<Point> cornerPoints = new List<Point>();
             cornerPoints.Add(lefmost);
             cornerPoints.Add(rightmost);
             cornerPoints.Add(topmost);
             cornerPoints.Add(bottommost);
 
-            foreach (Tuple<float, float> point in cornerPoints)
+            foreach (Point point in cornerPoints)
             {
                 if (PointInRectangular(point, rectangle))
                     return true;
