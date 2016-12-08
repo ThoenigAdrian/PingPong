@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,8 +14,8 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 using GameLogicLibrary;
 using PingPongServer.ServerGame;
-using PingPongServer;
 
+using Newtonsoft.Json.Linq;
 
 namespace PingPongServer
 {
@@ -31,15 +32,17 @@ namespace PingPongServer
         private SafeList<Game> RunningGames = new SafeList<Game>();
         private static List<bool> StateOfRunningGames = new List<bool>();
         // Logging
-        private LogWriterConsole Logger = new LogWriterConsole();        
-        
+        private LogWriterConsole Logger = new LogWriterConsole();
+
+        private int maximumNumberOfIncomingConnections = 1000; 
 
         public Server()
         {
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
-            MasterListeningSocket.Listen(100); // backlog variable per config file ??
+            MasterListeningSocket.Listen(maximumNumberOfIncomingConnections);
 
             MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT), Logger);
+            ReadConfigurationFromConfigurationFile();
         }
 
         public void Run()
@@ -172,7 +175,7 @@ namespace PingPongServer
 
         private void StartGame(Game game)
         {
-            Logger.GameLog("Found a Game which is ready to start");
+            Logger.GameLog("Found a Game which is ready to start ID: " + game.GameID);
             ThreadPool.QueueUserWorkItem(game.StartGame, this);
             RunningGames.Add(game);
             PendingGames.Remove(game);
@@ -184,9 +187,11 @@ namespace PingPongServer
             ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             Game newGame = new Game(newGameNetwork, initPackage.GamePlayerCount);
+            newGame.GameID = new Random().Next();
             newGame.AddClient(conn, initPackage.PlayerTeamwish);
             ConnectionsReadyForJoingAndStartingGames.Remove(conn);
             PendingGames.Add(newGame);
+            Logger.Log("Created a new Game with the following details: " + newGame.ToString());
             return true;
                 
         }
@@ -245,7 +250,50 @@ namespace PingPongServer
         {
             RemoveFinishedGames();
         }
-                
+
+        public void ReadConfigurationFromConfigurationFile()
+        {
+            // Configuration filename must be server_config.json
+            string filename = "server_config.json";
+            ReadConfigurationFromConfigurationFile(filename);
+
+        }
+
+        public void ReadConfigurationFromConfigurationFile(string filename)
+        {
+            string serverConfig = "";
+            try
+            {
+                using (StreamReader serverConfigReadStream = new StreamReader(File.Open(filename, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)))
+                {
+                    serverConfig = serverConfigReadStream.ReadToEnd();
+                }
+                JObject parsedServerConfiguration = JObject.Parse(serverConfig);
+                try
+                {
+                    maximumNumberOfIncomingConnections = (int)parsedServerConfiguration["maximumNumberOfIncomingConnections"];
+                }
+                    
+                catch(Exception exception)
+                {
+                    Logger.Log("Couldn't read maximumNumberOfConnections from configuration file , details : ");
+                    Logger.Log(exception.Message);
+                }
+                    
+            }
+            catch (FileNotFoundException)
+            {
+                Logger.Log("No configuration file for server found using default configuration");
+            }
+            catch (Newtonsoft.Json.JsonReaderException exception)
+            {
+                Logger.Log("Server configuration file is invalid, Additional Information : ");
+                Logger.Log(exception.Message);
+                Logger.Log("[Warning] Default Configuraiton will be used instead !\n");
+            }
+            
+        }
+
         private void RemoveFinishedGames()
         {   
             foreach(Game game in RunningGames.Entries)

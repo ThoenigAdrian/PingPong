@@ -16,6 +16,8 @@ namespace PingPongServer
     {
         public GameNetwork(UDPConnection UDPGameData) : this(UDPGameData, null) { }
         public List<int> DiedSessions = new List<int>();
+        public delegate void ClientLostEventHandler(object sender, EventArgs e);
+        public event ClientLostEventHandler ClientLost;
 
         public GameNetwork(UDPConnection UDPGameData, LogWriter Logger) : base (UDPGameData, Logger)
         {
@@ -25,6 +27,8 @@ namespace PingPongServer
         private void SessionDiedHandler(NetworkInterface sender, int sessionID)
         {
             DiedSessions.Add(sessionID);
+            if (ClientLost != null)
+                ClientLost(this, EventArgs.Empty);
         }
         
         public void SendTCPPackageToClient(PackageInterface packet , int sessionID)

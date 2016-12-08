@@ -11,7 +11,7 @@ namespace GameLogicLibrary.GameObjects
         public Ball Ball { get { return Structure.Ball; } }
         List<Player> Players { get { return Structure.Players; } }
 
-        public Dictionary<int,GameTeam> GameTeams = new Dictionary<int, GameTeam>();
+        public TeamsDictionary GameTeams = new TeamsDictionary();
         public const int TEAM_COUNT = 2; // restrict to two teams for now
         public int maxPlayers;
         public bool friendlyFire = false;
@@ -327,6 +327,33 @@ namespace GameLogicLibrary.GameObjects
                 score = 0;
                 PlayerList = new List<Player>();
             }
+
+            public override string ToString()
+            {
+                string s = "";
+                foreach (Player p in PlayerList)
+                {
+                    s += "\n\t Player : " + p.ToString();
+                }
+                return s;
+            }
+        }
+
+        public class TeamsDictionary : Dictionary<int, GameTeam>
+        {
+            public override string ToString()
+            {
+                string s = "";
+                foreach (KeyValuePair<int, GameTeam> Team in this)
+                {
+                    s += "Team : " + Team.Key.ToString();
+                    s += "\n" + Team.Value.ToString();
+                    
+                }
+                return s;
+            }
+            
+            
         }
 
     }
