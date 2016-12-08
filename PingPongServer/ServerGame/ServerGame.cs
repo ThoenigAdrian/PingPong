@@ -30,7 +30,7 @@ namespace PingPongServer.ServerGame
         public GameStructure GameStructure;
         public GameEngine GameEngine;
         private LogWriterConsole Logger = new LogWriterConsole();
-
+        public int GameID = 0;
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
         public event GameFinishedEventHandler GameFinished;
 
@@ -38,7 +38,8 @@ namespace PingPongServer.ServerGame
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
             Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
-            this.Network = Network;            
+            this.Network = Network;
+            this.Network.ClientLost += OnClientLost;
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
             GameEngine = new GameEngine(GameStructure);
@@ -54,10 +55,49 @@ namespace PingPongServer.ServerGame
             Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
         }
 
+        private void OnClientLost(object sender, EventArgs e)
+        {
+            bool gameOver = true;
+            List<Player> DisconnectedPlayers = new List<Player>();
+
+            foreach (Client c in Clients)
+                if (Network.DiedSessions.Contains(c.session))
+                    DisconnectedPlayers.AddRange(c.Players);
+
+            foreach(GameStructure.GameTeam team in GameStructure.GameTeams.Values)
+            {
+                foreach(Player p in team.PlayerList)
+                {
+                    if (!DisconnectedPlayers.Contains(p))
+                    {
+                        gameOver = false;
+                        break;
+                    }
+
+                }
+            }
+
+            if (gameOver)
+            {
+                OnGameFinished();
+            }
+                
+        }
+
         public override string ToString()
         {
             // Build a nice custom string in the future
-            return "Game with " + GameStructure.PlayersCount.ToString() + " Players " + "and Score" + GameStructure.GameTeams.ToString();
+            string str = "Game [" + GameID + "] \n\t" + "Players : " + GameStructure.PlayersCount.ToString();
+            foreach (KeyValuePair<int, GameStructure.GameTeam> team in GameStructure.GameTeams)
+            {
+                str += "\n\tTeam :" + team.Key;
+                str += team.Value.ToString();
+            }
+            foreach(Client c in Clients)
+            {
+                str += c.ToString();
+            }
+            return str;
         }
 
         // Caller will be notified via Event when Game is finished
@@ -130,6 +170,7 @@ namespace PingPongServer.ServerGame
         
         protected virtual void OnGameFinished()
         {
+            GameState = GameStates.Finished;
             Logger.GameLog("Game finished");
             Logger.NetworkLog("Tearing Down Network");
 

@@ -34,5 +34,10 @@
             DirectionY = 0;
             Speed = GameInitializers.PLAYER_SPEED;
         }
+
+        public override string ToString()
+        {
+            return "Player " + ID.ToString();
+        }
     }
 }

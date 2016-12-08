@@ -21,5 +21,15 @@ namespace PingPongServer.ServerGame.ServerGameObjects
             GameStructure.AddPlayer(player, GameStructure.GetFreeTeam());
         }
 
+        public override string ToString()
+        {
+            string s = "";
+            s += "\nClient ID: " + ClientID.ToString();
+            s += "\nThis Client contains the following players :";
+            foreach (Player p in Players)
+                s += "\n\t" + p.ToString();
+            return s;
+        }
+
     }
 }
