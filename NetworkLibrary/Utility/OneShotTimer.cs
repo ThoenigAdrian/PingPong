@@ -5,17 +5,16 @@ namespace NetworkLibrary.Utility
     public class OneShotTimer
     {
         DateTime m_start;
+        bool m_started = false;
         bool m_timerOverflow;
         long m_timerEnd;
 
         public OneShotTimer(long microSeconds, bool start = true)
         {
-            m_timerEnd = microSeconds;
+            TimerInterval(microSeconds);
 
             if (start)
                 Restart();
-            else
-                m_timerOverflow = true;
         }
 
         public void TimerInterval(long microSeconds)
@@ -27,20 +26,20 @@ namespace NetworkLibrary.Utility
         public void Restart()
         {
             m_start = DateTime.Now;
+            m_started = true;
             m_timerOverflow = false;
         }
 
         private bool TimerOverflow()
         {
-            if(m_timerOverflow)
+            if (!m_started)
+                return false;
+
+            if (m_timerOverflow)
                 return true;
 
-            DateTime now = DateTime.Now;
-
-            if(m_start.Ticks + (m_timerEnd * 10) < now.Ticks)
-            {
+            if(m_start.Ticks + (m_timerEnd * 10) < DateTime.Now.Ticks)
                 m_timerOverflow = true;
-            }
 
             return m_timerOverflow;
         }
