@@ -89,7 +89,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
                 if (!Receiving)
                 {
-
                     Receiving = true;
                     PreReceiveSettings();
                     StartReceiving();
@@ -164,7 +163,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         
         public bool ConnectionPolling()
         {
-            bool connected = true;
+            if (Disconnecting)
+                return false;
+
+            bool connected = false;
             if (ConnectionSocket.Poll(0, SelectMode.SelectRead))
             {
                 byte[] data = new byte[1];
