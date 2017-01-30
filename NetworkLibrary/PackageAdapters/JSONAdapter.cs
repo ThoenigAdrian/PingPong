@@ -11,8 +11,16 @@ namespace NetworkLibrary.PackageAdapters
     { 
         public override PackageType GetPackageType(string json)
         {
-            string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
-            return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
+            try
+            {
+                string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
+                return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
+            }
+            
+            catch
+            {
+                return PackageType.InvalidPackage;
+            }
 
         }
 

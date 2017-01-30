@@ -7,6 +7,8 @@
 
     public enum PackageType
     {
+        InvalidPackage,
+
         ClientControl,
         ClientPlayerMovement,
         OpenPort,
