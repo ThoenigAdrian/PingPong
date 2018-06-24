@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingPongServer", "PingPongServer.csproj", "{D9A9AB92-99B0-4679-824F-59E3AD011A51}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -12,6 +12,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicLibrary", "..\GameLogicLibrary\GameLogicLibrary.csproj", "{212421D7-F509-4477-A78D-BA638AB63EB1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSThreadSafety", "..\..\XSLibrary\XSLibrary\XSThreadSafety\XSThreadSafety.csproj", "{1364168D-0353-49F5-9DAC-2A501FD8055A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,8 +37,23 @@ Global
 		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {937A3170-367B-4E61-923D-8A6F7160470D}
 	EndGlobalSection
 EndGlobal

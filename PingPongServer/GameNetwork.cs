@@ -8,6 +8,7 @@ using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System.Net.Sockets;
+using XSLibrary.Network.Connections;
 
 namespace PingPongServer
 {
@@ -19,7 +20,7 @@ namespace PingPongServer
         public delegate void ClientLostEventHandler(object sender, EventArgs e);
         public event ClientLostEventHandler ClientLost;
 
-        public GameNetwork(UDPConnection UDPGameData, LogWriter Logger) : base (UDPGameData, Logger)
+        public GameNetwork(UDPConnection UDPGameData, GameLogger Logger) : base (UDPGameData, Logger)
         {
             SessionDied += SessionDiedHandler;
         }

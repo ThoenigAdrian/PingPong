@@ -11,6 +11,7 @@ using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using XSLibrary.Network.Connections;
 
 using GameLogicLibrary;
 using PingPongServer.ServerGame;
@@ -41,7 +42,8 @@ namespace PingPongServer
             MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterListeningSocket.Listen(maximumNumberOfIncomingConnections);
 
-            MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT), Logger);
+            MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
+            MasterUDPSocket.Logger = Logger;
             ReadConfigurationFromConfigurationFile();
         }
 
@@ -82,7 +84,7 @@ namespace PingPongServer
             {
                 Socket newSocket = MasterListeningSocket.Accept();
                 Logger.NetworkLog("Client connected " + newSocket.RemoteEndPoint.ToString());
-                TCPConnection tcp = new TCPConnection(newSocket, null);
+                TCPConnection tcp = new TCPConnection(newSocket);
                 NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
 
                 AcceptedConnections.Add(newNetworkConnection);

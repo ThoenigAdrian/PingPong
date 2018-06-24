@@ -58,6 +58,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj">
+      <Project>{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}</Project>
+      <Name>XSNetwork</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
+      <Project>{A37C8BF1-08E7-46BB-8F9E-536A82365FED}</Project>
+      <Name>XSUtility</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GameLogicLibrary\GameLogicLibrary.csproj">
       <Project>{212421d7-f509-4477-a78d-ba638ab63eb1}</Project>
       <Name>GameLogicLibrary</Name>
