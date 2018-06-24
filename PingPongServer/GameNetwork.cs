@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using NetworkLibrary.Utility;
-using GameLogicLibrary;
 using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System.Net.Sockets;
 using XSLibrary.Network.Connections;
+using XSLibrary.Utility;
 
 namespace PingPongServer
 {
-    
+
     public class GameNetwork : NetworkInterface
     {
-        public GameNetwork(UDPConnection UDPGameData) : this(UDPGameData, null) { }
+        public GameNetwork(UDPConnection UDPGameData) : this(UDPGameData, new NoLog()) { }
         public List<int> DiedSessions = new List<int>();
         public delegate void ClientLostEventHandler(object sender, EventArgs e);
         public event ClientLostEventHandler ClientLost;
 
-        public GameNetwork(UDPConnection UDPGameData, GameLogger Logger) : base (UDPGameData, Logger)
+        public GameNetwork(UDPConnection UDPGameData, Logger Logger) : base (UDPGameData, Logger)
         {
             SessionDied += SessionDiedHandler;
         }

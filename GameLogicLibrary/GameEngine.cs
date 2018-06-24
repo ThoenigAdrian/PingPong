@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
 using GameLogicLibrary.GameObjects;
+using XSLibrary.Utility;
 
 namespace GameLogicLibrary
 {
@@ -12,6 +12,8 @@ namespace GameLogicLibrary
 
         public delegate void TeamScoredEventHandler(object sender, EventArgs e);
         public event TeamScoredEventHandler TeamScored;
+
+        OneShotTimer m_matchOngoing = new OneShotTimer(1000 * 1000, true);
 
         public GameEngine(GameStructure GameStructure)
         {
@@ -26,7 +28,7 @@ namespace GameLogicLibrary
             GameStructure.Ball.DirectionY = GameInitializers.BALL_DIRY;
             GameStructure.Ball.LastTouchedTeam = -1;
 
-            Thread.Sleep(1000); // After score give the Player some Time to relax
+            m_matchOngoing.Restart();
         }
 
 
@@ -100,9 +102,11 @@ namespace GameLogicLibrary
 
         public void CalculateFrame(long timePassedInMilliseconds)
         {
-
-           GameStructure.Ball.PositionX += GameStructure.Ball.DirectionX * timePassedInMilliseconds;
-            GameStructure.Ball.PositionY += GameStructure.Ball.DirectionY * timePassedInMilliseconds;
+            if (m_matchOngoing == true)
+            {
+                GameStructure.Ball.PositionX += GameStructure.Ball.DirectionX * timePassedInMilliseconds;
+                GameStructure.Ball.PositionY += GameStructure.Ball.DirectionY * timePassedInMilliseconds;
+            }
 
             foreach (KeyValuePair<int, GameStructure.GameTeam> Team in GameStructure.GameTeams)
             {

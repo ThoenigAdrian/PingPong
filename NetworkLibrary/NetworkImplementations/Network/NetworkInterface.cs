@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NetworkLibrary.NetworkImplementations.Network;
 using XSLibrary.Network.Connections;
+using XSLibrary.Utility;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -27,10 +28,10 @@ namespace NetworkLibrary.NetworkImplementations
         NetworkConnectionPool ClientConnections { get; set; }
         UDPConnection UdpConnection { get; set; }
 
-        GameLogger Logger { get; set; }
+        Logger Logger { get; set; }
 
 
-        protected NetworkInterface(UDPConnection udpConnection, GameLogger logger)
+        protected NetworkInterface(UDPConnection udpConnection, Logger logger)
         {
             Logger = logger;
 
@@ -127,9 +128,6 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected void Log(string text)
         {
-            if (Logger == null)
-                return;
-
             Logger.Log(text);
         }
     }

@@ -33,7 +33,7 @@ namespace PingPongServer
         private SafeList<Game> RunningGames = new SafeList<Game>();
         private static List<bool> StateOfRunningGames = new List<bool>();
         // Logging
-        private LogWriterConsole Logger = new LogWriterConsole();
+        private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
 
         private int maximumNumberOfIncomingConnections = 1000; 
 
@@ -302,7 +302,7 @@ namespace PingPongServer
             {
                 if (game.GameState == GameStates.Finished)
                 {
-                   Logger.GameLog("Found a finished Game removing it now" + RunningGames.ToString());
+                   Logger.GameLog("Found a finished Game removing it now\n" + game.ToString());
                    RunningGames.Remove(game);
                 }                                        
             }
