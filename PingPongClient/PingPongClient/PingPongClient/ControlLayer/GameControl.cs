@@ -43,7 +43,10 @@ namespace PingPongClient.ControlLayer
         public override void Update(GameTime gameTime)
         {
             if (Network != null)
+            {
                 ApplyServerPositions();
+                UpdateScore();
+            }
 
             Interpolation.Interpolate(gameTime);
         }
@@ -122,6 +125,16 @@ namespace PingPongClient.ControlLayer
 
             Structure.Ball.PositionX = data.Ball.PositionX;
             Structure.Ball.PositionY = data.Ball.PositionY;
+        }
+
+        protected void UpdateScore()
+        {
+            ServerGameControlPackage score = Network.GetScore();
+            if (score == null)
+                return;
+
+            Structure._score.Score_Team1 = score.Score.Team1;
+            Structure._score.Score_Team2 = score.Score.Team2;
         }
 
         private Player GetPlayerWithID(int ID)

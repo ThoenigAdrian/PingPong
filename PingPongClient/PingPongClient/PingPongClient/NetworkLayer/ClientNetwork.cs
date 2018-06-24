@@ -92,6 +92,11 @@ namespace PingPongClient.NetworkLayer
             return In.GetDataUDP(ClientSession) as ServerDataPackage;
         }
 
+        public ServerGameControlPackage GetScore()
+        {
+            return In.GetDataTCP(ClientSession) as ServerGameControlPackage;
+        }
+
         protected override void PostDisconnectActions()
         {
             TerminateUDPConnection();

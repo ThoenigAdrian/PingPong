@@ -7,6 +7,13 @@ namespace GameLogicLibrary.GameObjects
 
     public class BasicStructure
     {
+        public struct Score
+        {
+            public int Score_Team1;
+            public int Score_Team2;
+        }
+
+        public Score _score;
         public GameField Field;
         public Ball Ball;
         public List<Player> Players;
@@ -16,6 +23,8 @@ namespace GameLogicLibrary.GameObjects
             Field = field;
             Ball = ball;
             Players = new List<Player>();
+            _score.Score_Team1 = 0;
+            _score.Score_Team2 = 0;
         }
 
         public void CalculateFrame(int passedMicroSeconds)

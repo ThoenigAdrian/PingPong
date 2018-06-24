@@ -2,6 +2,7 @@
 using GameLogicLibrary.GameObjects;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 
 namespace PingPongClient.VisualizeLayer.Visualizers
 {
@@ -35,7 +36,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected override Color GetBackgroundColor { get { return Color.Black; } }
 
-        protected override SpriteFont GetFont { get { return null; } }
+        protected override SpriteFont GetFont { get { return Content.Load<SpriteFont>("Game"); } }
 
         protected override void PostInitializing()
         {
@@ -65,6 +66,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected override void DrawVisualizer(GameTime gameTime)
         {
+            DrawScore();
             DrawBorders();
             DrawBall();
             
@@ -77,6 +79,20 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         protected override bool CanDraw()
         {
             return Structure != null;
+        }
+
+        protected void DrawScore()
+        {
+            DrawableString scoreString = new DrawableString("Team 1   " + Structure._score.Score_Team1 + "-" + Structure._score.Score_Team2 + "   Team 2",
+                new Vector2(0, 0),
+                Color.White);
+
+            Vector2 measurements = scoreString.GetMeasurements(Font);
+            float x = DrawingTranslation.GetAbsoluteX(FieldSize.X / 2);
+            x -= measurements.X / 2;
+            scoreString.Postion.X = x;
+
+            DrawString(scoreString);
         }
 
         protected void DrawBall()

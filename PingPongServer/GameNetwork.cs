@@ -50,6 +50,11 @@ namespace PingPongServer
             Out.BroadCastUDP(Frame);
         }
 
+        public void BroadcastScore(ServerGameControlPackage score)
+        {
+            Out.BroadCastTCP(score);
+        }
+
         private PackageInterface[] GetAllOfPackagesOfClient(int sessionID)
         {
             return In.GetAllDataTCP(sessionID);

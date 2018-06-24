@@ -53,6 +53,11 @@ namespace PingPongServer.ServerGame
         {
             Logger.GameLog("Team Scored");
             Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+
+            ServerGameControlPackage scoreData = new ServerGameControlPackage();
+            scoreData.Score.Team1 = GameStructure.GameTeams[0].score;
+            scoreData.Score.Team2 = GameStructure.GameTeams[1].score;
+            Network.BroadcastScore(scoreData);
         }
 
         private void OnClientLost(object sender, EventArgs e)
