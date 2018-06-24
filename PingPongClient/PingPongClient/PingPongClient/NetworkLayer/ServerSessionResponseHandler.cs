@@ -5,6 +5,7 @@ using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System.Net.Sockets;
 using System.Threading;
+using XSLibrary.Network.Connections;
 
 namespace PingPongClient.NetworkLayer
 {
@@ -14,7 +15,7 @@ namespace PingPongClient.NetworkLayer
 
         EventWaitHandle ReceivedEvent { get; set; }
 
-        public LogWriter Logger { get; set; }
+        public GameLogger Logger { get; set; }
 
         public Socket AcceptedSocket { get; private set; }
         PackageAdapter Adapter { get; set; }
@@ -25,7 +26,7 @@ namespace PingPongClient.NetworkLayer
         private bool Error { get; set; }
         public string ErrorMessage { get; private set; }
 
-        public ServerSessionResponseHandler(Socket acceptedSocket, PackageAdapter adapter, LogWriter logger)
+        public ServerSessionResponseHandler(Socket acceptedSocket, PackageAdapter adapter, GameLogger logger)
         {
             Logger = logger;
             AcceptedSocket = acceptedSocket;
@@ -53,7 +54,8 @@ namespace PingPongClient.NetworkLayer
                 sessionRequest.Reconnect = ConnectParameters.Reconnect;
                 sessionRequest.ReconnectSessionID = ConnectParameters.SessionID;
 
-                tcpConnection = new TCPConnection(AcceptedSocket, Logger);
+                tcpConnection = new TCPConnection(AcceptedSocket);
+                tcpConnection.Logger = Logger;
                 tcpConnection.DataReceivedEvent += ReadIDResponse;
                 tcpConnection.Send(Adapter.CreateNetworkDataFromPackage(sessionRequest));
                 tcpConnection.InitializeReceiving();
@@ -73,11 +75,11 @@ namespace PingPongClient.NetworkLayer
             ErrorMessage = "Server timeout while receiving session ID!";
         }
 
-        private void ReadIDResponse(TCPConnection sender, byte[] data)
+        private void ReadIDResponse(object sender, byte[] data)
         {
             try
             {
-                sender.DataReceivedEvent -= ReadIDResponse;
+                (sender as TCPConnection).DataReceivedEvent -= ReadIDResponse;
                 ServerSessionResponse responsePackage = Adapter.CreatePackagesFromStream(data)[0] as ServerSessionResponse;
                 SessionID = responsePackage.ClientSessionID;
             }

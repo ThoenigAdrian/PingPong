@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicLibrary", "..\Game
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSThreadSafety", "..\..\XSLibrary\XSLibrary\XSThreadSafety\XSThreadSafety.csproj", "{1364168D-0353-49F5-9DAC-2A501FD8055A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,22 @@ Global
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|x86.ActiveCfg = Release|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|x86.Build.0 = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|x86.Build.0 = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|x86.ActiveCfg = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|x86.Build.0 = Release|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Debug|x86.Build.0 = Debug|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|x86.ActiveCfg = Release|Any CPU
+		{1364168D-0353-49F5-9DAC-2A501FD8055A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

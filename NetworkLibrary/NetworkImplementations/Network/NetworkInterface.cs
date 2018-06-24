@@ -3,6 +3,7 @@ using NetworkLibrary.Utility;
 using System.Collections.Generic;
 using System.Threading;
 using NetworkLibrary.NetworkImplementations.Network;
+using XSLibrary.Network.Connections;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -26,10 +27,10 @@ namespace NetworkLibrary.NetworkImplementations
         NetworkConnectionPool ClientConnections { get; set; }
         UDPConnection UdpConnection { get; set; }
 
-        LogWriter Logger { get; set; }
+        GameLogger Logger { get; set; }
 
 
-        protected NetworkInterface(UDPConnection udpConnection, LogWriter logger)
+        protected NetworkInterface(UDPConnection udpConnection, GameLogger logger)
         {
             Logger = logger;
 
@@ -40,6 +41,7 @@ namespace NetworkLibrary.NetworkImplementations
             ErrorHandling = new NetworkErrorHandling(ClientConnections, this);
 
             UdpConnection = udpConnection;
+            UdpConnection.Logger = logger;
             UdpConnection.ReceiveErrorEvent += ErrorHandling.HandleUDPReceiveError;
             UdpConnection.InitializeReceiving();
 

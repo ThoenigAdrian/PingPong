@@ -1,6 +1,7 @@
 ﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.NetworkImplementations.Network;
 using System.Net;
+using XSLibrary.Network.Connections;
 
 namespace NetworkLibrary.NetworkImplementations
 {
@@ -25,7 +26,7 @@ namespace NetworkLibrary.NetworkImplementations
                 RaiseDeadSessionEvent(sender);
             }
 
-            public void HandleUDPReceiveError(ConnectionInterface sender, IPEndPoint receiveEndPoint)
+            public void HandleUDPReceiveError(object sender, IPEndPoint receiveEndPoint)
             {
                 NetworkConnection deadConnection = null;
 
@@ -44,8 +45,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             private void RemoveConnection(NetworkConnection connection)
             {
-                NetworkConnection dummy;
-                if (!ClientConnections.TryRemove(connection.ClientSession.SessionID, out dummy))
+                if (!ClientConnections.TryRemove(connection.ClientSession.SessionID, out NetworkConnection dummy))
                     throw new ConnectionException("Could not remove network connection!");
             }
 

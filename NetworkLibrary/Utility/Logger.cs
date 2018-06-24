@@ -1,15 +1,15 @@
 ﻿using System;
+using XSLibrary.Utility;
 
 namespace NetworkLibrary.Utility
 {
-    public abstract class LogWriter
+    public abstract class GameLogger : Logger
     {
-        public abstract void Log(string text);
         public abstract void NetworkLog(string text);
         public abstract void GameLog(string text);
     }
 
-    public class LogWriterConsole : LogWriter
+    public class LogWriterConsole : GameLogger
     {
         public override void Log(string text)
         {
@@ -18,12 +18,12 @@ namespace NetworkLibrary.Utility
 
         public override void NetworkLog(string text)
         {
-            Console.Out.WriteLine("[NETWORK] " + text);
+            Log("[NETWORK] " + text);
         }
 
         public override void GameLog(string text)
         {
-            Console.Out.WriteLine("[GAME] " + text);
+            Log("[GAME] " + text);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using XSLibrary.Network.Connections;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
@@ -154,13 +155,13 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             return null;
         }
 
-        private void ReceiveUDP(UDPConnection sender, byte[] data, IPEndPoint source)
+        private void ReceiveUDP(object sender, byte[] data, IPEndPoint source)
         {
             if (RemoteEndPoint.Port == source.Port)
                 UdpData.Write(new DataWrapper<byte[]>(data));
         }
 
-        private void ReceiveTCP(TCPConnection sender, byte[] data)
+        private void ReceiveTCP(object sender, byte[] data)
         {
             PackageInterface[] packages = Adapter.CreatePackagesFromStream(data);
             if (packages == null)
@@ -187,7 +188,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             return false;
         }
 
-        private void HandleTCPReceiveError(ConnectionInterface sender, IPEndPoint source)
+        private void HandleTCPReceiveError(object sender, IPEndPoint source)
         {
             CloseConnection();
         }

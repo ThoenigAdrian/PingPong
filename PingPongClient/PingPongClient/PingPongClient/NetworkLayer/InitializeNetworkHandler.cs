@@ -13,14 +13,14 @@ namespace PingPongClient.NetworkLayer
 
         public SessionConnectParameters ConnectParameters { get; private set; }
 
-        LogWriter Logger;
+        GameLogger Logger;
 
         public bool Error { get; private set; }
         public string Message { get; private set; }
        
         public ClientNetwork Network { get; private set; }
 
-        public InitializeNetworkHandler(SessionConnectParameters connectParams, LogWriter logger)
+        public InitializeNetworkHandler(SessionConnectParameters connectParams, GameLogger logger)
         {
             ConnectParameters = connectParams;
 

@@ -44,7 +44,7 @@ namespace PingPongClient
 
         GraphicsDeviceManager GraphicsManager { get; set; }
 
-        public LogWriter Logger = new LogWriterConsole();
+        public GameLogger Logger = new LogWriterConsole();
 
         volatile bool m_networkDied;
 

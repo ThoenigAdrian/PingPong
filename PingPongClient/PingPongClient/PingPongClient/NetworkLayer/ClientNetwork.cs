@@ -2,11 +2,11 @@ using System.Net;
 using System.Net.Sockets;
 using NetworkLibrary.Utility;
 using NetworkLibrary.NetworkImplementations;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
 using NetworkLibrary.PackageAdapters;
+using XSLibrary.Network.Connections;
 
 namespace PingPongClient.NetworkLayer
 {
@@ -16,8 +16,8 @@ namespace PingPongClient.NetworkLayer
 
         ServerSessionResponseHandler ResponseHandler { get; set; }
 
-        public ClientNetwork(Socket connectedSocket, LogWriter logger)
-            : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint, logger), logger)
+        public ClientNetwork(Socket connectedSocket, GameLogger logger)
+            : base(new UDPConnection(connectedSocket.LocalEndPoint as IPEndPoint), logger)
         {
             ResponseHandler = new ServerSessionResponseHandler(connectedSocket, new JSONAdapter(), logger);
         }
