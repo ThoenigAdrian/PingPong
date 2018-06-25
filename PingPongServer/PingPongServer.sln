@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingPongServer", "PingPongServer.csproj", "{D9A9AB92-99B0-4679-824F-59E3AD011A51}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -13,11 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicLibrary", "..\Game
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSThreadSafety", "..\..\XSLibrary\XSLibrary\XSThreadSafety\XSThreadSafety.csproj", "{1364168D-0353-49F5-9DAC-2A501FD8055A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSThreadSafety", "..\XSLibrary\XSLibrary\XSThreadSafety\XSThreadSafety.csproj", "{1364168D-0353-49F5-9DAC-2A501FD8055A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

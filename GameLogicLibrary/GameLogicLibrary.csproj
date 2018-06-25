@@ -56,8 +56,8 @@
     <Compile Include="Teams.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
-      <Project>{A37C8BF1-08E7-46BB-8F9E-536A82365FED}</Project>
+    <ProjectReference Include="..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
+      <Project>{a37c8bf1-08e7-46bb-8f9e-536a82365fed}</Project>
       <Name>XSUtility</Name>
     </ProjectReference>
   </ItemGroup>

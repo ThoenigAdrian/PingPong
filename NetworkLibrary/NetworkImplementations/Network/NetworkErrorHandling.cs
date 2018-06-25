@@ -45,7 +45,8 @@ namespace NetworkLibrary.NetworkImplementations
 
             private void RemoveConnection(NetworkConnection connection)
             {
-                if (!ClientConnections.TryRemove(connection.ClientSession.SessionID, out NetworkConnection dummy))
+                NetworkConnection dummy;
+                if (!ClientConnections.TryRemove(connection.ClientSession.SessionID, out dummy))
                     throw new ConnectionException("Could not remove network connection!");
             }
 

@@ -80,17 +80,17 @@
     <Compile Include="Utility\ResponseHandlerWithTimeout.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj">
-      <Project>{36a1d62e-ea81-4b77-ab0b-6753a7f394ed}</Project>
-      <Name>XSNetwork</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
-      <Project>{a37c8bf1-08e7-46bb-8f9e-536a82365fed}</Project>
-      <Name>XSUtility</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GameLogicLibrary\GameLogicLibrary.csproj">
       <Project>{212421d7-f509-4477-a78d-ba638ab63eb1}</Project>
       <Name>GameLogicLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj">
+      <Project>{36a1d62e-ea81-4b77-ab0b-6753a7f394ed}</Project>
+      <Name>XSNetwork</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
+      <Project>{a37c8bf1-08e7-46bb-8f9e-536a82365fed}</Project>
+      <Name>XSUtility</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
