@@ -71,6 +71,14 @@ namespace NetworkLibrary.NetworkImplementations
                     clientCon.SendKeepAlive();
                 }
             }
+
+            public void BroadCastHolePunching()
+            {
+                foreach (NetworkConnection clientCon in ClientConnections.Values)
+                {
+                    clientCon.SendHolePunching();
+                }
+            }
         }
     }
 }

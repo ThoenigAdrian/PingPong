@@ -20,6 +20,9 @@ namespace NetworkLibrary.NetworkImplementations
         protected int KeepAliveInterval { get; set; } // Milliseconds
         volatile bool m_keepAlive;
 
+        protected int HolePunchingInterval { get; set; } // Milliseconds
+        volatile bool m_holePunching;
+
         protected NetworkInput In { get; private set; }
         protected NetworkOutput Out { get; private set; }
 
@@ -29,7 +32,6 @@ namespace NetworkLibrary.NetworkImplementations
         UDPConnection UdpConnection { get; set; }
 
         Logger Logger { get; set; }
-
 
         protected NetworkInterface(UDPConnection udpConnection, Logger logger)
         {
@@ -48,6 +50,9 @@ namespace NetworkLibrary.NetworkImplementations
 
             KeepAliveInterval = 1000;
             m_keepAlive = true;
+
+            HolePunchingInterval = 1000;
+            m_holePunching = false;
 
             new Thread(KeepAliveLoop).Start();
         }
@@ -88,6 +93,7 @@ namespace NetworkLibrary.NetworkImplementations
         public void Disconnect()
         {
             m_keepAlive = false;
+            m_holePunching = false;
 
             foreach (NetworkConnection clientCon in ClientConnections.Values)
             {
@@ -97,6 +103,16 @@ namespace NetworkLibrary.NetworkImplementations
 
             UdpConnection.ReceiveErrorEvent -= ErrorHandling.HandleUDPReceiveError;
             PostDisconnectActions();
+        }
+
+        public void StartHolePunching()
+        {
+            if (m_holePunching)
+                return;
+
+            m_holePunching = true;
+
+            new Thread(HolePunchingLoop).Start();
         }
 
         protected virtual void PostDisconnectActions()
@@ -123,6 +139,15 @@ namespace NetworkLibrary.NetworkImplementations
             {
                 Out.BroadCastKeepAlive();
                 Thread.Sleep(KeepAliveInterval);
+            }
+        }
+
+        private void HolePunchingLoop()
+        {
+            while (m_holePunching)
+            {
+                Out.BroadCastHolePunching();
+                Thread.Sleep(HolePunchingInterval);
             }
         }
 

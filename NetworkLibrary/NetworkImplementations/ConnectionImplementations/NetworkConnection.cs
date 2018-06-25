@@ -138,6 +138,15 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             { CloseConnection(); }
         }
 
+        public void SendHolePunching()
+        {
+            try { UdpConnection.HolePunching(RemoteEndPoint); }
+            catch (SocketException)
+            { CloseConnection(); }
+            catch (IOException)
+            { CloseConnection(); }
+        }
+
         public PackageInterface ReadTCP()
         {
             return TcpPackages.Read();

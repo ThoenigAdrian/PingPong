@@ -53,6 +53,9 @@ namespace PingPongClient.ControlLayer
 
         public void InitializeGame(Player[] players, GameField field, Ball ball)
         {
+            if (Network != null)
+                Network.StartHolePunching();
+
             Structure = new BasicStructure(field, ball);
 
             Input.ClearPlayerInput();
