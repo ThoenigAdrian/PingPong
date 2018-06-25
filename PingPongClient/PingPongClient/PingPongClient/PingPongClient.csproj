@@ -126,11 +126,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj">
+    <ProjectReference Include="..\..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj">
       <Project>{36a1d62e-ea81-4b77-ab0b-6753a7f394ed}</Project>
       <Name>XSNetwork</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
+    <ProjectReference Include="..\..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
       <Project>{A37C8BF1-08E7-46BB-8F9E-536A82365FED}</Project>
       <Name>XSUtility</Name>
     </ProjectReference>
