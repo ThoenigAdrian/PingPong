@@ -17,7 +17,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public Session ClientSession { get; set; }
 
-        TCPConnection TcpConnection { get; set; }
+        TCPPacketConnection TcpConnection { get; set; }
         UDPConnection UdpConnection { get; set; }
 
         DataContainer<PackageInterface> TcpPackages { get; set; }
@@ -33,9 +33,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         SafeList<ResponseRequest> m_openResponses;
 
-        public NetworkConnection(TCPConnection tcpConnection) : this(tcpConnection, null) { }
-        public NetworkConnection(TCPConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
-        public NetworkConnection(TCPConnection tcpConnection, ResponseRequest responseRequest, PackageAdapter adapter)
+        public NetworkConnection(TCPPacketConnection tcpConnection) : this(tcpConnection, null) { }
+        public NetworkConnection(TCPPacketConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
+        public NetworkConnection(TCPPacketConnection tcpConnection, ResponseRequest responseRequest, PackageAdapter adapter)
         {
             Adapter = adapter;
 

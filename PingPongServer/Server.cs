@@ -84,7 +84,7 @@ namespace PingPongServer
             {
                 Socket newSocket = MasterListeningSocket.Accept();
                 Logger.NetworkLog("Client connected " + newSocket.RemoteEndPoint.ToString());
-                TCPConnection tcp = new TCPConnection(newSocket);
+                TCPPacketConnection tcp = new TCPPacketConnection(newSocket);
                 NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
 
                 AcceptedConnections.Add(newNetworkConnection);

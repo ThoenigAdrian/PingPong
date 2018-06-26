@@ -45,7 +45,7 @@ namespace PingPongClient.NetworkLayer
 
         private void HandleSessionRespone()
         {
-            TCPConnection tcpConnection;
+            TCPPacketConnection tcpConnection;
             try
             {
                 ReceivedEvent = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -54,7 +54,7 @@ namespace PingPongClient.NetworkLayer
                 sessionRequest.Reconnect = ConnectParameters.Reconnect;
                 sessionRequest.ReconnectSessionID = ConnectParameters.SessionID;
 
-                tcpConnection = new TCPConnection(AcceptedSocket);
+                tcpConnection = new TCPPacketConnection(AcceptedSocket);
                 tcpConnection.Logger = Logger;
                 tcpConnection.DataReceivedEvent += ReadIDResponse;
                 tcpConnection.Send(Adapter.CreateNetworkDataFromPackage(sessionRequest));
