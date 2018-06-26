@@ -44,9 +44,16 @@ namespace PingPongClient.InputLayer.KeyboardInputs
                     return movement;
             }
 
-            if (Keyboard.KeyNowReleased(Translation.GetMovementKey(PlayerMovementInputs.Up))
-                || Keyboard.KeyNowReleased(Translation.GetMovementKey(PlayerMovementInputs.Down)))
+            if (Keyboard.KeyNowReleased(Translation.GetMovementKey(PlayerMovementInputs.Up)) || Keyboard.KeyNowReleased(Translation.GetMovementKey(PlayerMovementInputs.Down)))
+            {
+                foreach (PlayerMovementInputs movement in Enum.GetValues(typeof(PlayerMovementInputs)))
+                {
+                    if (Keyboard.KeyCurrentlyPressed(Translation.GetMovementKey(movement)))
+                        return movement;
+                }
                 return PlayerMovementInputs.StopMoving;
+            }
+                
 
             return PlayerMovementInputs.NoInput;
         }
