@@ -5,8 +5,8 @@
         static void Main(string[] args)
         {
             Server Server = new Server();
-            Server.Run();
-            Server.Dispose();
+            try { Server.Run(); }
+            catch { Server.Dispose(); }            
         }
     }
 }
