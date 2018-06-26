@@ -14,7 +14,7 @@ namespace GameLogicLibrary.GameObjects
     {
         public int Radius { get; set; }
         public int LastTouchedTeam;
-        private float internal_speed;
+        private float internal_speed = 1F;
 
         public Ball()
         {
@@ -22,10 +22,21 @@ namespace GameLogicLibrary.GameObjects
             PositionY = GameInitializers.BALL_POSY;
             DirectionX = GameInitializers.BALL_DIRX;
             DirectionY = GameInitializers.BALL_DIRY;
-            Speed = 1F;
+            Speed = internal_speed;
             LastTouchedTeam = -1; // = No Team        + refactor Teams stuff e.g Team Blue , Team Red or something different but it doesn't make sense to have a enum like this (Team1,Team2,Team3)
             Radius = GameInitializers.BALL_RADIUS;
         }
+
+        public void resetToInitialSpeed()
+        {
+            this.Speed = 1F;
+        }
+
+        public void increaseSpeed()
+        {
+            Speed = internal_speed + 1F/3000000;
+        }
+        
 
         public float Speed
         {

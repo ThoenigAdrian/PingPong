@@ -60,6 +60,14 @@ namespace PingPongServer.ServerGame
             Network.BroadcastScore(scoreData);
         }
 
+        private void OnGameOver(object sender, EventArgs e)
+        {
+            Logger.GameLog("Team Scored");
+            Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Logger.GameLog("This was the final point");
+
+        }
+
         private void OnClientLost(object sender, EventArgs e)
         {
             bool gameOver = true;

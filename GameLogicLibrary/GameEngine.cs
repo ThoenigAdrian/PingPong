@@ -27,6 +27,7 @@ namespace GameLogicLibrary
             GameStructure.Ball.DirectionX = GameInitializers.BALL_DIRX;
             GameStructure.Ball.DirectionY = GameInitializers.BALL_DIRY;
             GameStructure.Ball.LastTouchedTeam = -1;
+            GameStructure.Ball.resetToInitialSpeed();
 
             m_matchOngoing.Restart();
         }
@@ -162,6 +163,8 @@ namespace GameLogicLibrary
                 GameStructure.Ball.PositionY = GameStructure.Ball.Radius + (GameStructure.Ball.Radius - GameStructure.Ball.PositionY);
                 GameStructure.Ball.DirectionY = GameStructure.Ball.DirectionY * -1;
             }
+
+            GameStructure.Ball.increaseSpeed();
         }
 
         private void CalculatePlayerPosition(Player player)
