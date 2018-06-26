@@ -1,9 +1,5 @@
-﻿using NetworkLibrary.DataPackages.ServerSourcePackages;
-using NetworkLibrary.DataPackages;
-using Newtonsoft.Json;
+﻿using NetworkLibrary.DataPackages;
 using System;
-using NetworkLibrary.DataPackages.ClientSourcePackages;
-using System.Collections.Generic;
 
 namespace NetworkLibrary.PackageAdapters
 {
@@ -11,8 +7,6 @@ namespace NetworkLibrary.PackageAdapters
 
     public abstract class PackageAdapter
     {
-
-
         public abstract PackageInterface[] CreatePackagesFromStream(byte[] stream);
 
         public abstract PackageInterface CreatePackageFromNetworkData(byte[] data);
@@ -21,5 +15,4 @@ namespace NetworkLibrary.PackageAdapters
 
         public abstract PackageType GetPackageType(string json);
     }
-
 }
