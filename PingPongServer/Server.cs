@@ -17,14 +17,15 @@ using GameLogicLibrary;
 using PingPongServer.ServerGame;
 
 using Newtonsoft.Json.Linq;
+using XSLibrary.Network.Accepters;
 
 namespace PingPongServer
 {
 
-    public class Server
+    public class Server : IDisposable
     {
         // Network 
-        private Socket MasterListeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private TCPAccepter ConnectionAccepter;
         private UDPConnection MasterUDPSocket;
         private SafeList<NetworkConnection> ConnectionsReadyForJoingAndStartingGames = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
@@ -35,12 +36,15 @@ namespace PingPongServer
         // Logging
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
 
+        public bool ServerStopping { get { return m_stopServer; } }
+        volatile bool m_stopServer = false; 
+
         private int maximumNumberOfIncomingConnections = 1000; 
 
         public Server()
         {
-            MasterListeningSocket.Bind(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
-            MasterListeningSocket.Listen(maximumNumberOfIncomingConnections);
+            ConnectionAccepter = new TCPAccepter(NetworkConstants.SERVER_PORT, maximumNumberOfIncomingConnections);
+            ConnectionAccepter.ClientConnected += OnSocketAccept;
 
             MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterUDPSocket.Logger = Logger;
@@ -49,12 +53,12 @@ namespace PingPongServer
 
         public void Run()
         {
-            StartCollectIncomingConnectionsThread();
+            ConnectionAccepter.Run();
             StartGameManagerThread();
 
             Logger.Log("Server is now running\n");
 
-            while (true)
+            while (!m_stopServer)
             {
                 foreach (NetworkConnection networkConnection in AcceptedConnections.Entries)
                     ProcessClientSessionRequest(networkConnection);
@@ -64,31 +68,27 @@ namespace PingPongServer
             }
         }
 
+        public void Stop()
+        {
+            m_stopServer = true;
+
+            ConnectionAccepter.Stop();
+        }
+
+        private void OnSocketAccept(object sender, Socket acceptedSocket)
+        {
+            Logger.NetworkLog("Client connected " + acceptedSocket.RemoteEndPoint.ToString());
+            TCPPacketConnection tcp = new TCPPacketConnection(acceptedSocket);
+            NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
+
+            AcceptedConnections.Add(newNetworkConnection);
+        }
+
         private void StartGameManagerThread()
         {
             Logger.Log("Starting Thread which takes Care of the Games");
             Thread ManageGamesThread = new Thread(new ThreadStart(ManageGames));
             ManageGamesThread.Start();
-        }
-
-        private void StartCollectIncomingConnectionsThread()
-        {
-            Logger.Log("Starting Thread which takes care of Incomming Connections");
-            Thread CollectIncomingConnectionsThread = new Thread(new ThreadStart(CollectIncomingConnections));
-            CollectIncomingConnectionsThread.Start();
-        }
-
-        private void CollectIncomingConnections()
-        {
-            while (true)
-            {
-                Socket newSocket = MasterListeningSocket.Accept();
-                Logger.NetworkLog("Client connected " + newSocket.RemoteEndPoint.ToString());
-                TCPPacketConnection tcp = new TCPPacketConnection(newSocket);
-                NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
-
-                AcceptedConnections.Add(newNetworkConnection);
-            }
         }
 
         private void ProcessClientSessionRequest(NetworkConnection networkConnection)
@@ -115,7 +115,7 @@ namespace PingPongServer
 
         private void ManageGames()
         {
-            while (true)
+            while (!m_stopServer)
             {
                 foreach (Game game in PendingGames.Entries)
                 {
@@ -306,6 +306,11 @@ namespace PingPongServer
                    RunningGames.Remove(game);
                 }                                        
             }
+        }
+
+        public void Dispose()
+        {
+            Stop();
         }
                 
     }

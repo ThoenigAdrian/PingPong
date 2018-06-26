@@ -6,6 +6,7 @@
         {
             Server Server = new Server();
             Server.Run();
+            Server.Dispose();
         }
     }
 }
