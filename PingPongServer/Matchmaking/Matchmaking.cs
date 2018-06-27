@@ -50,22 +50,31 @@ namespace PingPongServer
 
         public void FindMatch()
         {
+            int maxPlayerCount = 6;
+
             ClientData client1 = new ClientData()
             {
-                MaxPlayerCount = 6,
+                MaxPlayerCount = maxPlayerCount,
                 TeamWishes = new int[2] { 0, 1 }
             };
 
             ClientData client2 = new ClientData()
             {
-                MaxPlayerCount = 6,
-                TeamWishes = new int[4] { 0, 1 ,1, 0}
+                MaxPlayerCount = maxPlayerCount,
+                TeamWishes = new int[3] { 0, 1, 1 }
+            };
+
+            ClientData client3 = new ClientData()
+            {
+                MaxPlayerCount = maxPlayerCount,
+                TeamWishes = new int[1] { 0 }
             };
 
             Game testGame = new Game();
             testGame.MaxPlayerCount = client1.MaxPlayerCount;
             testGame.AddClient(client1);
             testGame.AddClient(client2);
+            testGame.AddClient(client3);
 
             bool fits = testGame.FitsIntoGame();
             bool full = testGame.Full();
