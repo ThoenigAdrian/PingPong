@@ -72,8 +72,6 @@ namespace NetworkLibrary.PackageAdapters
                     return JsonConvert.DeserializeObject<ClientOpenPortPackage>(jsonString);
                 case PackageType.ClientInitalizeGamePackage:
                     return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(jsonString);
-                case PackageType.ClientJoinGameRequest:
-                    return JsonConvert.DeserializeObject<ClientJoinGameRequest>(jsonString);
                 case PackageType.ServerAddPlayerResponsePackage:
                     return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(jsonString);
                 case PackageType.ServerGameControl:

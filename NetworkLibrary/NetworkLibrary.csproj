@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="DataPackages\ClientSourcePackages\ClientOpenPortPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientInitializeGamePackage.cs" />
-    <Compile Include="DataPackages\ClientSourcePackages\ClientJoinGameRequest.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientRegisteredPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientRejoinGamePackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientSessionRequest.cs" />

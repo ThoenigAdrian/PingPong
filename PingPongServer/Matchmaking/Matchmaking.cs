@@ -40,7 +40,7 @@ namespace PingPongServer
                 m_waitingForMatch.Add(maxPlayerCount, sameSizedEntry);
             }
 
-            sameSizedEntry.SearchingClients.Add(client);
+            sameSizedEntry.GroupedClients.AddRequest(client);
         } 
 
         private bool GameSizeOpen(int maxPlayerCount)
@@ -48,17 +48,48 @@ namespace PingPongServer
             return m_waitingForMatch.ContainsKey(maxPlayerCount);
         } 
 
-        void FindMatch()
+        public void FindMatch()
         {
-            
+            ClientData client1 = new ClientData()
+            {
+                MaxPlayerCount = 6,
+                TeamWishes = new int[2] { 0, 1 }
+            };
+
+            ClientData client2 = new ClientData()
+            {
+                MaxPlayerCount = 6,
+                TeamWishes = new int[4] { 0, 1 ,1, 0}
+            };
+
+            Game testGame = new Game();
+            testGame.MaxPlayerCount = client1.MaxPlayerCount;
+            testGame.AddClient(client1);
+            testGame.AddClient(client2);
+
+            bool fits = testGame.FitsIntoGame();
+            bool full = testGame.Full();
+
+            //foreach(MatchingEntry entry in m_waitingForMatch.Values)
+            //{
+            //    HandleEntry(entry);
+            //}
+        }
+
+        private void HandleEntry(MatchingEntry entry)
+        {
+            //forea
         }
 
         bool IsRequestValid(ClientData request)
         {
-            if (request.Team1Count > request.MaxTeamSize
-                || request.Team1Count < request.MinTeamSize
-                || request.Team2Count > request.MaxTeamSize
-                || request.Team2Count < request.MinTeamSize)
+            if (request.MaxPlayerCount % 2 != 0)
+                return false;
+
+            if (request.ClientPlayerCount > request.MaxPlayerCount)
+                return false;
+
+            if (request.Team1Count > request.TeamSize || request.Team2Count > request.TeamSize)
                 return false;
 
             return true;

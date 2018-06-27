@@ -50,6 +50,8 @@ namespace PingPongServer
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
             ReadConfigurationFromConfigurationFile();
+
+            new Matchmaking().FindMatch();
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
@@ -214,7 +216,7 @@ namespace PingPongServer
         // Returns true if client could be added to a game
         private bool JoinClientToGame(NetworkConnection conn, PackageInterface packet)
         {
-            ClientJoinGameRequest pack = (ClientJoinGameRequest)packet;
+            ClientInitializeGamePackage pack = (ClientInitializeGamePackage)packet;
 
             foreach (Game game in PendingGames.Entries)
             {
