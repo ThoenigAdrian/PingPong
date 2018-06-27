@@ -32,28 +32,6 @@ namespace PingPongClient.ControlLayer
             RequestType = RequestOptions.Start;
         }
 
-        public bool Hack()
-        {
-            ControlInputs hackInput = Input.GetControlInput();
-
-            if (hackInput == ControlInputs.Pause)
-            {
-                Network.SendClientStart(2, new int[] { 0, 1 });
-
-                Player[] players = new Player[2];
-                players[0] = new Player(0, 0, GameInitializers.PLAYER_1_X);
-                players[1] = new Player(1, 1, GameInitializers.PLAYER_2_X);
-
-                ParentControl.GameControl.InitializeGame(players, new GameField(), new Ball());
-
-                ParentControl.SwitchMode(GameMode.Game);
-
-                return true;
-            }
-
-            return false;
-        }
-
         public void ResetSelection()
         {
             RegistrationLobby.Selection = 0;
@@ -61,9 +39,6 @@ namespace PingPongClient.ControlLayer
 
         public override void HandleInput()
         {
-            if (Hack())
-                return;
-
             SelectionInputs selectionInput = Input.GetSelectionInput();
 
             if (selectionInput != SelectionInputs.NoInput)

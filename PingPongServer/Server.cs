@@ -47,8 +47,15 @@ namespace PingPongServer
             ConnectionAccepter.ClientConnected += OnSocketAccept;
 
             MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
+            MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
             ReadConfigurationFromConfigurationFile();
+        }
+
+        private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
+        {
+            if (!ServerStopping)
+                throw new Exception("y u du dis");
         }
 
         public void Run()
@@ -135,26 +142,32 @@ namespace PingPongServer
                 if (packet == null)
                     continue;
 
-                switch (packet.PackageType)
+                if (packet.PackageType == PackageType.ClientInitalizeGamePackage)
                 {
-                    case PackageType.ClientInitalizeGamePackage:
-                        Logger.NetworkLog("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString());
-                        Logger.GameLog("Creating a new game");
-                        CreateNewGame(conn, packet);
-                        break;
+                    ClientInitializeGamePackage initPackage = packet as ClientInitializeGamePackage;
+                    switch (initPackage.Request)
+                    {
+                        case ClientInitializeGamePackage.RequestType.StartNew:
+                            Logger.NetworkLog("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString());
+                            Logger.GameLog("Creating a new game");
+                            CreateNewGame(conn, packet);
+                            break;
+                        case ClientInitializeGamePackage.RequestType.Join:
+                            if (!JoinClientToGame(conn, packet))
+                                throw new NotImplementedException(); // Need to have an error handling package for client
+                            break;
 
-                    case PackageType.ClientRejoinGamePackage:
-                        if (!RejoinClientToGame(conn))
-                            throw new NotImplementedException(); // Need to have an error handling package for client
-                        break;
-
-                    case PackageType.ClientJoinGameRequest:
-                        if (!JoinClientToGame(conn, packet))
-                            throw new NotImplementedException(); // Need to have an error handling package for client
-                        break;
-
+                        case ClientInitializeGamePackage.RequestType.Matchmaking:
+                            AddToMatchmaking(conn, packet);
+                            break;
+                    }
                 }
             }
+        }
+
+        private void AddToMatchmaking(NetworkConnection conn, PackageInterface packet)
+        {
+            throw new NotImplementedException();
         }
 
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)
