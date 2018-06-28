@@ -1,5 +1,4 @@
-﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using System;
+﻿using System;
 
 namespace PingPongServer
 {
@@ -8,7 +7,6 @@ namespace PingPongServer
         private class Request
         {
             public int ID { get; private set; }
-            //public NetworkConnection ClientConnection { get; private set; }
             public int MaxPlayerCount { get; private set; }
             int[] TeamWishes { get; set; }
             public int ClientPlayerCount { get { return TeamWishes.Length; } }

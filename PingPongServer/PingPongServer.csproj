@@ -51,7 +51,7 @@
     <Compile Include="Matchmaking\Matchmaking.cs" />
     <Compile Include="Matchmaking\PuzzleBox.cs" />
     <Compile Include="Matchmaking\Request.cs" />
-    <Compile Include="Matchmaking\RequestGrouping.cs" />
+    <Compile Include="Matchmaking\Filtering.cs" />
     <Compile Include="Matchmaking\ValidCombinations.cs" />
     <Compile Include="ServerGame\ServerGameObjects\Client.cs" />
     <Compile Include="ServerGame\ServerGame.cs" />

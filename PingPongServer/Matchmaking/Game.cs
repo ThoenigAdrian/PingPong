@@ -48,6 +48,7 @@ namespace PingPongServer
             public bool GameReady()
             {
                 bool ready = Full();
+                ready &= !OneTeamSizeExceeds();
                 ready &= FitsIntoGame();
 
                 if (ready)
@@ -86,31 +87,28 @@ namespace PingPongServer
                 return false;
             }
 
-            private bool OneTeamSizeExceeds(List<Request> allRequests, int maxPlayerSize)
+            private bool OneTeamSizeExceeds()
             {
-                Request maximumRequest = GetRequestWithBiggestTeam(allRequests);
-                allRequests.Remove(maximumRequest);
-                List<Request> allRequestsWithoutMaximum = new List<Request>(allRequests);
-                allRequestsWithoutMaximum.Remove(maximumRequest);
-                int minimumPossibleTeamSize = GetCountBiggestTeam(allRequests) + GetMinimumSum(allRequestsWithoutMaximum);
+                Request maximumRequest = GetRequestWithBiggestTeam();
+                int minimumPossibleTeamSize = GetCountBigTeam(maximumRequest) + (GetMinimumSum() - GetCountSmallTeam(maximumRequest));
                 return minimumPossibleTeamSize > TeamSize;
             }
 
-            private int GetMinimumSum(List<Request> requestList)
+            private int GetMinimumSum()
             {
                 int minimumSum = 0;
-                foreach (Request request in requestList)
+                foreach (Request request in m_requests)
                 {
                     minimumSum += GetCountSmallTeam(request);
                 }
                 return minimumSum;
             }
 
-            private Request GetRequestWithBiggestTeam(List<Request> requestList)
+            private Request GetRequestWithBiggestTeam()
             {
                 int maximumPlayers = 0;
                 Request maxRequest = null;
-                foreach (Request request in requestList)
+                foreach (Request request in m_requests)
                 {
                     int countBigTeam = GetCountBigTeam(request);
                     if (countBigTeam > maximumPlayers)
@@ -122,9 +120,9 @@ namespace PingPongServer
                 return maxRequest;
             }
 
-            private int GetCountBiggestTeam(List<Request> requestList)
+            private int GetCountBiggestTeam()
             {
-                return GetCountBigTeam(GetRequestWithBiggestTeam(requestList));
+                return GetCountBigTeam(GetRequestWithBiggestTeam());
             }
 
             private int GetCountSmallTeam(Request request)
