@@ -61,16 +61,14 @@ namespace PingPongServer
 
                 for (int step = 0; step < possibilities; step++)
                 {
-                    for (int i = 0; i < m_requests.Count - 1; i++)
-                    {
-                        int clientIndex = m_requests.Count - 1 - i;
-
-                        if (step % (2 << i) == (1 << i))
-                            m_requests[clientIndex].SwapTeams();
-                    }
-
                     if (CurrentlyFitting())
                         return true;
+
+                    for (int i = 0; i < m_requests.Count - 1 && step < possibilities - 1; i++)
+                    {
+                        if (step % (1 << i) == (1 << i) - 1)
+                            m_requests[m_requests.Count - 1 - i].SwapTeams();
+                    }
                 }
 
                 return false;
