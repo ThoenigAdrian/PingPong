@@ -1,5 +1,7 @@
 ﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using XSLibrary.Network.Connections;
 
 namespace PingPongServer
 {
@@ -9,12 +11,7 @@ namespace PingPongServer
 
         public bool AddRequestToQueue(NetworkConnection connection, int maxPlayerCount, int[] teamWishes)
         {
-            ClientData request = new ClientData()
-            {
-                ClientConnection = connection,
-                MaxPlayerCount = maxPlayerCount,
-                TeamWishes = teamWishes
-            };
+            Request request = new Request(/*connection,*/ maxPlayerCount, teamWishes);
 
             if (!IsRequestValid(request))
                 return false;
@@ -23,7 +20,7 @@ namespace PingPongServer
             return true;
         }
         
-        private void AddSearchingClient(ClientData client)
+        private void AddSearchingClient(Request client)
         {
             int maxPlayerCount = client.MaxPlayerCount;
 
@@ -40,7 +37,7 @@ namespace PingPongServer
                 m_waitingForMatch.Add(maxPlayerCount, sameSizedEntry);
             }
 
-            sameSizedEntry.GroupedClients.AddRequest(client);
+            sameSizedEntry.GroupedRequests.AddRequest(client);
         } 
 
         private bool GameSizeOpen(int maxPlayerCount)
@@ -50,34 +47,26 @@ namespace PingPongServer
 
         public void FindMatch()
         {
-            int maxPlayerCount = 6;
+            int maxPlayerCount = 8;
 
-            ClientData client1 = new ClientData()
-            {
-                MaxPlayerCount = maxPlayerCount,
-                TeamWishes = new int[2] { 0, 1 }
-            };
+            Request client1 = new Request(maxPlayerCount, new int[2] { 0, 0 });
+            Request client2 = new Request(maxPlayerCount, new int[3] { 0, 0, 1 });
+            Request client3 = new Request(maxPlayerCount, new int[3] { 0, 0, 0 });
 
-            ClientData client2 = new ClientData()
-            {
-                MaxPlayerCount = maxPlayerCount,
-                TeamWishes = new int[3] { 0, 1, 1 }
-            };
-
-            ClientData client3 = new ClientData()
-            {
-                MaxPlayerCount = maxPlayerCount,
-                TeamWishes = new int[1] { 0 }
-            };
+            bool equal = client2.IsEqualRequest(client3);
 
             Game testGame = new Game();
             testGame.MaxPlayerCount = client1.MaxPlayerCount;
-            testGame.AddClient(client1);
-            testGame.AddClient(client2);
-            testGame.AddClient(client3);
+            testGame.AddRequest(client1);
+            testGame.AddRequest(client2);
+            testGame.AddRequest(client3);
 
-            bool fits = testGame.FitsIntoGame();
-            bool full = testGame.Full();
+            bool ready = testGame.GameReady();
+
+            int[] final1 = client1.GetPlayerPlacements();
+            int[] final2 = client2.GetPlayerPlacements();
+            int[] final3 = client3.GetPlayerPlacements();
+
 
             //foreach(MatchingEntry entry in m_waitingForMatch.Values)
             //{
@@ -90,7 +79,7 @@ namespace PingPongServer
             //forea
         }
 
-        bool IsRequestValid(ClientData request)
+        bool IsRequestValid(Request request)
         {
             if (request.MaxPlayerCount % 2 != 0)
                 return false;

@@ -6,11 +6,11 @@ namespace PingPongServer
     {
         private class RequestGroup
         {
-            public List<List<ClientData>> m_clients { get; private set; } = new List<List<ClientData>>();
+            public List<List<Request>> m_requests { get; private set; } = new List<List<Request>>();
 
-            public void AddRequest(ClientData request)
+            public void AddRequest(Request request)
             {
-                foreach (List<ClientData> group in m_clients)
+                foreach (List<Request> group in m_requests)
                 {
                     if (group.Count > 0 && group[0].IsEqualRequest(request))
                     {
@@ -19,20 +19,20 @@ namespace PingPongServer
                     }
                 }
 
-                List<ClientData> newGroup = new List<ClientData>();
-                m_clients.Add(newGroup);
+                List<Request> newGroup = new List<Request>();
+                m_requests.Add(newGroup);
                 newGroup.Add(request);
             }
 
-            public void RemoveRequest(ClientData request)
+            public void RemoveRequest(Request request)
             {
-                foreach (List<ClientData> group in m_clients)
+                foreach (List<Request> group in m_requests)
                 {
                     if (group.Contains(request))
                     {
                         group.Remove(request);
                         if (group.Count <= 0)
-                            m_clients.Remove(group);
+                            m_requests.Remove(group);
                         return;
                     }
                 }
