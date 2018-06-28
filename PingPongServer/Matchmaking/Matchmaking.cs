@@ -1,17 +1,15 @@
 ﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using System.Collections.Generic;
-using System.Net.Sockets;
-using XSLibrary.Network.Connections;
 
 namespace PingPongServer
 {
     public partial class Matchmaking
     {
-        Dictionary<int, MatchingEntry> m_waitingForMatch = new Dictionary<int, MatchingEntry>();
+        Dictionary<int, Filter> m_waitingForMatch = new Dictionary<int, Filter>();
 
         public bool AddRequestToQueue(NetworkConnection connection, int maxPlayerCount, int[] teamWishes)
         {
-            Request request = new Request(/*connection,*/ maxPlayerCount, teamWishes);
+            Request request = new Request(connection.ClientSession.SessionID, maxPlayerCount, teamWishes);
 
             if (!IsRequestValid(request))
                 return false;
@@ -24,20 +22,20 @@ namespace PingPongServer
         {
             int maxPlayerCount = client.MaxPlayerCount;
 
-            MatchingEntry sameSizedEntry = null;
+            Filter sameSizedFilter = null;
 
             if (GameSizeOpen(maxPlayerCount))
             {
-                sameSizedEntry = m_waitingForMatch[maxPlayerCount];
+                sameSizedFilter = m_waitingForMatch[maxPlayerCount];
             }
             else
             {
-                sameSizedEntry = new MatchingEntry();
-                sameSizedEntry.Game = new Game() { MaxPlayerCount = maxPlayerCount };
-                m_waitingForMatch.Add(maxPlayerCount, sameSizedEntry);
+                sameSizedFilter = new Filter(maxPlayerCount);
+                sameSizedFilter.FoundValidCombination += HandleValidCombination;
+                m_waitingForMatch.Add(maxPlayerCount, sameSizedFilter);
             }
 
-            sameSizedEntry.GroupedRequests.AddRequest(client);
+            sameSizedFilter.AddRequest(client);
         } 
 
         private bool GameSizeOpen(int maxPlayerCount)
@@ -49,34 +47,29 @@ namespace PingPongServer
         {
             int maxPlayerCount = 8;
 
-            Request client1 = new Request(maxPlayerCount, new int[2] { 0, 0 });
-            Request client2 = new Request(maxPlayerCount, new int[3] { 0, 0, 1 });
-            Request client3 = new Request(maxPlayerCount, new int[3] { 0, 0, 0 });
-
-            bool equal = client2.IsEqualRequest(client3);
-
-            Game testGame = new Game();
-            testGame.MaxPlayerCount = client1.MaxPlayerCount;
-            testGame.AddRequest(client1);
-            testGame.AddRequest(client2);
-            testGame.AddRequest(client3);
-
-            bool ready = testGame.GameReady();
-
-            int[] final1 = client1.GetPlayerPlacements();
-            int[] final2 = client2.GetPlayerPlacements();
-            int[] final3 = client3.GetPlayerPlacements();
+            AddSearchingClient(new Request(0, maxPlayerCount, new int[2] { 0, 0 }));
+            AddSearchingClient(new Request(1, maxPlayerCount, new int[3] { 0, 0, 1 }));
+            AddSearchingClient(new Request(2, maxPlayerCount, new int[3] { 0, 0, 1 }));
 
 
-            //foreach(MatchingEntry entry in m_waitingForMatch.Values)
-            //{
-            //    HandleEntry(entry);
-            //}
+            foreach (Filter entry in m_waitingForMatch.Values)
+            {
+                UpdateFilter(entry);
+            }
         }
 
-        private void HandleEntry(MatchingEntry entry)
+        private void UpdateFilter(Filter filter)
         {
-            //forea
+            filter.SearchNewCombinations();
+            filter.SearchValidCombinations();
+        }
+
+        private void HandleValidCombination(object sender, Request[] requests)
+        {
+            foreach (Request request in requests)
+            {
+                int[] placements = request.GetPlayerPlacements();
+            }
         }
 
         bool IsRequestValid(Request request)

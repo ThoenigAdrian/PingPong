@@ -9,7 +9,7 @@ namespace PingPongServer
         {
             List<Request> m_requests = new List<Request>();
 
-            public int MaxPlayerCount { get; set; }
+            public int MaxPlayerCount { get; private set; }
             public int TeamSize { get { return MaxPlayerCount / 2; } }
             public int CurrentPlayerCount
             {
@@ -23,15 +23,26 @@ namespace PingPongServer
                 }
             }
 
-            public void AddRequest(Request client, int index = -1)
+            public Game(int maxPlayerCount)
+            {
+                MaxPlayerCount = maxPlayerCount;
+            }
+
+            public void AddRequest(Request client)
             {
                 m_requests.Add(client);
             }
 
             public void ReplaceRequest(Request client, int index)
             {
-                m_requests.RemoveAt(index);
+                if(index < m_requests.Count)
+                    m_requests.RemoveAt(index);
                 m_requests.Insert(index, client);
+            }
+
+            public Request[] GetRequests()
+            {
+                return m_requests.ToArray();
             }
 
             public bool GameReady()
@@ -68,7 +79,7 @@ namespace PingPongServer
                     for (int i = 0; i < m_requests.Count - 1 && step < possibilities - 1; i++)
                     {
                         if (step % (1 << i) == (1 << i) - 1)
-                            m_requests[m_requests.Count - 1 - i].SwapTeams();
+                            m_requests[m_requests.Count - 1 - i].Reverse();
                     }
                 }
 
@@ -77,91 +88,53 @@ namespace PingPongServer
 
             private bool OneTeamSizeExceeds(List<Request> allRequests, int maxPlayerSize)
             {
-                int maxTeamSize = maxPlayerSize / 2;
-                Request maximumRequest = getRequestWithMaximumPlayersInTeam(allRequests);
+                Request maximumRequest = GetRequestWithBiggestTeam(allRequests);
                 allRequests.Remove(maximumRequest);
-                List<Request> allRequestsWithoutMaximum = cloneRequestList(allRequests);
+                List<Request> allRequestsWithoutMaximum = new List<Request>(allRequests);
                 allRequestsWithoutMaximum.Remove(maximumRequest);
-                int minimumPossibleTeamSize = getMaximumPlayersOfRequestList(allRequests) + getSumOfMinimumPlayersOfRequestList(allRequestsWithoutMaximum);
-                return minimumPossibleTeamSize > maxTeamSize;
+                int minimumPossibleTeamSize = GetCountBiggestTeam(allRequests) + GetMinimumSum(allRequestsWithoutMaximum);
+                return minimumPossibleTeamSize > TeamSize;
             }
 
-            private int getSumOfMinimumPlayersOfRequestList(List<Request> requestList)
+            private int GetMinimumSum(List<Request> requestList)
             {
-                int sumOfMinimumPlayersOfRequestList = 0;
+                int minimumSum = 0;
                 foreach (Request request in requestList)
                 {
-                    sumOfMinimumPlayersOfRequestList += getMinimumPlayersOfRequest(request);
+                    minimumSum += GetCountSmallTeam(request);
                 }
-                return sumOfMinimumPlayersOfRequestList;
+                return minimumSum;
             }
 
-            private Request getRequestWithMaximumPlayersInTeam(List<Request> requestList)
+            private Request GetRequestWithBiggestTeam(List<Request> requestList)
             {
-                int maximumPlayersOfCurrentRequest = 0;
                 int maximumPlayers = 0;
                 Request maxRequest = null;
                 foreach (Request request in requestList)
                 {
-                    maximumPlayersOfCurrentRequest = getMaximumPlayersOfRequest(request);
-                    if (maximumPlayersOfCurrentRequest > maximumPlayers)
+                    int countBigTeam = GetCountBigTeam(request);
+                    if (countBigTeam > maximumPlayers)
                     {
-                        maximumPlayers = maximumPlayersOfCurrentRequest;
+                        maximumPlayers = countBigTeam;
                         maxRequest = request;
                     }
                 }
                 return maxRequest;
             }
 
-            private List<Request> cloneRequestList(List<Request> requestList)
+            private int GetCountBiggestTeam(List<Request> requestList)
             {
-                List<Request> clonedList = new List<Request>();
-                foreach (Request request in requestList)
-                {
-                    clonedList.Add(request);
-                }
-                return clonedList;
+                return GetCountBigTeam(GetRequestWithBiggestTeam(requestList));
             }
 
-
-            private int getMinimumPlayersOfRequestList(List<Request> requestList)
-            {
-                int minimumPlayersOfCurrentRequest = 0;
-                int minimumPlayers = 10000;
-                foreach (Request request in requestList)
-                {
-                    minimumPlayersOfCurrentRequest = getMinimumPlayersOfRequest(request);
-                    if (minimumPlayersOfCurrentRequest < minimumPlayers)
-                    {
-                        minimumPlayers = minimumPlayersOfCurrentRequest;
-                    }
-                }
-                return minimumPlayers;
-            }
-
-            private int getMaximumPlayersOfRequestList(List<Request> requestList)
-            {
-                int maximumPlayersOfCurrentRequest = 0;
-                int maximumPlayers = 0;
-                foreach (Request request in requestList)
-                {
-                    maximumPlayersOfCurrentRequest = getMaximumPlayersOfRequest(request);
-                    if (maximumPlayersOfCurrentRequest > maximumPlayers)
-                    {
-                        maximumPlayers = maximumPlayersOfCurrentRequest;
-                    }
-                }
-                return maximumPlayers;
-            }
-
-            private int getMinimumPlayersOfRequest(Request request)
+            private int GetCountSmallTeam(Request request)
             {
                 return Math.Min(request.Team1Count, request.Team2Count);
             }
 
-            private int getMaximumPlayersOfRequest(Request request)
+            private int GetCountBigTeam(Request request)
             {
-                return Math.Min(request.Team1Count, request.Team2Count);
+                return Math.Max(request.Team1Count, request.Team2Count);
             }
 
             private bool CurrentlyFitting()
@@ -180,9 +153,14 @@ namespace PingPongServer
 
             private void ApplyPlayerPositions()
             {
+                ApplyPlayerPositions(m_requests.ToArray());
+            }
+
+            public static void ApplyPlayerPositions(Request[] requests)
+            {
                 int currentTeam1Offset = 0;
                 int currentTeam2Offset = 0;
-                foreach (Request request in m_requests)
+                foreach (Request request in requests)
                 {
                     request.Team1Offset = currentTeam1Offset;
                     request.Team2Offset = currentTeam2Offset;

@@ -6,7 +6,7 @@
         {
             Server Server = new Server();
             try { Server.Run(); }
-            catch { Server.Dispose(); }            
+            finally { Server.Dispose(); }            
         }
     }
 }

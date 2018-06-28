@@ -1,4 +1,5 @@
 ﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using System;
 
 namespace PingPongServer
 {
@@ -6,20 +7,22 @@ namespace PingPongServer
     {
         private class Request
         {
-            public NetworkConnection ClientConnection { get; private set; }
+            public int ID { get; private set; }
+            //public NetworkConnection ClientConnection { get; private set; }
             public int MaxPlayerCount { get; private set; }
             int[] TeamWishes { get; set; }
             public int ClientPlayerCount { get { return TeamWishes.Length; } }
             public int TeamSize { get { return MaxPlayerCount / 2; } }
 
-            private bool ReverseTeams { get; set; }
+            public bool ReverseTeams { get; private set; }
 
             private int m_team1Count = -1;
             public int Team1Count
             {
                 get
                 {
-                    CalculatateTeamCount();
+                    if (m_team1Count < 0)
+                        CalculatateTeamCount();
 
                     if (ReverseTeams)
                         return TeamWishes.Length - m_team1Count;
@@ -32,7 +35,8 @@ namespace PingPongServer
             {
                 get
                 {
-                    CalculatateTeamCount();
+                    if (m_team1Count < 0)
+                        CalculatateTeamCount();
 
                     if (ReverseTeams)
                         return m_team1Count;
@@ -44,41 +48,65 @@ namespace PingPongServer
             public int Team1Offset { get; set; }
             public int Team2Offset { get; set; }
 
-            public Request(/*NetworkConnection connection,*/ int maxPlayerCount, int[] teamWishes)
+            public Request(int id, int maxPlayerCount, int[] teamWishes)
             {
-                //ClientConnection = connection;
+                ID = id;
                 MaxPlayerCount = maxPlayerCount;
                 TeamWishes = teamWishes;
+
+                ReverseTeams = false;
+
+                NormalizeRequest();
             }
 
             public int[] GetPlayerPlacements()
             {
                 int[] playerPlacements = new int[TeamWishes.Length];
-                for (int i = 0; i < TeamWishes.Length; i++)
-                {
-                    if ((TeamWishes[i] == 0) != ReverseTeams)
-                        playerPlacements[i] = 1;
-                    else
-                        playerPlacements[i] = 0;
-                }
+                Array.Copy(TeamWishes, playerPlacements, TeamWishes.Length);
+                if (ReverseTeams)
+                    SwapTeams(playerPlacements);
                 return playerPlacements;
             }
 
-            public void SwapTeams()
+            private void NormalizeRequest()
+            {
+                if (m_team1Count < 0)
+                    CalculatateTeamCount();
+
+                if (Team1Count > Team2Count)
+                    SwapTeams();
+            }
+
+            private void SwapTeams()
+            {
+                SwapTeams(TeamWishes);
+
+                m_team1Count = TeamWishes.Length - m_team1Count;
+            }
+
+            private void SwapTeams(int[] teamWishes)
+            {
+                for (int i = 0; i < teamWishes.Length; i++)
+                {
+                    if (teamWishes[i] == 0)
+                        teamWishes[i] = 1;
+                    else
+                        teamWishes[i] = 0;
+                }
+            }
+
+            public void Reverse()
             {
                 ReverseTeams = !ReverseTeams;
             }
 
             private void CalculatateTeamCount()
             {
-                if (m_team1Count < 0)
+                m_team1Count = 0;
+                foreach (int wish in TeamWishes)
                 {
-                    m_team1Count = 0;
-                    foreach (int wish in TeamWishes)
-                    {
-                        if (wish == 0)
-                            m_team1Count++;
-                    }
+                    if (wish == 0)
+                        m_team1Count++;
                 }
             }
 
@@ -88,13 +116,14 @@ namespace PingPongServer
                     && other.ClientPlayerCount == ClientPlayerCount
                     && (other.Team1Count == Team1Count || other.Team2Count == Team1Count);
             }
-        }
 
-
-        private class MatchingEntry
-        {
-            public Game Game { get; set; }
-            public RequestGroup GroupedRequests { get; set; } = new RequestGroup();
+            public Request Copy()
+            {
+                Request copy = new Request(-1, MaxPlayerCount, TeamWishes);
+                copy.m_team1Count = m_team1Count;
+                copy.ReverseTeams = ReverseTeams;
+                return copy;
+            }
         }
     }
 }
