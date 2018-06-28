@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace PingPongServer
 {
@@ -72,6 +73,95 @@ namespace PingPongServer
                 }
 
                 return false;
+            }
+
+            private bool OneTeamSizeExceeds(List<Request> allRequests, int maxPlayerSize)
+            {
+                int maxTeamSize = maxPlayerSize / 2;
+                Request maximumRequest = getRequestWithMaximumPlayersInTeam(allRequests);
+                allRequests.Remove(maximumRequest);
+                List<Request> allRequestsWithoutMaximum = cloneRequestList(allRequests);
+                allRequestsWithoutMaximum.Remove(maximumRequest);
+                int minimumPossibleTeamSize = getMaximumPlayersOfRequestList(allRequests) + getSumOfMinimumPlayersOfRequestList(allRequestsWithoutMaximum);
+                return minimumPossibleTeamSize > maxTeamSize;
+            }
+
+            private int getSumOfMinimumPlayersOfRequestList(List<Request> requestList)
+            {
+                int sumOfMinimumPlayersOfRequestList = 0;
+                foreach (Request request in requestList)
+                {
+                    sumOfMinimumPlayersOfRequestList += getMinimumPlayersOfRequest(request);
+                }
+                return sumOfMinimumPlayersOfRequestList;
+            }
+
+            private Request getRequestWithMaximumPlayersInTeam(List<Request> requestList)
+            {
+                int maximumPlayersOfCurrentRequest = 0;
+                int maximumPlayers = 0;
+                Request maxRequest = null;
+                foreach (Request request in requestList)
+                {
+                    maximumPlayersOfCurrentRequest = getMaximumPlayersOfRequest(request);
+                    if (maximumPlayersOfCurrentRequest > maximumPlayers)
+                    {
+                        maximumPlayers = maximumPlayersOfCurrentRequest;
+                        maxRequest = request;
+                    }
+                }
+                return maxRequest;
+            }
+
+            private List<Request> cloneRequestList(List<Request> requestList)
+            {
+                List<Request> clonedList = new List<Request>();
+                foreach (Request request in requestList)
+                {
+                    clonedList.Add(request);
+                }
+                return clonedList;
+            }
+
+
+            private int getMinimumPlayersOfRequestList(List<Request> requestList)
+            {
+                int minimumPlayersOfCurrentRequest = 0;
+                int minimumPlayers = 10000;
+                foreach (Request request in requestList)
+                {
+                    minimumPlayersOfCurrentRequest = getMinimumPlayersOfRequest(request);
+                    if (minimumPlayersOfCurrentRequest < minimumPlayers)
+                    {
+                        minimumPlayers = minimumPlayersOfCurrentRequest;
+                    }
+                }
+                return minimumPlayers;
+            }
+
+            private int getMaximumPlayersOfRequestList(List<Request> requestList)
+            {
+                int maximumPlayersOfCurrentRequest = 0;
+                int maximumPlayers = 0;
+                foreach (Request request in requestList)
+                {
+                    maximumPlayersOfCurrentRequest = getMaximumPlayersOfRequest(request);
+                    if (maximumPlayersOfCurrentRequest > maximumPlayers)
+                    {
+                        maximumPlayers = maximumPlayersOfCurrentRequest;
+                    }
+                }
+                return maximumPlayers;
+            }
+
+            private int getMinimumPlayersOfRequest(Request request)
+            {
+                return Math.Min(request.Team1Count, request.Team2Count);
+            }
+
+            private int getMaximumPlayersOfRequest(Request request)
+            {
+                return Math.Min(request.Team1Count, request.Team2Count);
             }
 
             private bool CurrentlyFitting()
