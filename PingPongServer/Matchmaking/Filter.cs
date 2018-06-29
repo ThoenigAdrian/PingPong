@@ -46,63 +46,27 @@ namespace PingPongServer
             public void SearchNewCombinations()
             {
                 PuzzleBox puzzleBox = new PuzzleBox(MaxPlayerCount, m_requestGroups.ToArray());
-                puzzleBox.SearchNewCombinations();
-                m_validCombinations.AddRange(puzzleBox.FoundCombinations);
-            }
-        }
-
-        private class RequestGroup
-        {
-            public Request GroupType { get; private set; }
-
-            List<Request> m_requests = new List<Request>();
-
-            public int CombinationMaxDepth { get; set; } = -1;
-
-            public RequestGroup(Request request)
-            {
-                GroupType = request.Copy();
-                m_requests.Add(request);
+                AddToValidCombinations(puzzleBox.SearchNewCombinations());
             }
 
-            public bool IsEqualRequest(Request request)
+            private void AddToValidCombinations(ValidCombination[] foundCombinations)
             {
-                return GroupType.IsEqualRequest(request);
-            }
-
-            public bool Push(Request request)
-            {
-                if (IsEqualRequest(request))
+                foreach (ValidCombination combination in foundCombinations)
                 {
-                    m_requests.Add(request);
-                    return true;
+                    if (!Contains(combination))
+                        m_validCombinations.Add(combination);
+                }
+            }
+
+            private bool Contains(ValidCombination combination)
+            {
+                foreach(ValidCombination existingCombination in m_validCombinations)
+                {
+                    if (existingCombination.IsEqual(combination))
+                        return true;
                 }
 
                 return false;
-            }
-
-            public bool PushFront(Request request)
-            {
-                if (IsEqualRequest(request))
-                {
-                    m_requests.Insert(0, request);
-                    return true;
-                }
-
-                return false;
-            }
-
-            public Request Pop()
-            {
-                Request poppedRequest = null;
-
-                if (m_requests.Count > 0)
-                {
-                    poppedRequest = m_requests[0];
-                    m_requests.RemoveAt(0);
-                }
-
-                return poppedRequest;
             }
         }
     }

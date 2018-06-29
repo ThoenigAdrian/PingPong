@@ -6,7 +6,7 @@ namespace PingPongServer
     {
         private class ValidCombination
         {
-            public class Entry
+            private class Entry
             {
                 public RequestGroup Group { get; private set; }
                 public bool Reversed { get; private set; }
@@ -23,6 +23,34 @@ namespace PingPongServer
             public void AddToCombination(RequestGroup requestGroup, bool reversed)
             {
                 Combination.Add(new Entry(requestGroup, reversed));
+            }
+
+            public bool IsEqual(ValidCombination other)
+            {
+                if (other.Combination.Count != Combination.Count)
+                    return false;
+
+                List<Entry> entriesCopy = new List<Entry>(Combination);
+
+                foreach (Entry otherEntry in other.Combination)
+                {
+                    bool found = false;
+
+                    foreach (Entry entry in entriesCopy)
+                    {
+                        if (entry.Group == otherEntry.Group && entry.Reversed == otherEntry.Reversed)
+                        {
+                            found = true;
+                            entriesCopy.Remove(entry);
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        return false;
+                }
+
+                return true;
             }
 
             public Request[] GetRequests()

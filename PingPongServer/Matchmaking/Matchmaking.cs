@@ -31,7 +31,7 @@ namespace PingPongServer
             else
             {
                 sameSizedFilter = new Filter(maxPlayerCount);
-                sameSizedFilter.FoundValidCombination += HandleValidCombination;
+                sameSizedFilter.FoundValidCombination += HandleFoundMatch;
                 m_waitingForMatch.Add(maxPlayerCount, sameSizedFilter);
             }
 
@@ -64,7 +64,7 @@ namespace PingPongServer
             filter.SearchValidCombinations();
         }
 
-        private void HandleValidCombination(object sender, Request[] requests)
+        private void HandleFoundMatch(object sender, Request[] requests)
         {
             foreach (Request request in requests)
             {

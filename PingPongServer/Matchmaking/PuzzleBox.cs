@@ -10,7 +10,7 @@ namespace PingPongServer
             RequestGroup[] m_requestGroups;
             Game m_game;
 
-            public List<ValidCombination> FoundCombinations { get; set; } = new List<ValidCombination>();
+            List<ValidCombination> FoundCombinations { get; set; } = new List<ValidCombination>();
 
             public PuzzleBox(int maxPlayerCount, RequestGroup[] requestGroups)
             {
@@ -18,13 +18,17 @@ namespace PingPongServer
                 m_game = new Game(maxPlayerCount);
             }
 
-            public void SearchNewCombinations()
+            public ValidCombination[] SearchNewCombinations()
             {
+                FoundCombinations.Clear();
+
                 for (int maxDepth = 0; maxDepth < MaxPlayerCount; maxDepth++)
                 {
                     m_game.ResetRequests();
                     FindCombinationsRecursive(0, maxDepth);
                 }
+
+                return FoundCombinations.ToArray();
             }
 
             private void FindCombinationsRecursive(int depth, int maxDepth)
