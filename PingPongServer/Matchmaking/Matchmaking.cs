@@ -1,5 +1,4 @@
-﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PingPongServer.Matchmaking
 {
@@ -7,10 +6,17 @@ namespace PingPongServer.Matchmaking
     {
         Dictionary<int, Filter> m_waitingForMatch = new Dictionary<int, Filter>();
 
-        public bool AddRequestToQueue(NetworkConnection connection, int maxPlayerCount, int[] teamWishes)
-        {
-            Request request = new Request(connection.ClientSession.SessionID, maxPlayerCount, teamWishes);
+        public List<Request[]> Matches { get; private set; } = new List<Request[]>();
 
+        public bool AddRequestToQueue(int id, int maxPlayerCount, int[] teamWishes)
+        {
+            Request request = new Request(id, maxPlayerCount, teamWishes);
+
+            return AddRequestToQueue(request);
+        }
+
+        public bool AddRequestToQueue(Request request)
+        {
             if (!IsRequestValid(request))
                 return false;
 
@@ -66,10 +72,7 @@ namespace PingPongServer.Matchmaking
 
         private void HandleFoundMatch(object sender, Request[] requests)
         {
-            foreach (Request request in requests)
-            {
-                int[] placements = request.GetPlayerPlacements();
-            }
+            Matches.Add(requests);
         }
 
         bool IsRequestValid(Request request)

@@ -18,6 +18,8 @@ using PingPongServer.ServerGame;
 
 using Newtonsoft.Json.Linq;
 using XSLibrary.Network.Accepters;
+using PingPongServer.Matchmaking;
+using static PingPongServer.MatchmakingManager;
 
 namespace PingPongServer
 {
@@ -29,6 +31,8 @@ namespace PingPongServer
         private UDPConnection MasterUDPSocket;
         private SafeList<NetworkConnection> ConnectionsReadyForJoingAndStartingGames = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
+        private MatchmakingManager MatchManager = new MatchmakingManager();
+
         // Game
         private SafeList<Game> PendingGames = new SafeList<Game>();
         private SafeList<Game> RunningGames = new SafeList<Game>();
@@ -51,7 +55,7 @@ namespace PingPongServer
             MasterUDPSocket.Logger = Logger;
             ReadConfigurationFromConfigurationFile();
 
-            new Matchmaking().FindMatch();
+            MatchManager.OnMatchFound += StartMatchmadeGame;
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
@@ -131,9 +135,25 @@ namespace PingPongServer
                     if (game.GameState == GameStates.Ready)
                         StartGame(game);
                 }
-                ServeClientGameRequests();                
+                ServeClientGameRequests();
+
+                MatchManager.Update();
+
+
                 Thread.Sleep(10);
             }
+        }
+
+        private void StartMatchmadeGame(object sender, MatchData match)
+        {
+            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
+            Game newGame = new Game(newGameNetwork, match.MaxPlayerCount);
+            newGame.GameID = new Random().Next();
+
+            foreach (ClientData client in match.Clients)
+                newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
+
+            newGame.StartGame(this);
         }
 
         private void ServeClientGameRequests()
@@ -160,16 +180,11 @@ namespace PingPongServer
                             break;
 
                         case ClientInitializeGamePackage.RequestType.Matchmaking:
-                            AddToMatchmaking(conn, packet);
+                            MatchManager.AddClientToQueue(conn, initPackage);
                             break;
                     }
                 }
             }
-        }
-
-        private void AddToMatchmaking(NetworkConnection conn, PackageInterface packet)
-        {
-            throw new NotImplementedException();
         }
 
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)

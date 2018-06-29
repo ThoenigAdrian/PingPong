@@ -74,7 +74,7 @@ namespace PingPongServer.ServerGame
             List<Player> DisconnectedPlayers = new List<Player>();
 
             foreach (Client c in Clients)
-                if (Network.DiedSessions.Contains(c.session))
+                if (Network.DiedSessions.Contains(c.SessionID))
                     DisconnectedPlayers.AddRange(c.Players);
 
             foreach(GameStructure.GameTeam team in GameStructure.GameTeams.Values)
@@ -117,7 +117,7 @@ namespace PingPongServer.ServerGame
         public void StartGame(object caller)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();            
-            GameFinished += (GameFinishedEventHandler)((Server)caller).OnGameFinished;
+            GameFinished += (caller as Server).OnGameFinished;
             GameState = GameStates.Running;
             Logger.GameLog("Game started");
 
@@ -140,35 +140,41 @@ namespace PingPongServer.ServerGame
 
             Network.AddClientConnection(client);            
             Client newClient = new Client(GameStructure, client.ClientSession.SessionID);
-            
-            for (int index = 0; index < playerTeamWish.Length; index++)
+
+            int maxTeamSize = GameStructure.maxPlayers / 2;
+
+            foreach (int team in playerTeamWish)
             {
-                float playerPosition = 0;
-                                
-                if (playerTeamWish[index] == 0 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].PlayerList.Count >= 1)
-                    playerPosition = GameInitializers.PLAYER_1_X + GameStructure.GameTeams.Count * 30F;
-                else if (playerTeamWish[index] == 1 && GameStructure.maxPlayers / 2 - GameStructure.GameTeams[playerTeamWish[index]].PlayerList.Count >= 1)
-                    playerPosition = GameInitializers.PLAYER_2_X - GameStructure.GameTeams.Count * 30F;
-                                
+                int index = GameStructure.PlayersCount;
+                int teamOpenSpots = maxTeamSize - GameStructure.GameTeams[team].PlayerList.Count;
 
-                Player newPlayer = new Player(GameStructure.PlayersCount, GameStructure.GetFreeTeam(), playerPosition);
+                if (teamOpenSpots < 1)
+                    continue;
+  
+                Player newPlayer = new Player(index, team, GameInitializers.GetPlayerX(team, index));
 
-                newClient.AddPlayer(newPlayer, GameStructure);
+                newClient.AddPlayer(newPlayer);
+                GameStructure.AddPlayer(newPlayer, team);
             }
-            ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
-            packet.m_field = new GameField();
-            packet.m_ball = new Ball();
-            packet.m_players = new Player[2];
-            packet.m_players[0] = new Player(0, 0, GameInitializers.PLAYER_1_X);
-            packet.m_players[1] = new Player(1, 1, GameInitializers.PLAYER_2_X);
 
-            Network.SendTCPPackageToClient(packet, client.ClientSession.SessionID);
+            SendServerInitResponse(newClient);
             Clients.Add(newClient);                       
             
             if (GameStructure.PlayersCount == maxPlayers)
                 GameState = GameStates.Ready;
 
             return true;
+        }
+
+        private void SendServerInitResponse(Client client)
+        {
+            ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
+            packet.m_field = new GameField();
+            packet.m_ball = new Ball();
+            packet.m_players = new Player[GameStructure.PlayersCount];
+            packet.m_players = client.Players.ToArray();
+
+            Network.SendTCPPackageToClient(packet, client.SessionID);
         }
         
         public void RejoinClient(NetworkConnection client)
@@ -241,7 +247,7 @@ namespace PingPongServer.ServerGame
             List<ClientControlPackage> cc = new List<ClientControlPackage>();
             foreach (Client c in Clients)
             {
-                PackageInterface[] ps = getAllDataRelatedToClient(c.session);
+                PackageInterface[] ps = getAllDataRelatedToClient(c.SessionID);
                 foreach(PackageInterface p in ps)
                 {
                     if (p == null || p.PackageType != PackageType.ClientControl)
@@ -258,7 +264,7 @@ namespace PingPongServer.ServerGame
             List<PlayerMovementPackage> cc = new List<PlayerMovementPackage>();
             foreach (Client c in Clients)
             {
-                PackageInterface[] ps = getAllDataRelatedToClient(c.session);
+                PackageInterface[] ps = getAllDataRelatedToClient(c.SessionID);
                 foreach (PackageInterface p in ps)
                 {
                     PlayerMovementPackage movementPackage = p as PlayerMovementPackage;

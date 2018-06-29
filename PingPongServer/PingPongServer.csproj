@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MatchmakingManager.cs" />
     <Compile Include="Matchmaking\Game.cs" />
     <Compile Include="Matchmaking\Matchmaking.cs" />
     <Compile Include="Matchmaking\PuzzleBox.cs" />

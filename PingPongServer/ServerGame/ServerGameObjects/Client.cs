@@ -5,26 +5,23 @@ namespace PingPongServer.ServerGame.ServerGameObjects
 {
     public class Client
     {
-        
-        public int ClientID;
-        public int session;
+        public int SessionID;
         public List<Player> Players = new List<Player>();
 
         public Client(GameStructure gameStructure, int sessionID)
         {
-            this.session = sessionID;
+            this.SessionID = sessionID;
         }
 
-        public void AddPlayer(Player player, GameStructure GameStructure)
+        public void AddPlayer(Player player)
         {
             Players.Add(player);
-            GameStructure.AddPlayer(player, GameStructure.GetFreeTeam());
         }
 
         public override string ToString()
         {
             string s = "";
-            s += "\nClient ID: " + ClientID.ToString();
+            s += "\nClient ID: " + SessionID.ToString();
             s += "\nThis Client contains the following players :";
             foreach (Player p in Players)
                 s += "\n\t" + p.ToString();
