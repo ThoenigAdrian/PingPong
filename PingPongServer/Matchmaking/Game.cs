@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System;
 
-namespace PingPongServer
+namespace PingPongServer.Matchmaking
 {
-    public partial class Matchmaking
+    public partial class Matchmaker
     {
         private class Game
         {

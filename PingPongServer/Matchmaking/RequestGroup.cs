@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace PingPongServer
+namespace PingPongServer.Matchmaking
 {
-    public partial class Matchmaking
+    public partial class Matchmaker
     {
         private class RequestGroup
         {
             public Request GroupType { get; private set; }
+            public int Count { get { return m_requests.Count; } }
 
             List<Request> m_requests = new List<Request>();
 
