@@ -10,9 +10,7 @@ namespace PingPongServer.Matchmaking
 
         public bool AddRequestToQueue(int id, int maxPlayerCount, int[] teamWishes)
         {
-            Request request = new Request(id, maxPlayerCount, teamWishes);
-
-            return AddRequestToQueue(request);
+            return AddRequestToQueue(new Request(id, maxPlayerCount, teamWishes));
         }
 
         public bool AddRequestToQueue(Request request)

@@ -26,8 +26,7 @@ namespace PingPongServer
         private void SessionDiedHandler(NetworkInterface sender, int sessionID)
         {
             DiedSessions.Add(sessionID);
-            if (ClientLost != null)
-                ClientLost(this, EventArgs.Empty);
+            ClientLost?.Invoke(this, EventArgs.Empty);
         }
         
         public void SendTCPPackageToClient(PackageInterface packet , int sessionID)

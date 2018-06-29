@@ -83,8 +83,7 @@ namespace GameLogicLibrary
         {
             ResetBall();
 
-            if (TeamScored != null)
-                TeamScored(this, EventArgs.Empty);
+            TeamScored?.Invoke(this, EventArgs.Empty);
         }
 
         private void ChangeDirectionOfBall(float Angle)

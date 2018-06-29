@@ -9,7 +9,7 @@ namespace PingPongServer.Matchmaking
             public delegate void ValidCombinationHandler(object sender, Request[] combination);
             public event ValidCombinationHandler FoundValidCombination;
 
-            public List<RequestGroup> m_requestGroups { get; private set; } = new List<RequestGroup>();
+            public List<RequestGroup> RequestGroups { get; private set; } = new List<RequestGroup>();
             List<ValidCombination> m_validCombinations = new List<ValidCombination>();
 
             public int MaxPlayerCount { get; private set; }
@@ -21,14 +21,14 @@ namespace PingPongServer.Matchmaking
 
             public void AddRequest(Request request)
             {
-                foreach (RequestGroup group in m_requestGroups)
+                foreach (RequestGroup group in RequestGroups)
                 {
                     if (group.Push(request))
                         return;
                 }
 
                 RequestGroup newGroup = new RequestGroup(request);
-                m_requestGroups.Add(newGroup);
+                RequestGroups.Add(newGroup);
             }
 
             public void SearchValidCombinations()
@@ -45,7 +45,7 @@ namespace PingPongServer.Matchmaking
 
             public void SearchNewCombinations()
             {
-                PuzzleBox puzzleBox = new PuzzleBox(MaxPlayerCount, m_requestGroups.ToArray());
+                PuzzleBox puzzleBox = new PuzzleBox(MaxPlayerCount, RequestGroups.ToArray());
                 AddToValidCombinations(puzzleBox.SearchNewCombinations());
             }
 

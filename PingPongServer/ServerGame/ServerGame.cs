@@ -201,12 +201,11 @@ namespace PingPongServer.ServerGame
             Logger.GameLog("Game finished");
             Logger.NetworkLog("Tearing Down Network");
 
-            if (GameFinished != null)
-                GameFinished(this, EventArgs.Empty);
+            GameFinished?.Invoke(this, EventArgs.Empty);
         }
 
 
-        private PackageInterface[] getAllDataRelatedToClient(int sessionID)
+        private PackageInterface[] GetClientData(int sessionID)
         {
             List<PackageInterface> ps = new List<PackageInterface>();
 
@@ -255,7 +254,7 @@ namespace PingPongServer.ServerGame
             List<ClientControlPackage> cc = new List<ClientControlPackage>();
             foreach (Client c in Clients)
             {
-                PackageInterface[] ps = getAllDataRelatedToClient(c.SessionID);
+                PackageInterface[] ps = GetClientData(c.SessionID);
                 foreach(PackageInterface p in ps)
                 {
                     if (p == null || p.PackageType != PackageType.ClientControl)
@@ -272,7 +271,7 @@ namespace PingPongServer.ServerGame
             List<PlayerMovementPackage> cc = new List<PlayerMovementPackage>();
             foreach (Client c in Clients)
             {
-                PackageInterface[] ps = getAllDataRelatedToClient(c.SessionID);
+                PackageInterface[] ps = GetClientData(c.SessionID);
                 foreach (PackageInterface p in ps)
                 {
                     PlayerMovementPackage movementPackage = p as PlayerMovementPackage;
