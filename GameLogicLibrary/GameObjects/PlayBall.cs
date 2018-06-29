@@ -7,7 +7,7 @@ namespace GameLogicLibrary.GameObjects
         public float PositionX { get; set; }
         public float PositionY { get; set; }
         public float DirectionX { get; protected set; }
-        public float DirectionY { get; set; }
+        public float DirectionY { get; protected set; }
     }
 
     public class Ball : RawBall

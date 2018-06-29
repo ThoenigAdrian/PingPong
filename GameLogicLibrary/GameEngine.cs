@@ -156,7 +156,7 @@ namespace GameLogicLibrary
             if (GameStructure.Ball.PositionY >= GameStructure.GameField.Height - GameStructure.Ball.Radius)
             {
                 GameStructure.Ball.PositionY = (GameStructure.GameField.Height - GameStructure.Ball.Radius) - (GameStructure.Ball.PositionY - (GameStructure.GameField.Height - GameStructure.Ball.Radius));
-                GameStructure.Ball.DirectionY = GameStructure.Ball.DirectionY * -1;
+                GameStructure.Ball.ReverseDirectionY();
             }
             if (GameStructure.Ball.PositionX <= GameStructure.Ball.Radius)
             {
@@ -176,7 +176,7 @@ namespace GameLogicLibrary
             if (GameStructure.Ball.PositionY <= GameStructure.Ball.Radius)
             {
                 GameStructure.Ball.PositionY = GameStructure.Ball.Radius + (GameStructure.Ball.Radius - GameStructure.Ball.PositionY);
-                GameStructure.Ball.DirectionY = GameStructure.Ball.DirectionY * -1;
+                GameStructure.Ball.ReverseDirectionY();
             }
 
         }
