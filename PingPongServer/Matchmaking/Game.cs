@@ -51,8 +51,8 @@ namespace PingPongServer.Matchmaking
                 ready &= !OneTeamSizeExceeds();
                 ready &= FitsIntoGame();
 
-                if (ready)
-                    ApplyPlayerPositions();
+                //if (ready)
+                //    ApplyPlayerPositions();
 
                 return ready;
             }
@@ -85,6 +85,45 @@ namespace PingPongServer.Matchmaking
                 }
 
                 return false;
+            }
+
+
+            private bool CurrentlyFitting()
+            {
+                int team1 = 0;
+                int team2 = 0;
+
+                foreach (Request request in m_requests)
+                {
+                    team1 += request.Team1Count;
+                    team2 += request.Team2Count;
+                }
+
+                return team1 <= TeamSize && team2 <= TeamSize;
+            }
+
+            private void ApplyPlayerPositions()
+            {
+                ApplyPlayerPositions(m_requests.ToArray());
+            }
+
+            public static void ApplyPlayerPositions(Request[] requests)
+            {
+                int currentTeam1Offset = 0;
+                int currentTeam2Offset = 0;
+                foreach (Request request in requests)
+                {
+                    request.Team1Offset = currentTeam1Offset;
+                    request.Team2Offset = currentTeam2Offset;
+
+                    currentTeam1Offset += request.Team1Count;
+                    currentTeam2Offset += request.Team2Count;
+                }
+            }
+
+            public void ResetRequests()
+            {
+                m_requests.Clear();
             }
 
             private bool OneTeamSizeExceeds()
@@ -133,44 +172,6 @@ namespace PingPongServer.Matchmaking
             private int GetCountBigTeam(Request request)
             {
                 return Math.Max(request.Team1Count, request.Team2Count);
-            }
-
-            private bool CurrentlyFitting()
-            {
-                int team1 = 0;
-                int team2 = 0;
-
-                foreach (Request request in m_requests)
-                {
-                    team1 += request.Team1Count;
-                    team2 += request.Team2Count;
-                }
-
-                return team1 <= TeamSize && team2 <= TeamSize;
-            }
-
-            private void ApplyPlayerPositions()
-            {
-                ApplyPlayerPositions(m_requests.ToArray());
-            }
-
-            public static void ApplyPlayerPositions(Request[] requests)
-            {
-                int currentTeam1Offset = 0;
-                int currentTeam2Offset = 0;
-                foreach (Request request in requests)
-                {
-                    request.Team1Offset = currentTeam1Offset;
-                    request.Team2Offset = currentTeam2Offset;
-
-                    currentTeam1Offset += request.Team1Count;
-                    currentTeam2Offset += request.Team2Count;
-                }
-            }
-
-            public void ResetRequests()
-            {
-                m_requests.Clear();
             }
         }
     }

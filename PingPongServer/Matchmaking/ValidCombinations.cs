@@ -69,8 +69,7 @@ namespace PingPongServer.Matchmaking
                         return null;
                     }
 
-                    if (entry.Reversed != request.ReverseTeams)
-                        request.Reverse();
+                    request.ReverseTeams = entry.Reversed;
 
                     requests[index] = request;
                     index++;

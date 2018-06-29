@@ -10,7 +10,7 @@ namespace PingPongServer.Matchmaking
         public int ClientPlayerCount { get { return TeamWishes.Length; } }
         public int TeamSize { get { return MaxPlayerCount / 2; } }
 
-        public bool ReverseTeams { get; private set; }
+        public bool ReverseTeams { get; set; }
 
         private int m_team1Count = -1;
         public int Team1Count
@@ -73,6 +73,11 @@ namespace PingPongServer.Matchmaking
                 SwapTeams();
         }
 
+        public void Reverse()
+        {
+            ReverseTeams = !ReverseTeams;
+        }
+
         private void SwapTeams()
         {
             SwapTeams(TeamWishes);
@@ -89,11 +94,6 @@ namespace PingPongServer.Matchmaking
                 else
                     teamWishes[i] = 0;
             }
-        }
-
-        public void Reverse()
-        {
-            ReverseTeams = !ReverseTeams;
         }
 
         private void CalculatateTeamCount()

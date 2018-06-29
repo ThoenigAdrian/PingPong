@@ -35,7 +35,7 @@ namespace PingPongServer.Matchmaking
             {
                 for (int i = 0; i < m_requestGroups.Length; i++)
                 {
-                    m_game.ReplaceRequest(m_requestGroups[i].GroupType, depth);
+                    m_game.ReplaceRequest(m_requestGroups[i].GroupType.Copy(), depth);
 
                     if (depth == maxDepth)
                     {
