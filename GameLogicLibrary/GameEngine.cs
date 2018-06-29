@@ -49,7 +49,7 @@ namespace GameLogicLibrary
                 angle += 45;
 
             float radiant = (float)angle / 180 * (float)Math.PI;
-            GameStructure.Ball.ChangeAngleOfBall(angle);
+            GameStructure.Ball.ChangeAngleOfBall(radiant);
         }
 
         private bool PointInRectangular(GameStructure.Point point, GameStructure.Rectangle rectangle)
