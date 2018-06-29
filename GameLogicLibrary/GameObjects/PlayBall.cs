@@ -14,28 +14,27 @@ namespace GameLogicLibrary.GameObjects
     {
         public int Radius { get; set; }
         public int LastTouchedTeam;
-        private const float initialSpeed = 1F;
-        private float internal_speed = initialSpeed;
+        private float internal_speed = GameInitializers.BALL_SPEED;
 
         public Ball()
         {
             PositionX = GameInitializers.BALL_POSX;
             PositionY = GameInitializers.BALL_POSY;
-            DirectionX = GameInitializers.BALL_DIRX;
-            DirectionY = GameInitializers.BALL_DIRY;
-            Speed = internal_speed;
+            DirectionX = 0;
+            DirectionY = 0;
+            Speed = GameInitializers.BALL_SPEED;
             LastTouchedTeam = -1; // = No Team        + refactor Teams stuff e.g Team Blue , Team Red or something different but it doesn't make sense to have a enum like this (Team1,Team2,Team3)
             Radius = GameInitializers.BALL_RADIUS;
         }
 
         public void resetToInitialSpeed()
         {
-            Speed = initialSpeed;
+            Speed = GameInitializers.BALL_SPEED;
         }
 
         public void increaseSpeed(float secondsPassed)
         {
-            Speed = initialSpeed * secondsPassed;
+            Speed = GameInitializers.BALL_SPEED * secondsPassed;
         }
         
 

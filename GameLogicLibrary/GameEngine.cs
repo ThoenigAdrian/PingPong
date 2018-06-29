@@ -15,23 +15,44 @@ namespace GameLogicLibrary
 
         OneShotTimer m_matchOngoing = new OneShotTimer(1000 * 1000, true);
 
+        Random random;
+
         public GameEngine(GameStructure GameStructure)
         {
             this.GameStructure = GameStructure;
+            random = new Random();
+            ResetBall();
         }
 
         private void ResetBall()
         {
             GameStructure.Ball.PositionX = GameInitializers.BALL_POSX;
             GameStructure.Ball.PositionY = GameInitializers.BALL_POSY;
-            GameStructure.Ball.DirectionX = GameInitializers.BALL_DIRX;
-            GameStructure.Ball.DirectionY = GameInitializers.BALL_DIRY;
+            RandomizeBallDirection(GameStructure.Ball);
             GameStructure.Ball.LastTouchedTeam = -1;
             GameStructure.Ball.resetToInitialSpeed();
 
             m_matchOngoing.Restart();
         }
 
+        private void RandomizeBallDirection(Ball ball)
+        {
+            int angle = random.Next(360);
+
+            if (angle > 45 && angle < 90)
+                angle -= 45;
+            else if (angle > 90 && angle < 135)
+                angle += 45;
+            else if (angle > 225 && angle < 270)
+                angle -= 45;
+            else if (angle > 270 && angle < 315)
+                angle += 45;
+
+            double radiant = (double)angle / 180 * Math.PI;
+
+            GameStructure.Ball.DirectionX = (float)Math.Cos(radiant);
+            GameStructure.Ball.DirectionY = (float)Math.Sin(radiant);
+        }
 
         private bool PointInRectangular(GameStructure.Point point, GameStructure.Rectangle rectangle)
         {

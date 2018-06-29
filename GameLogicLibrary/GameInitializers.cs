@@ -10,8 +10,7 @@ namespace GameLogicLibrary
         public const int BALL_RADIUS = 5;
         public const int BALL_POSX = BORDER_WIDTH / 2;
         public const int BALL_POSY = BORDER_HEIGHT / 2;
-        public const float BALL_DIRX = 0.1F;
-        public const float BALL_DIRY = 0.1F;
+        public const float BALL_SPEED = 0.1F;
 
         public const int PLAYER_HEIGHT = 50;
         public const int PLAYER_WIDTH = 5;
