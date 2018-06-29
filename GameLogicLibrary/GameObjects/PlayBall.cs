@@ -37,9 +37,6 @@ namespace GameLogicLibrary.GameObjects
             DirectionY *= -1;
         }
 
-
-
-
         public void resetToInitialSpeed()
         {
             Speed = GameInitializers.BALL_SPEED;
@@ -47,7 +44,7 @@ namespace GameLogicLibrary.GameObjects
 
         public void increaseSpeed(TimeSpan timePassed)
         {
-            Speed = GameInitializers.BALL_SPEED * (float)timePassed.TotalSeconds;
+            Speed = GameInitializers.BALL_SPEED * ((float)timePassed.TotalSeconds / 15F);
         }
 
         public void ChangeAngleOfBall(float Angle)
@@ -56,18 +53,23 @@ namespace GameLogicLibrary.GameObjects
             DirectionY = (float)Math.Sin(Angle) * internal_speed;
         }
 
+        private void Normalize()
+        {
+            float distance = (float)Math.Sqrt(DirectionX * DirectionX + DirectionY * DirectionY);
+            DirectionX = DirectionX / distance;
+            DirectionY = DirectionY / distance;
+        }
+
 
         public float Speed
         {
-            get
-            {
-                return (float) Math.Sqrt(DirectionX * DirectionX + DirectionY * DirectionY);
-            }
+            get { return internal_speed; }
             set
             {
                 internal_speed = value;
-                DirectionX = DirectionX * internal_speed;
-                DirectionY = DirectionY * internal_speed;
+                Normalize();
+                DirectionX *= internal_speed;
+                DirectionY *= internal_speed;
                 
             }
         }

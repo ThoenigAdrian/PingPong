@@ -22,7 +22,6 @@ namespace GameLogicLibrary
             this.GameStructure = GameStructure;
             random = new Random();
             ResetBall();
-            RandomizeBallDirection();
         }
 
         private void ResetBall()
