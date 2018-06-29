@@ -14,7 +14,8 @@ namespace GameLogicLibrary.GameObjects
     {
         public int Radius { get; set; }
         public int LastTouchedTeam;
-        private float internal_speed = 1F;
+        private const float initialSpeed = 1F;
+        private float internal_speed = initialSpeed;
 
         public Ball()
         {
@@ -29,12 +30,12 @@ namespace GameLogicLibrary.GameObjects
 
         public void resetToInitialSpeed()
         {
-            this.Speed = 1F;
+            Speed = initialSpeed;
         }
 
-        public void increaseSpeed()
+        public void increaseSpeed(float secondsPassed)
         {
-            Speed = internal_speed + 1F/3000000;
+            Speed = initialSpeed * secondsPassed;
         }
         
 

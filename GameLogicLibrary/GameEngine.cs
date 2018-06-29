@@ -164,7 +164,7 @@ namespace GameLogicLibrary
                 GameStructure.Ball.DirectionY = GameStructure.Ball.DirectionY * -1;
             }
 
-            GameStructure.Ball.increaseSpeed();
+            GameStructure.Ball.increaseSpeed(m_matchOngoing.secondsPassed());
         }
 
         private void CalculatePlayerPosition(Player player)
