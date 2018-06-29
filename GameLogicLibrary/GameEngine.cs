@@ -13,7 +13,7 @@ namespace GameLogicLibrary
         public delegate void TeamScoredEventHandler(object sender, EventArgs e);
         public event TeamScoredEventHandler TeamScored;
 
-        OneShotTimer m_matchOngoing = new OneShotTimer(1000 * 1000, true);
+        OneShotTimer GameOngoingTimer;
 
         Random random;
 
@@ -22,36 +22,24 @@ namespace GameLogicLibrary
             this.GameStructure = GameStructure;
             random = new Random();
             ResetBall();
+            RandomizeBallDirection();
         }
 
         private void ResetBall()
         {
             GameStructure.Ball.PositionX = GameInitializers.BALL_POSX;
             GameStructure.Ball.PositionY = GameInitializers.BALL_POSY;
-            RandomizeBallDirection(GameStructure.Ball);
+            RandomizeBallDirection();
             GameStructure.Ball.LastTouchedTeam = -1;
             GameStructure.Ball.resetToInitialSpeed();
-
-            m_matchOngoing.Restart();
+            GameOngoingTimer = new OneShotTimer(1000 * 1000, true);
         }
 
-        private void RandomizeBallDirection(Ball ball)
+        private void RandomizeBallDirection()
         {
-            int angle = random.Next(360);
-
-            if (angle > 45 && angle < 90)
-                angle -= 45;
-            else if (angle > 90 && angle < 135)
-                angle += 45;
-            else if (angle > 225 && angle < 270)
-                angle -= 45;
-            else if (angle > 270 && angle < 315)
-                angle += 45;
-
-            double radiant = (double)angle / 180 * Math.PI;
-
-            GameStructure.Ball.DirectionX = (float)Math.Cos(radiant);
-            GameStructure.Ball.DirectionY = (float)Math.Sin(radiant);
+            float angle = random.Next(360);
+            GameStructure.Ball.ChangeAngleOfBall(angle);
+            
         }
 
         private bool PointInRectangular(GameStructure.Point point, GameStructure.Rectangle rectangle)
@@ -111,19 +99,20 @@ namespace GameLogicLibrary
         {
             if (GameStructure.Ball.DirectionX > 0)
             {
-                ChangeAngleOfBall(Angle);
-                GameStructure.Ball.DirectionX *= -1;
+                GameStructure.Ball.ChangeAngleOfBall(Angle);
+                GameStructure.Ball.ReverseDirectionX();
+                
             }
             else
             {
-                ChangeAngleOfBall(Angle);
+                GameStructure.Ball.ChangeAngleOfBall(Angle);
             }
 
         }
 
         public void CalculateFrame(long timePassedInMilliseconds)
         {
-            if (m_matchOngoing == true)
+            if (GameOngoingTimer == true)
             {
                 GameStructure.Ball.PositionX += GameStructure.Ball.DirectionX * timePassedInMilliseconds;
                 GameStructure.Ball.PositionY += GameStructure.Ball.DirectionY * timePassedInMilliseconds;
@@ -138,6 +127,12 @@ namespace GameLogicLibrary
             }
 
             CalculateCollisions();
+            IncreaseBallSpeed();
+        }
+
+        private void IncreaseBallSpeed()
+        {
+            GameStructure.Ball.increaseSpeed(GameOngoingTimer.TimePassed);
         }
 
         private void CalculateWallCollisions()
@@ -153,7 +148,7 @@ namespace GameLogicLibrary
                 else
                 {
                    GameStructure.Ball.PositionX = (GameStructure.GameField.Width - GameStructure.Ball.Radius) - (GameStructure.Ball.PositionX - (GameStructure.GameField.Width - GameStructure.Ball.Radius));
-                    GameStructure.Ball.DirectionX = GameStructure.Ball.DirectionX * -1;
+                    GameStructure.Ball.ReverseDirectionX();
                 }
 
             }
@@ -174,7 +169,7 @@ namespace GameLogicLibrary
                 else
                 {
                    GameStructure.Ball.PositionX =GameStructure.Ball.PositionX * -1;
-                    GameStructure.Ball.DirectionX = GameStructure.Ball.DirectionX * -1;
+                   GameStructure.Ball.ReverseDirectionX();
                 }
             }
 
@@ -184,7 +179,6 @@ namespace GameLogicLibrary
                 GameStructure.Ball.DirectionY = GameStructure.Ball.DirectionY * -1;
             }
 
-            GameStructure.Ball.increaseSpeed(m_matchOngoing.secondsPassed());
         }
 
         private void CalculatePlayerPosition(Player player)
@@ -239,13 +233,7 @@ namespace GameLogicLibrary
 
             return relativeDistance;
         }
-
-        private void ChangeAngleOfBall(float Angle)
-        {
-            float speed = GameStructure.Ball.Speed;
-            GameStructure.Ball.DirectionX = (float)Math.Cos(Angle) * speed;
-            GameStructure.Ball.DirectionY = (float)Math.Sin(Angle) * speed;
-        }
+        
 
         /* THOUGHTS ABOUT A BETTER COLLISION DETECTION SYSTEM BUT MAYBE NOT NECESSARY
         private bool CircleInRectangle(Player p)

@@ -11,12 +11,15 @@ namespace GameLogicLibrary
         public const int BALL_POSX = BORDER_WIDTH / 2;
         public const int BALL_POSY = BORDER_HEIGHT / 2;
         public const float BALL_SPEED = 0.1F;
+        public const float BALL_DIRX = 0.1F;
+        public const float BALL_DIRY = 0.1F;
 
         public const int PLAYER_HEIGHT = 50;
         public const int PLAYER_WIDTH = 5;
         public const int PLAYER_SPACING = 20;
         public const int PLAYER_XOFFSET = 30;
         public const float PLAYER_SPEED = 1.5F;
+        
         public const float MAXIMUM_ANGLE_DEGREE = 70;
         public const float MAXIMUM_ANGLE_RAD = (float)(Math.PI * MAXIMUM_ANGLE_DEGREE / 180);
 

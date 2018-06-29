@@ -6,7 +6,7 @@ namespace GameLogicLibrary.GameObjects
     {
         public float PositionX { get; set; }
         public float PositionY { get; set; }
-        public float DirectionX { get; set; }
+        public float DirectionX { get; protected set; }
         public float DirectionY { get; set; }
     }
 
@@ -20,23 +20,42 @@ namespace GameLogicLibrary.GameObjects
         {
             PositionX = GameInitializers.BALL_POSX;
             PositionY = GameInitializers.BALL_POSY;
-            DirectionX = 0;
-            DirectionY = 0;
+            DirectionX = GameInitializers.BALL_DIRX;
+            DirectionY = GameInitializers.BALL_DIRY;
             Speed = GameInitializers.BALL_SPEED;
             LastTouchedTeam = -1; // = No Team        + refactor Teams stuff e.g Team Blue , Team Red or something different but it doesn't make sense to have a enum like this (Team1,Team2,Team3)
             Radius = GameInitializers.BALL_RADIUS;
         }
+
+        public void ReverseDirectionX()
+        {
+            DirectionX *= -1;
+        }
+
+        public void ReverseDirectionY()
+        {
+            DirectionY *= -1;
+        }
+
+
+
 
         public void resetToInitialSpeed()
         {
             Speed = GameInitializers.BALL_SPEED;
         }
 
-        public void increaseSpeed(float secondsPassed)
+        public void increaseSpeed(TimeSpan timePassed)
         {
-            Speed = GameInitializers.BALL_SPEED * secondsPassed;
+            Speed = GameInitializers.BALL_SPEED * (float)timePassed.TotalSeconds;
         }
-        
+
+        public void ChangeAngleOfBall(float Angle)
+        {
+            //DirectionX = (float)Math.Cos(Angle) * internal_speed;
+            //DirectionY = (float)Math.Sin(Angle) * internal_speed;
+        }
+
 
         public float Speed
         {
