@@ -5,8 +5,6 @@ using PingPongClient.VisualizeLayer.Visualizers;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.InputLayer.KeyboardInputs;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
-using GameLogicLibrary.GameObjects;
-using GameLogicLibrary;
 
 namespace PingPongClient.ControlLayer
 {

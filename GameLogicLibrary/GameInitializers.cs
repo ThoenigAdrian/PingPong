@@ -8,8 +8,8 @@ namespace GameLogicLibrary
         public const int BORDER_WIDTH = 500;
 
         public const int BALL_RADIUS = 5;
-        public const int BALL_POSX = 250;
-        public const int BALL_POSY = 100;
+        public const int BALL_POSX = BORDER_WIDTH / 2;
+        public const int BALL_POSY = BORDER_HEIGHT / 2;
         public const float BALL_DIRX = 0.1F;
         public const float BALL_DIRY = 0.1F;
 
@@ -27,7 +27,7 @@ namespace GameLogicLibrary
             if (team == 0)
                 return PLAYER_XOFFSET + (playerIndex * PLAYER_SPACING);
             else
-                return (BORDER_WIDTH - PLAYER_XOFFSET - PLAYER_WIDTH) - (playerIndex * PLAYER_SPACING);
+                return BORDER_WIDTH - PLAYER_XOFFSET - PLAYER_WIDTH - (playerIndex * PLAYER_SPACING);
         }
     }
 }

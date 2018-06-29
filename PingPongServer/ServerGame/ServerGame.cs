@@ -119,6 +119,10 @@ namespace PingPongServer.ServerGame
             ServerDataPackage ServerPackage = new ServerDataPackage();            
             GameFinished += (caller as Server).OnGameFinished;
             GameState = GameStates.Running;
+
+            foreach (Client client in Clients)
+                SendServerInitResponse(client);
+
             Logger.GameLog("Game started");
 
             while (GameState == GameStates.Running)
@@ -146,18 +150,18 @@ namespace PingPongServer.ServerGame
             foreach (int team in playerTeamWish)
             {
                 int index = GameStructure.PlayersCount;
-                int teamOpenSpots = maxTeamSize - GameStructure.GameTeams[team].PlayerList.Count;
+                int teamIndex = GameStructure.GameTeams[team].PlayerList.Count;
+                int teamOpenSpots = maxTeamSize - teamIndex;
 
                 if (teamOpenSpots < 1)
                     continue;
   
-                Player newPlayer = new Player(index, team, GameInitializers.GetPlayerX(team, index));
+                Player newPlayer = new Player(index, team, GameInitializers.GetPlayerX(team, teamIndex));
 
                 newClient.AddPlayer(newPlayer);
-                GameStructure.AddPlayer(newPlayer, team);
+                GameStructure.AddPlayer(newPlayer);
             }
 
-            SendServerInitResponse(newClient);
             Clients.Add(newClient);                       
             
             if (GameStructure.PlayersCount == maxPlayers)
@@ -171,8 +175,12 @@ namespace PingPongServer.ServerGame
             ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
             packet.m_field = new GameField();
             packet.m_ball = new Ball();
+
             packet.m_players = new Player[GameStructure.PlayersCount];
-            packet.m_players = client.Players.ToArray();
+            Array.Copy(GameStructure.GetAllPlayers(), packet.m_players, GameStructure.PlayersCount);
+
+            foreach(Player player in packet.m_players)
+                player.Controllable = client.Players.Contains(player);
 
             Network.SendTCPPackageToClient(packet, client.SessionID);
         }
@@ -221,16 +229,16 @@ namespace PingPongServer.ServerGame
 
             foreach (KeyValuePair<int, GameStructure.GameTeam> Team in GameStructure.GameTeams)
             {
-                foreach (Player p in Team.Value.PlayerList)
+                foreach (Player player in Team.Value.PlayerList)
                 {
-                    if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Down)
-                        p.DirectionY = p.Speed;
-                    else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.Up)
-                        p.DirectionY = -p.Speed;
-                    else if ((ClientMovement)GetLastPlayerMovement(p.ID) == ClientMovement.StopMoving)
-                        p.DirectionY = 0;
+                    if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.Down)
+                        player.DirectionY = player.Speed;
+                    else if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.Up)
+                        player.DirectionY = -player.Speed;
+                    else if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.StopMoving)
+                        player.DirectionY = 0;
 
-                    NextFrame.Players.Add(p);
+                    NextFrame.Players.Add(player);
                 }
             }
 

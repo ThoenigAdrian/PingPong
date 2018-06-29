@@ -63,17 +63,24 @@ namespace PingPongClient.ControlLayer
             int index = 0;
             foreach (Player player in players)
             {
-                AddPlayer(player, index++);
+                if (player.Controllable)
+                    AddControllablePlayer(player, index++);
+                else
+                    AddPlayer(player);
             }
-            
 
             (Visualizer as GameStructureVisualizer).SetGameStructure(Structure);
         }
 
-        public void AddPlayer(Player player, int index)
+        private void AddControllablePlayer(Player player, int index)
         {
             Structure.Players.Add(player);
             Input.AddPlayerInput(player.ID, index++);
+        }
+
+        private void AddPlayer(Player player)
+        {
+            Structure.Players.Add(player);
         }
 
         protected void SendMovementInputs()

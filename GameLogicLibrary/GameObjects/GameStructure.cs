@@ -50,16 +50,16 @@ namespace GameLogicLibrary.GameObjects
 
                                 
 
-        public void AddPlayer(Player Player, int Team)
+        public void AddPlayer(Player Player)
         {
             try
             {
-                GameTeams[Team].PlayerList.Add(Player);
+                GameTeams[Player.Team].PlayerList.Add(Player);
             }
             catch(KeyNotFoundException)
             {
-                GameTeams.Add(Team, new GameTeam());
-                GameTeams[Team].PlayerList.Add(Player);
+                GameTeams.Add(Player.Team, new GameTeam());
+                GameTeams[Player.Team].PlayerList.Add(Player);
             }                            
         }
 
