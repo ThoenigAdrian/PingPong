@@ -7,6 +7,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 {
     public enum RequestOptions
     {
+        Matchmaking,
         Start,
         Join
     }
@@ -68,10 +69,18 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             m_playerCount = Math.Max(2, m_playerCount);
             m_playerCount = Math.Min(6, m_playerCount);
 
-            if (SelectedOption == RequestOptions.Start)
-                DrawablePlayerCount.Value = "Start a new game with a maximum of <" + m_playerCount + "> players.";
-            else
-                DrawablePlayerCount.Value = "Join a game with a maximum of <" + m_playerCount + "> players.";
+            switch (SelectedOption)
+            {
+                case RequestOptions.Start:
+                    DrawablePlayerCount.Value = "Start a new game with a maximum of <" + m_playerCount + "> players.";
+                    break;
+                case RequestOptions.Join:
+                    DrawablePlayerCount.Value = "Join a game with a maximum of <" + m_playerCount + "> players.";
+                    break;
+                case RequestOptions.Matchmaking:
+                    DrawablePlayerCount.Value = "Queue for matchmaking with a maximum of <" + m_playerCount + "> players.";
+                    break;
+            }
         } 
     }
 }

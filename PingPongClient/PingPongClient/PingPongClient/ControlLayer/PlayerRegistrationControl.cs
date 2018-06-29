@@ -78,6 +78,10 @@ namespace PingPongClient.ControlLayer
                 case RequestOptions.Join:
                     Network.SendClientJoin(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
                     break;
+
+                case RequestOptions.Matchmaking:
+                    Network.SendClientQueueMatchmaking(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
+                    break;
             }
 
             IssueServerResponse(PackageType.ServerPlayerIDResponse);
