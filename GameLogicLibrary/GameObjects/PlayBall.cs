@@ -44,7 +44,7 @@ namespace GameLogicLibrary.GameObjects
 
         public void increaseSpeed(TimeSpan timePassed)
         {
-            Speed = GameInitializers.BALL_SPEED * ((float)timePassed.TotalSeconds / 15F);
+            Speed = GameInitializers.BALL_SPEED + ((float)timePassed.TotalSeconds / 200);
         }
 
         public void ChangeAngleOfBall(float Angle)
@@ -70,7 +70,6 @@ namespace GameLogicLibrary.GameObjects
                 Normalize();
                 DirectionX *= internal_speed;
                 DirectionY *= internal_speed;
-                
             }
         }
     }
