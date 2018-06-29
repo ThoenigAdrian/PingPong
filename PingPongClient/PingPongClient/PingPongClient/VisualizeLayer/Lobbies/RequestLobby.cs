@@ -67,7 +67,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         void UpdatePlayerCount()
         {
             m_playerCount = Math.Max(2, m_playerCount);
-            m_playerCount = Math.Min(6, m_playerCount);
+            m_playerCount = Math.Min(8, m_playerCount);
 
             switch (SelectedOption)
             {

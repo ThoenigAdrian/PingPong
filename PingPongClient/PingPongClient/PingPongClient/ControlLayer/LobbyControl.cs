@@ -81,11 +81,11 @@ namespace PingPongClient.ControlLayer
             switch (selection)
             {
                 case SelectionInputs.Left:
-                    RequestLobby.PlayerCount--;
+                    RequestLobby.PlayerCount -= 2;
                     break;
 
                 case SelectionInputs.Right:
-                    RequestLobby.PlayerCount++;
+                    RequestLobby.PlayerCount += 2;
                     break;
 
                 default:

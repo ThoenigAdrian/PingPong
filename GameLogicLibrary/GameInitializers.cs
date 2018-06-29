@@ -15,7 +15,6 @@ namespace GameLogicLibrary
         public const int PLAYER_HEIGHT = 50;
         public const int PLAYER_WIDTH = 5;
         public const int PLAYER_SPACING = 20;
-        public const int PLAYER_Y = BORDER_HEIGHT / 2 - PLAYER_HEIGHT / 2;
         public const int PLAYER_XOFFSET = 30;
         public const float PLAYER_SPEED = 1.5F;
         public const float MAXIMUM_ANGLE_DEGREE = 70;
@@ -27,6 +26,16 @@ namespace GameLogicLibrary
                 return PLAYER_XOFFSET + (playerIndex * PLAYER_SPACING);
             else
                 return BORDER_WIDTH - PLAYER_XOFFSET - PLAYER_WIDTH - (playerIndex * PLAYER_SPACING);
+        }
+
+        public static int GetPlayerY(int teamSize)
+        {
+            return BORDER_HEIGHT / 2 - GetPlayerHeight(teamSize) / 2;
+        }
+
+        public static int GetPlayerHeight(int teamSize)
+        {
+            return (int)(PLAYER_HEIGHT * Math.Pow(0.8, (teamSize > 0 ? teamSize - 1 : 0)));
         }
     }
 }

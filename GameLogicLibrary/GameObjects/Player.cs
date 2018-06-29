@@ -28,9 +28,9 @@
             Controllable = false;
 
             PositionX = positionX;
-            PositionY = GameInitializers.PLAYER_Y;
+            PositionY = GameInitializers.GetPlayerY(0);
 
-            Height = GameInitializers.PLAYER_HEIGHT;
+            Height = GameInitializers.GetPlayerHeight(0);
             Width = GameInitializers.PLAYER_WIDTH;
 
             DirectionY = 0;

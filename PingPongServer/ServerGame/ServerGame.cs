@@ -157,6 +157,8 @@ namespace PingPongServer.ServerGame
                     continue;
   
                 Player newPlayer = new Player(index, team, GameInitializers.GetPlayerX(team, teamIndex));
+                newPlayer.Height = GameInitializers.GetPlayerHeight(maxTeamSize);
+                newPlayer.PositionY = GameInitializers.GetPlayerY(maxTeamSize);
 
                 newClient.AddPlayer(newPlayer);
                 GameStructure.AddPlayer(newPlayer);
