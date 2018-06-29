@@ -18,8 +18,6 @@ using PingPongServer.ServerGame;
 
 using Newtonsoft.Json.Linq;
 using XSLibrary.Network.Accepters;
-using PingPongServer.Matchmaking;
-using static PingPongServer.MatchmakingManager;
 
 namespace PingPongServer
 {
@@ -144,13 +142,13 @@ namespace PingPongServer
             }
         }
 
-        private void StartMatchmadeGame(object sender, MatchData match)
+        private void StartMatchmadeGame(object sender, MatchmakingManager.MatchData match)
         {
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             Game newGame = new Game(newGameNetwork, match.MaxPlayerCount);
             newGame.GameID = new Random().Next();
 
-            foreach (ClientData client in match.Clients)
+            foreach (MatchmakingManager.ClientData client in match.Clients)
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
 
             newGame.StartGame(this);
