@@ -37,9 +37,19 @@ namespace GameLogicLibrary
 
         private void RandomizeBallDirection()
         {
-            float angle = random.Next(360);
+            int angle = random.Next(360);
+
+            if (angle > 45 && angle < 90)
+                angle -= 45;
+            else if (angle > 90 && angle < 135)
+                angle += 45;
+            else if (angle > 225 && angle < 270)
+                angle -= 45;
+            else if (angle > 270 && angle < 315)
+                angle += 45;
+
+            float radiant = (float)angle / 180 * (float)Math.PI;
             GameStructure.Ball.ChangeAngleOfBall(angle);
-            
         }
 
         private bool PointInRectangular(GameStructure.Point point, GameStructure.Rectangle rectangle)
