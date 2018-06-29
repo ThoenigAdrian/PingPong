@@ -52,8 +52,8 @@ namespace GameLogicLibrary.GameObjects
 
         public void ChangeAngleOfBall(float Angle)
         {
-            //DirectionX = (float)Math.Cos(Angle) * internal_speed;
-            //DirectionY = (float)Math.Sin(Angle) * internal_speed;
+            DirectionX = (float)Math.Cos(Angle) * internal_speed;
+            DirectionY = (float)Math.Sin(Angle) * internal_speed;
         }
 
 
