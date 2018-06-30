@@ -80,7 +80,8 @@
     <Compile Include="ControlLayer\Control.cs" />
     <Compile Include="ControlLayer\GameControl.cs" />
     <Compile Include="ControlLayer\Interpolation.cs" />
-    <Compile Include="ControlLayer\LobbyControl.cs" />
+    <Compile Include="ControlLayer\GameOptionsControl.cs" />
+    <Compile Include="ControlLayer\MatchmakingStatusControl.cs" />
     <Compile Include="ControlLayer\PlayerRegistrationControl.cs" />
     <Compile Include="ControlLayer\SubControlInterface.cs" />
     <Compile Include="InputLayer\InputTranslation\SelectionTranslation.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
     <Compile Include="VisualizeLayer\Lobbies\ConnectionLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\LobbyInterface.cs" />
+    <Compile Include="VisualizeLayer\Lobbies\MatchmakingStatusLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\PlayerEntry.cs" />
     <Compile Include="VisualizeLayer\Lobbies\PlayerRegistrationLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\RequestLobby.cs" />

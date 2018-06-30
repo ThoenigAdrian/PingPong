@@ -6,23 +6,23 @@ using PingPongClient.VisualizeLayer.Visualizers;
 
 namespace PingPongClient.ControlLayer
 {
-    public class LobbyControl : SubControlInterface
+    public class GameOptionsControl : SubControlInterface
     {
-        RequestLobby RequestLobby { get; set; }
+        GameOptions GameOptionLobby { get; set; }
 
         LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
 
-        public override GameMode GetMode { get { return GameMode.Lobby; } }
+        public override GameMode GetMode { get { return GameMode.Options; } }
 
-        public LobbyControl(Control parent) : base(parent)
+        public GameOptionsControl(Control parent) : base(parent)
         {
-            RequestLobby = new RequestLobby();
-            Visualizer = new LobbyVisualizer(RequestLobby);
+            GameOptionLobby = new GameOptions();
+            Visualizer = new LobbyVisualizer(GameOptionLobby);
         }
 
         public void SetServerIP(string serverIP)
         {
-            RequestLobby.Status = "Connected to " + serverIP + "   Session: " + Network.ClientSession;
+            GameOptionLobby.Status = "Connected to " + serverIP + "   Session: " + Network.ClientSession;
         }
 
         public override void HandleInput()
@@ -46,11 +46,11 @@ namespace PingPongClient.ControlLayer
                     break;
 
                 case SelectionInputs.Up:
-                    RequestLobby.Selection--;
+                    GameOptionLobby.Selection--;
                     break;
 
                 case SelectionInputs.Down:
-                    RequestLobby.Selection++;
+                    GameOptionLobby.Selection++;
                     break;
 
                 default:
@@ -60,8 +60,8 @@ namespace PingPongClient.ControlLayer
 
         private void ApplyConfiguration()
         {
-            ParentControl.RegistrationControl.MaxPlayers = RequestLobby.PlayerCount;
-            ParentControl.RegistrationControl.RequestType = RequestLobby.SelectedOption;
+            ParentControl.RegistrationControl.MaxPlayers = GameOptionLobby.PlayerCount;
+            ParentControl.RegistrationControl.RequestType = GameOptionLobby.SelectedOption;
             ParentControl.RegistrationControl.ResetSelection();
             ParentControl.SwitchMode(GameMode.Registration);
         }
@@ -81,11 +81,11 @@ namespace PingPongClient.ControlLayer
             switch (selection)
             {
                 case SelectionInputs.Left:
-                    RequestLobby.PlayerCount -= 2;
+                    GameOptionLobby.PlayerCount -= 2;
                     break;
 
                 case SelectionInputs.Right:
-                    RequestLobby.PlayerCount += 2;
+                    GameOptionLobby.PlayerCount += 2;
                     break;
 
                 default:

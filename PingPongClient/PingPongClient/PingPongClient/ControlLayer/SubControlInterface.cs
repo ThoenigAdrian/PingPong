@@ -28,10 +28,10 @@ namespace PingPongClient.ControlLayer
 
         public abstract GameMode GetMode { get; }
 
-        protected void IssueServerResponse(PackageType responseType)
+        protected void IssueServerResponse(PackageType responseType, int timeout = 5000)
         {
             WaitingForResponse = true;
-            ParentControl.IssueServerResponse(new SubControlResponseRequest(GetMode, responseType, 5000));
+            ParentControl.IssueServerResponse(new SubControlResponseRequest(GetMode, responseType, timeout));
         }
 
         public void ProcessServerResponse(PackageInterface responsePackage)

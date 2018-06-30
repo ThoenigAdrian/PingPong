@@ -12,7 +12,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         Join
     }
 
-    class RequestLobby : LobbyInterface
+    class GameOptions : LobbyInterface
     {
         public RequestOptions SelectedOption { get { return (RequestOptions)Selection; } }
 
@@ -45,7 +45,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         StartJoinSelection StartJoinSelection;
         DrawableString DrawablePlayerCount;
 
-        public RequestLobby()
+        public GameOptions()
         {
             m_playerCount = 2;
 

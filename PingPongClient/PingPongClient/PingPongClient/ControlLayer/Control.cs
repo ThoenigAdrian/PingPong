@@ -16,8 +16,9 @@ namespace PingPongClient
     public enum GameMode
     {
         Connect,
-        Lobby,
+        Options,
         Registration,
+        Status,
         Game
     }
 
@@ -33,8 +34,9 @@ namespace PingPongClient
         SubControlInterface ActiveControl { get; set; }
 
         public ConnectionControl ConnectionControl { get; set; }
-        public LobbyControl OptionControl { get; set; }
+        public GameOptionsControl OptionControl { get; set; }
         public PlayerRegistrationControl RegistrationControl { get; set; }
+        public MatchmakingStatusControl StatusControl { get; set; }
         public GameControl GameControl { get; set; }
 
         private SubControlResponseRequest CurrentResponseRequest { get; set; }
@@ -56,16 +58,17 @@ namespace PingPongClient
             SubControls = new Dictionary<GameMode, SubControlInterface>();
 
             ConnectionControl = new ConnectionControl(this);
-            OptionControl = new LobbyControl(this);
+            OptionControl = new GameOptionsControl(this);
             RegistrationControl = new PlayerRegistrationControl(this);
+            StatusControl = new MatchmakingStatusControl(this);
             GameControl = new GameControl(this);
 
             SubControls.Add(GameMode.Connect, ConnectionControl);
-            SubControls.Add(GameMode.Lobby, OptionControl);
+            SubControls.Add(GameMode.Options, OptionControl);
             SubControls.Add(GameMode.Registration, RegistrationControl);
+            SubControls.Add(GameMode.Status, StatusControl);
             SubControls.Add(GameMode.Game, GameControl);
             
-
             ActiveControl = GetSubControl(GameMode.Connect);
 
             m_networkDied = false;
