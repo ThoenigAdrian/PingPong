@@ -219,6 +219,7 @@ namespace PingPongServer
             else
             {
                 response.Error = true;
+                response.GameFound = false;
                 response.Status = "Could not start matchmaking because of an invalid request\n";
                 response.Status += "Received Request: PlayerCount(" + initPackage.GamePlayerCount.ToString() + ") TeamWishes (" + initPackage.PlayerTeamwish.ToString() + ")";
             }

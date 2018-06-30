@@ -72,6 +72,7 @@ namespace PingPongServer
             foreach(NetworkConnection clientConnection in m_waitingClientConnections)
             {
                 response.Error = false;
+                response.GameFound = false;
                 response.Status = "Waiting for additional players to start the game";
                 clientConnection.SendTCP(response);
             }
