@@ -18,7 +18,7 @@ namespace GameLogicLibrary
 
         public const int PLAYER_HEIGHT = 50;
         public const int PLAYER_WIDTH = 5;
-        public const int PLAYER_SPACING = 20;
+        public const int PLAYER_SPACING = 30;
         public const int PLAYER_XOFFSET = 30;
         public const float PLAYER_SPEED = 1.5F;
         
