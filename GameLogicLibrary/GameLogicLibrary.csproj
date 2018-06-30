@@ -42,7 +42,8 @@
   <ItemGroup>
     <Compile Include="ClientControls.cs" />
     <Compile Include="ClientMovement.cs" />
-    <Compile Include="GameEngine.cs" />
+    <Compile Include="GameEngine\CollisionDetector.cs" />
+    <Compile Include="GameEngine\GameEngine.cs" />
     <Compile Include="GameMath.cs" />
     <Compile Include="GameObjects\BasicStructure.cs" />
     <Compile Include="GameObjects\PlayBall.cs" />
