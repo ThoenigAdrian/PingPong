@@ -58,8 +58,6 @@ namespace PingPongServer
             ReadConfigurationFromConfigurationFile();
 
             MatchManager.OnMatchFound += StartMatchmadeGame;
-
-            
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)

@@ -24,7 +24,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             Status.Visible = true;
         }
 
-        private void ResetStatus()
+        public void ResetStatus()
         {
             Status.Value = "Waiting for match...";
             Status.Visible = true;

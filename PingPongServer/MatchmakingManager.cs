@@ -38,7 +38,12 @@ namespace PingPongServer
         public void AddClientToQueue(NetworkConnection clientConnection, ClientInitializeGamePackage initData)
         {
             if (Matchmaking.AddRequestToQueue(clientConnection.ClientSession.SessionID, initData.GamePlayerCount, initData.PlayerTeamwish))
+            {
                 m_waitingClientConnections.Add(clientConnection);
+                SendMatchmakingStatus(clientConnection, "Added to Queue. Waiting for additional players to start the game");
+            }
+            else
+                SendMatchmakingError(clientConnection, "Invalid game options. Check your configuration!");
         }
 
         public void Update()
@@ -58,27 +63,38 @@ namespace PingPongServer
                 OnMatchFound?.Invoke(this, matchData);
             }
 
-            UpdateWaitingClients();
+            if (UpdateMatchmakingQueue == true)
+            {
+                BroadcastMatchmakingStatus();
+                UpdateMatchmakingQueue.Restart();
+            }
 
         }
 
-        public void UpdateWaitingClients()
+        private void BroadcastMatchmakingStatus()
         {
-            if(UpdateMatchmakingQueue != true)
-                return;
+            foreach (NetworkConnection clientConnection in m_waitingClientConnections)
+                SendMatchmakingStatus(clientConnection, "Waiting for additional players to start the game");
+        }
 
+        private void SendMatchmakingStatus(NetworkConnection clientConnection, string statusMessage)
+        {
             ServerMatchmakingStatusResponse response = new ServerMatchmakingStatusResponse();
-            
-            foreach(NetworkConnection clientConnection in m_waitingClientConnections)
-            {
-                response.Error = false;
-                response.GameFound = false;
-                response.Status = "Waiting for additional players to start the game";
-                clientConnection.SendTCP(response);
-            }
+            response.Error = false;
+            response.GameFound = false;
+            response.Status = statusMessage;
 
-            UpdateMatchmakingQueue.Restart();
-            
+            clientConnection.SendTCP(response);
+        }
+
+        private void SendMatchmakingError(NetworkConnection clientConnection, string errorMessage)
+        {
+            ServerMatchmakingStatusResponse response = new ServerMatchmakingStatusResponse();
+            response.Error = true;
+            response.GameFound = false;
+            response.Status = errorMessage;
+
+            clientConnection.SendTCP(response);
         }
         
 
@@ -134,7 +150,7 @@ namespace PingPongServer
 
         private void HandleConnectionNotFound(Request[] match)
         {
-
+            // todo
         }
     }
 }

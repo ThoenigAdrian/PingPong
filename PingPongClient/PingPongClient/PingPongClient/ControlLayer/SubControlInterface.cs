@@ -49,6 +49,8 @@ namespace PingPongClient.ControlLayer
         protected virtual void ServerResponseActions(PackageInterface responsePackage) { }
         protected virtual void ResponseTimeoutActions(PackageType requestedPackageType) { }
 
+        public virtual void OnEnter() { }
+
         public abstract void HandleInput();
         
         public abstract void Update(GameTime gameTime);

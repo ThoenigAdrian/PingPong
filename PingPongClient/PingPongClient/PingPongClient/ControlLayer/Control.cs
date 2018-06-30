@@ -27,7 +27,14 @@ namespace PingPongClient
         public GameMode Mode
         {
             get { return ActiveControl.GetMode; }
-            private set { ActiveControl = GetSubControl(value); }
+            private set
+            {
+                if (value != Mode)
+                {
+                    ActiveControl = GetSubControl(value);
+                    ActiveControl.OnEnter();
+                }
+            }
         }
         
         Dictionary<GameMode, SubControlInterface> SubControls { get; set; }

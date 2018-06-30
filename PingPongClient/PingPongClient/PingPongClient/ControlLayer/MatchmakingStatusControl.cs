@@ -20,6 +20,12 @@ namespace PingPongClient.ControlLayer
             Visualizer = new LobbyVisualizer(StatusLobby);
         }
 
+        public override void OnEnter()
+        {
+            StatusLobby.ResetStatus();
+            IssueServerResponse(PackageType.ServerMatchmakingStatusResponse, 15000);
+        }
+
         public override void HandleInput()
         {
             if(Input.GetTextEditInput() == TextEditInputs.Delete)
@@ -76,6 +82,7 @@ namespace PingPongClient.ControlLayer
 
         protected override void ResponseTimeoutActions(PackageType requestedPackageType)
         {
+            StatusLobby.SetStatus("Timeout!");
             CancelWaiting();
         }
 
