@@ -82,35 +82,12 @@ namespace PingPongClient.ControlLayer
                     break;
             }
 
-            IssueServerResponse(PackageType.ServerPlayerIDResponse);
-            RegistrationLobby.SetStatus("Waiting for server response...");
+            ParentControl.SwitchMode(GameMode.Status);
         }
 
         public override void Update(GameTime gameTime)
         {
             RegistrationLobby.UpdateStatusVisibility();
-        }
-
-        protected override void ServerResponseActions(PackageInterface responsePackage)
-        {
-            ServerInitializeGameResponse response = responsePackage as ServerInitializeGameResponse;
-            if (response == null)
-                throw new Exception("Response reader failed to read package!");
-
-            if(response.m_players == null || response.m_ball == null || response.m_field == null)
-            {
-                RegistrationLobby.SetStatus("Server response invalid!");
-                return;
-            }
-
-            ParentControl.GameControl.InitializeGame(response.m_players, response.m_field, response.m_ball);
-
-            ParentControl.SwitchMode(GameMode.Game);
-        }
-
-        protected override void ResponseTimeoutActions(PackageType requestedPackageType)
-        {
-            RegistrationLobby.SetStatus("Server response timeout!");
         }
     }
 }

@@ -150,7 +150,7 @@ namespace PingPongClient.ControlLayer
                     ShowReconnectOptions();
 
                     ParentControl.OptionControl.SetServerIP(handler.ConnectParameters.ServerIP.ToString());
-                    ParentControl.SwitchMode(GameMode.Lobby);
+                    ParentControl.SwitchMode(GameMode.Options);
                 }
             }
             finally
