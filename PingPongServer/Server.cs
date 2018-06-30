@@ -18,6 +18,8 @@ using PingPongServer.ServerGame;
 
 using Newtonsoft.Json.Linq;
 using XSLibrary.Network.Accepters;
+using PingPongServer.Matchmaking;
+using NetworkLibrary.DataPackages.ServerSourcePackages.Matchmaking;
 
 namespace PingPongServer
 {
@@ -38,10 +40,12 @@ namespace PingPongServer
         // Logging
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
 
-        public bool ServerStopping { get { return m_stopServer; } }
-        volatile bool m_stopServer = false; 
+        
 
-        private int maximumNumberOfIncomingConnections = 1000; 
+        public bool ServerStopping { get { return m_stopServer; } }
+        volatile bool m_stopServer = false;
+
+        private int maximumNumberOfIncomingConnections = 1000;
 
         public Server()
         {
@@ -54,6 +58,8 @@ namespace PingPongServer
             ReadConfigurationFromConfigurationFile();
 
             MatchManager.OnMatchFound += StartMatchmadeGame;
+
+            
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
@@ -134,7 +140,6 @@ namespace PingPongServer
                         StartGame(game);
                 }
                 ServeClientGameRequests();
-
                 MatchManager.Update();
 
 
@@ -152,6 +157,12 @@ namespace PingPongServer
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
 
             newGame.StartGame(this);
+        }
+
+        private void UpdateMatchmakingQueuedClients()
+        {
+            MatchManager.Update();
+            
         }
 
         private void ServeClientGameRequests()
@@ -179,9 +190,29 @@ namespace PingPongServer
 
                         case ClientInitializeGamePackage.RequestType.Matchmaking:
                             MatchManager.AddClientToQueue(conn, initPackage);
+                            SendMatchmakingInitResponse(conn, initPackage);
                             break;
                     }
                 }
+            }
+        }
+
+        private void SendMatchmakingInitResponse(NetworkConnection clientConnection, ClientInitializeGamePackage initPackage)
+        {
+            ServerMatchmakingStatusResponse response = new ServerMatchmakingStatusResponse();
+            Request clientRequest = new Request(clientConnection.ClientSession.SessionID, initPackage.GamePlayerCount, initPackage.PlayerTeamwish);
+            if (MatchManager.IsRequestValid(clientRequest))
+            {
+                
+                response.Error = false;
+                response.Status = "Waiting for additional players to start the game";
+                clientConnection.SendTCP(response);
+            }
+            else
+            {
+                response.Error = true;
+                response.Status = "Could not start matchmaking because of an invalid request\n";
+                response.Status += "Received Request: PlayerCount(" + initPackage.GamePlayerCount.ToString() + ") TeamWishes (" + initPackage.PlayerTeamwish.ToString() + ")";
             }
         }
 

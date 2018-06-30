@@ -73,7 +73,7 @@ namespace PingPongServer.Matchmaking
             Matches.Add(requests);
         }
 
-        bool IsRequestValid(Request request)
+        public bool IsRequestValid(Request request)
         {
             if (request.MaxPlayerCount % 2 != 0)
                 return false;

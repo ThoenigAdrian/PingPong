@@ -1,5 +1,7 @@
 ﻿using NetworkLibrary.DataPackages.ClientSourcePackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages.Matchmaking;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using NetworkLibrary.Utility;
 using PingPongServer.Matchmaking;
 using System.Collections.Generic;
 
@@ -9,6 +11,9 @@ namespace PingPongServer
     {
         public delegate void MatchFoundHandler(object sender, MatchData matchData);
         public event MatchFoundHandler OnMatchFound;
+        private int MatchmakingRefreshIntervalInSeconds = 5;
+        private OneShotTimer UpdateMatchmakingQueue;
+        
 
         public class MatchData
         {
@@ -20,6 +25,11 @@ namespace PingPongServer
         {
             public NetworkConnection m_clientConnection;
             public Request m_request;
+        }
+
+        public MatchmakingManager()
+        {
+            UpdateMatchmakingQueue = new OneShotTimer(MatchmakingRefreshIntervalInSeconds * 1000000, true);
         }
 
         private Matchmaker Matchmaking { get; set; } = new Matchmaker();
@@ -47,7 +57,29 @@ namespace PingPongServer
 
                 OnMatchFound?.Invoke(this, matchData);
             }
+
+            UpdateWaitingClients();
+
         }
+
+        public void UpdateWaitingClients()
+        {
+            if(UpdateMatchmakingQueue != true)
+                return;
+
+            ServerMatchmakingStatusResponse response = new ServerMatchmakingStatusResponse();
+            
+            foreach(NetworkConnection clientConnection in m_waitingClientConnections)
+            {
+                response.Error = false;
+                response.Status = "Waiting for additional players to start the game";
+                clientConnection.SendTCP(response);
+            }
+
+            UpdateMatchmakingQueue.Restart();
+            
+        }
+        
 
         private MatchData GenerateMatchData(Request[] match)
         {
@@ -92,6 +124,11 @@ namespace PingPongServer
             {
                 m_waitingClientConnections.Remove(client.m_clientConnection);
             }
+        }
+
+        public bool IsRequestValid(Request request)
+        {
+            return Matchmaking.IsRequestValid(request);
         }
 
         private void HandleConnectionNotFound(Request[] match)
