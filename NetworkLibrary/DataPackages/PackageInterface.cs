@@ -21,8 +21,7 @@
         ServerJoinGameResponsePackage,
         ServerSessionResponse,
         ServerPlayerIDResponse,
-        ServerGameValidResponse,
-        ServerGameInvalidResponse
+        ServerMatchmakingStatusResponse
     }
 
     public enum Result
