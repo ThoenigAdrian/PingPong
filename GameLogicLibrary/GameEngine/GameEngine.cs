@@ -87,7 +87,7 @@ namespace GameLogicLibrary
             else if (angle > 270 && angle < 315)
                 angle += 45;
 
-            float radiant = (float) new GameMath().DegreeToRadian(angle);
+            float radiant = GameMath.DegreeToRadian(angle);
             GameStructure.Ball.ChangeAngleOfBall(radiant);
         }
 

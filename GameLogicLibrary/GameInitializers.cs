@@ -21,7 +21,7 @@ namespace GameLogicLibrary
         public const float PLAYER_SPEED = 1.5F;
         
         public const float MAXIMUM_ANGLE_DEGREE = 70;
-        public const float MAXIMUM_ANGLE_RAD = (float)(Math.PI * MAXIMUM_ANGLE_DEGREE / 180);
+        public readonly float MAXIMUM_ANGLE_RAD = GameMath.DegreeToRadian(MAXIMUM_ANGLE_DEGREE);
 
         public static int GetPlayerX(int team, int playerIndex)
         {
