@@ -51,7 +51,7 @@ namespace NetworkLibrary.Utility
 
         public static bool operator !=(OneShotTimer timer, bool val)
         {
-            return timer != val;
+            return timer.TimerOverflow() != val;
         }
         
         public override int GetHashCode()
