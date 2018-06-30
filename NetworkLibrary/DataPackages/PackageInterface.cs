@@ -20,7 +20,9 @@
         ServerAddPlayerResponsePackage,
         ServerJoinGameResponsePackage,
         ServerSessionResponse,
-        ServerPlayerIDResponse
+        ServerPlayerIDResponse,
+        ServerGameValidResponse,
+        ServerGameInvalidResponse
     }
 
     public enum Result

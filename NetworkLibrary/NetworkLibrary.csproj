@@ -51,6 +51,8 @@
     <Compile Include="DataPackages\ClientSourcePackages\PlayerMovementPackage.cs" />
     <Compile Include="DataPackages\ClientSourcePackages\ClientControlPackage.cs" />
     <Compile Include="DataPackages\PackageInterface.cs" />
+    <Compile Include="DataPackages\ServerSourcePackages\Matchmaking\ServerGameValidResponse.cs" />
+    <Compile Include="DataPackages\ServerSourcePackages\Matchmaking\ServerGameInvalidResponse.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerAddPlayerResponsePackage.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerJoinGameResponsePackage.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerInitializeGameResponse.cs" />
