@@ -5,11 +5,11 @@ using System.Text;
 
 namespace GameLogicLibrary
 {
-    public class GameMath
+    public static class GameMath
     {
-        public double DegreeToRadian(double angle)
+        public static float DegreeToRadian(float angle)
         {
-            return Math.PI * angle / 180.0;
+            return (float)Math.PI * angle / 180.0F;
         }
     }
 }
