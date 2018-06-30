@@ -44,6 +44,7 @@
     <Compile Include="ClientMovement.cs" />
     <Compile Include="GameEngine\CollisionDetector.cs" />
     <Compile Include="GameEngine\GameEngine.cs" />
+    <Compile Include="GameEngine\PingPongCollisionDetector.cs" />
     <Compile Include="GameMath.cs" />
     <Compile Include="GameObjects\BasicStructure.cs" />
     <Compile Include="GameObjects\PlayBall.cs" />

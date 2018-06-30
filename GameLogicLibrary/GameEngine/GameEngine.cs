@@ -6,22 +6,28 @@ using XSLibrary.Utility;
 
 namespace GameLogicLibrary
 {
+
+    public delegate void TeamScoredDelegateClass();
+
     public class GameEngine
     {
         private GameStructure GameStructure;
 
         public delegate void TeamScoredEventHandler(object sender, EventArgs e);
         public event TeamScoredEventHandler TeamScored;
-        private CollisionDetector Collisions;
+        private PingPongCollisionDetector Collisions;
 
         OneShotTimer GameOngoingTimer;
+        
+        TeamScoredDelegateClass TeamScoredDelegate;
 
         Random random;
 
         public GameEngine(GameStructure GameStructure)
         {
             this.GameStructure = GameStructure;
-            Collisions = new CollisionDetector();
+            Collisions = new PingPongCollisionDetector(GameStructure);
+            TeamScoredDelegate = new TeamScoredDelegateClass(OnTeamScored);
             random = new Random();
             ResetBall();
         }
@@ -42,7 +48,7 @@ namespace GameLogicLibrary
                 }
             }
 
-            CalculateCollisions();
+            Collisions.CalculateCollisions(TeamScoredDelegate);
             IncreaseBallSpeed();
         }
 
@@ -66,10 +72,7 @@ namespace GameLogicLibrary
             GameOngoingTimer = new OneShotTimer(1000 * 1000, true);
         }
 
-        private float GetNewAngleOfBall(Player p)
-        {
-            return GameInitializers.MAXIMUM_ANGLE_RAD * GetRelativeDistanceFromMiddlePoint(p);
-        }
+        
         
         private void RandomizeBallDirection()
         {
@@ -94,121 +97,17 @@ namespace GameLogicLibrary
             TeamScored?.Invoke(this, EventArgs.Empty);
         }
 
-        private void ChangeDirectionOfBall(float Angle)
-        {
-            if (GameStructure.Ball.DirectionX > 0)
-            {
-                GameStructure.Ball.ChangeAngleOfBall(Angle);
-                GameStructure.Ball.ReverseDirectionX();
-
-            }
-            else
-            {
-                GameStructure.Ball.ChangeAngleOfBall(Angle);
-            }
-
-        }
 
         private void IncreaseBallSpeed()
         {
             GameStructure.Ball.increaseSpeed(GameOngoingTimer.TimePassed);
         }
 
-        private bool BallInPlayerBar(Player player)
-        {
-            GameStructure.Circle circle = new GameStructure.Circle(GameStructure.Ball.PositionX, GameStructure.Ball.PositionY, GameStructure.Ball.Radius);
-            GameStructure.Rectangle rectangle = new GameStructure.Rectangle(player.PositionX, player.PositionY, player.Height, player.Width);
-            return Collisions.CircleInRect(circle, rectangle);
-        }
-
-
-        private void CalculateWallCollisions()
-        {
-            if (GameStructure.Ball.PositionX >= GameStructure.GameField.Width - GameStructure.Ball.Radius)
-            {
-                if (GameStructure.scoring)
-                {
-                    GameStructure.GameTeams[0].score++;
-                    OnTeamScored();
-                }
-
-                else
-                {
-                   GameStructure.Ball.PositionX = (GameStructure.GameField.Width - GameStructure.Ball.Radius) - (GameStructure.Ball.PositionX - (GameStructure.GameField.Width - GameStructure.Ball.Radius));
-                   GameStructure.Ball.ReverseDirectionX();
-                }
-
-            }
-
-            if (GameStructure.Ball.PositionY >= GameStructure.GameField.Height - GameStructure.Ball.Radius)
-            {
-                GameStructure.Ball.PositionY = (GameStructure.GameField.Height - GameStructure.Ball.Radius) - (GameStructure.Ball.PositionY - (GameStructure.GameField.Height - GameStructure.Ball.Radius));
-                GameStructure.Ball.ReverseDirectionY();
-            }
-            if (GameStructure.Ball.PositionX <= GameStructure.Ball.Radius)
-            {
-                if (GameStructure.scoring)
-                {
-                    GameStructure.GameTeams[1].score++;
-                    OnTeamScored();
-                }
-
-                else
-                {
-                   GameStructure.Ball.PositionX =GameStructure.Ball.PositionX * -1;
-                   GameStructure.Ball.ReverseDirectionX();
-                }
-            }
-
-            if (GameStructure.Ball.PositionY <= GameStructure.Ball.Radius)
-            {
-                GameStructure.Ball.PositionY = GameStructure.Ball.Radius + (GameStructure.Ball.Radius - GameStructure.Ball.PositionY);
-                GameStructure.Ball.ReverseDirectionY();
-            }
-
-        }
+        
 
         
 
-        private void CalculateCollisions()
-        {
-            CalculatePlayerBallCollisions();
-            CalculateWallCollisions();
-        }
-
-        private void CalculatePlayerBallCollisions()
-        {
-            foreach (KeyValuePair<int, GameStructure.GameTeam> Team in GameStructure.GameTeams)
-            {
-                foreach (Player player in Team.Value.PlayerList)
-                {
-                    if ((GameStructure.Ball.LastTouchedTeam == player.Team) && !GameStructure.friendlyFire)
-                        continue;
-                    if (BallInPlayerBar(player))
-                    {
-                        GameStructure.Ball.LastTouchedTeam = player.Team;
-                        float Angle = GetNewAngleOfBall(player);
-                        ChangeDirectionOfBall(Angle);
-                        return; // ASSUMING ONLY ONE PLAYER CAN TOUCH THE BALL !
-                    }
-
-                }
-            }
-        }
-
         
-
-        private float GetRelativeDistanceFromMiddlePoint(Player p)
-        {
-            float relativeDistance = (GameStructure.Ball.PositionY - (p.PositionY + p.Height / 2)) / (p.Height / 2);
-
-            if (relativeDistance < -1)
-                relativeDistance = -1;
-            if (relativeDistance > 1)
-                relativeDistance = 1;
-
-            return relativeDistance;
-        }
 
         private float Max(Tuple<float, float> floatTuple)
         {
