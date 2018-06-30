@@ -154,7 +154,14 @@ namespace PingPongServer
             newGame.GameID = new Random().Next();
 
             foreach (MatchmakingManager.ClientData client in match.Clients)
+            {
+                ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
+                GameFoundPackage.GameFound = true;
+                GameFoundPackage.Status = "Game will start soon...";
+                GameFoundPackage.Error = false;
+                client.m_clientConnection.SendTCP(GameFoundPackage);
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
+            }
 
             newGame.StartGame(this);
         }
@@ -206,6 +213,7 @@ namespace PingPongServer
                 
                 response.Error = false;
                 response.Status = "Waiting for additional players to start the game";
+                response.GameFound = false;
                 clientConnection.SendTCP(response);
             }
             else
