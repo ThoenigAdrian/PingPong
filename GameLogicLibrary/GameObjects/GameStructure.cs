@@ -14,7 +14,7 @@ namespace GameLogicLibrary.GameObjects
         public TeamsDictionary GameTeams = new TeamsDictionary();
         public const int TEAM_COUNT = 2; // restrict to two teams for now
         public int maxPlayers;
-        public bool friendlyFire = false;
+        public bool friendlyFire = true;
         public bool scoring = true;
 
         

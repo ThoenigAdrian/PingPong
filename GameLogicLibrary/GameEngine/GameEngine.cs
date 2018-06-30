@@ -14,7 +14,9 @@ namespace GameLogicLibrary
         private GameStructure GameStructure;
 
         public delegate void TeamScoredEventHandler(object sender, EventArgs e);
-        public event TeamScoredEventHandler TeamScored;
+        public event TeamScoredEventHandler TeamScoredHandler;
+        public delegate void GameFinishedEventHandler(object sender, EventArgs e);
+        public event GameFinishedEventHandler GameFinishedHandler;
         private PingPongCollisionDetector Collisions;
 
         OneShotTimer GameOngoingTimer;
@@ -91,23 +93,30 @@ namespace GameLogicLibrary
             GameStructure.Ball.ChangeAngleOfBall(radiant);
         }
 
+        
+
         private void OnTeamScored()
         {
             ResetBall();
-            TeamScored?.Invoke(this, EventArgs.Empty);
+            TeamScoredHandler?.Invoke(this, EventArgs.Empty);
+            CheckIfOneTeamWon();
         }
 
+        private void CheckIfOneTeamWon()
+        {
+            for (int index = 0; index < GameStructure.GameTeams.Count; index++)
+            {
+                if (GameStructure.GameTeams[index].score >= GameInitializers.SCORE_NEEDED_FOR_VICTORY)
+                {
+                    GameFinishedHandler(this, EventArgs.Empty);
+                }
+            }
+        }
 
         private void IncreaseBallSpeed()
         {
             GameStructure.Ball.increaseSpeed(GameOngoingTimer.TimePassed);
         }
-
-        
-
-        
-
-        
 
         private float Max(Tuple<float, float> floatTuple)
         {

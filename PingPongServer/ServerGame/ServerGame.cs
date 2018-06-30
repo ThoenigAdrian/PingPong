@@ -45,7 +45,8 @@ namespace PingPongServer.ServerGame
             GameEngine = new GameEngine(GameStructure);
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;
-            GameEngine.TeamScored += OnTeamScored;
+            GameEngine.TeamScoredHandler += OnTeamScored;
+            GameEngine.GameFinishedHandler += OnGameFinished;
 
         }
 
@@ -60,11 +61,14 @@ namespace PingPongServer.ServerGame
             Network.BroadcastScore(scoreData);
         }
 
-        private void OnGameOver(object sender, EventArgs e)
+        private void OnGameFinished(object sender, EventArgs e)
         {
-            Logger.GameLog("Team Scored");
-            Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
             Logger.GameLog("This was the final point");
+            Logger.GameLog("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());            
+
+            GameState = GameStates.Finished;
+            Logger.GameLog("Game finished");
+            Logger.NetworkLog("Tearing Down Network");            
 
         }
 
@@ -199,11 +203,7 @@ namespace PingPongServer.ServerGame
         
         protected virtual void OnGameFinished()
         {
-            GameState = GameStates.Finished;
-            Logger.GameLog("Game finished");
-            Logger.NetworkLog("Tearing Down Network");
-
-            GameFinished?.Invoke(this, EventArgs.Empty);
+            
         }
 
 

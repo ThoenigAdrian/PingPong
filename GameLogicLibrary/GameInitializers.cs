@@ -7,6 +7,8 @@ namespace GameLogicLibrary
         public const int BORDER_HEIGHT = 200;
         public const int BORDER_WIDTH = 500;
 
+        public const int SCORE_NEEDED_FOR_VICTORY = 20;
+
         public const int BALL_RADIUS = 5;
         public const int BALL_POSX = BORDER_WIDTH / 2;
         public const int BALL_POSY = BORDER_HEIGHT / 2;
