@@ -6,7 +6,8 @@
         {
             get { return PackageType.ServerMatchmakingStatusResponse; }
         }
-        
+
+        public bool GameFound;
         public string Status;
         public bool Error;
     }
