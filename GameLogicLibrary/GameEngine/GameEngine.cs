@@ -82,11 +82,11 @@ namespace GameLogicLibrary
 
             if (angle > 45 && angle < 90)
                 angle -= 45;
-            else if (angle > 90 && angle < 135)
+            else if (angle >= 90 && angle < 135)
                 angle += 45;
             else if (angle > 225 && angle < 270)
                 angle -= 45;
-            else if (angle > 270 && angle < 315)
+            else if (angle >= 270 && angle < 315)
                 angle += 45;
 
             float radiant = GameMath.DegreeToRadian(angle);

@@ -164,12 +164,6 @@ namespace PingPongServer
             newGame.StartGame(this);
         }
 
-        private void UpdateMatchmakingQueuedClients()
-        {
-            MatchManager.Update();
-            
-        }
-
         private void ServeClientGameRequests()
         {
             foreach (NetworkConnection conn in ConnectionsReadyForJoingAndStartingGames.Entries)
