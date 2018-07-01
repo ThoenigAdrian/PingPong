@@ -54,7 +54,9 @@ namespace NetworkLibrary.NetworkImplementations
             HolePunchingInterval = 1000;
             m_holePunching = false;
 
-            new Thread(KeepAliveLoop).Start();
+            Thread keepAliveThread = new Thread(KeepAliveLoop);
+            keepAliveThread.Name = "Keep alive";
+            keepAliveThread.Start();
         }
 
         public void AddClientConnection(NetworkConnection clientConnection)
@@ -112,7 +114,9 @@ namespace NetworkLibrary.NetworkImplementations
 
             m_holePunching = true;
 
-            new Thread(HolePunchingLoop).Start();
+            Thread holePunchingThread = new Thread(HolePunchingLoop);
+            holePunchingThread.Name = "Hole punching";
+            holePunchingThread.Start();
         }
 
         protected virtual void PostDisconnectActions()
