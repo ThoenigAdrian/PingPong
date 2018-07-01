@@ -11,6 +11,7 @@ namespace PingPongClient.ControlLayer
     {
         MatchmakingStatusLobby StatusLobby;
         OneShotTimer CancelTimer { get; set; }
+        OneShotTimer Timeout { get; set; }
         bool Canceled { get { return CancelTimer.Started; } }
 
         public override GameMode GetMode { get { return GameMode.Status; } }
@@ -20,13 +21,14 @@ namespace PingPongClient.ControlLayer
             StatusLobby = new MatchmakingStatusLobby();
             Visualizer = new LobbyVisualizer(StatusLobby);
             CancelTimer = new OneShotTimer(3 * 1000* 1000, false);
+            Timeout = new OneShotTimer(15 * 1000 * 1000, false);
         }
 
         public override void OnEnter()
         {
             CancelTimer.Reset();
             StatusLobby.ResetStatus();
-            IssueServerResponse(PackageType.ServerMatchmakingStatusResponse, 15000);
+            Timeout.Restart();
         }
 
         public override void HandleInput()
@@ -40,6 +42,17 @@ namespace PingPongClient.ControlLayer
                 CancelTimer.Reset();
                 Cancel();
             }
+
+            if (Timeout == true)
+                TimeoutActions();
+            else
+                ProcessAllTCPPackages();
+        }
+
+        private void ProcessAllTCPPackages()
+        {
+            if (Network == null)
+                return;
 
             foreach (PackageInterface package in Network.GetTCPPackages())
                 ProcessTCPPackage(package);
@@ -58,39 +71,18 @@ namespace PingPongClient.ControlLayer
             }
         }
 
-        protected override void ServerResponseActions(PackageInterface responsePackage)
-        {
-            ServerMatchmakingStatusResponse statusResponse = responsePackage as ServerMatchmakingStatusResponse;
-            if (statusResponse != null)
-            {
-                HandleStatusResponse(statusResponse);
-                return;
-            }
-
-            ServerInitializeGameResponse initResponse = responsePackage as ServerInitializeGameResponse;
-            if (initResponse != null)
-            {
-                HandleInitResponse(initResponse);
-                return;
-            }
-        }
-
         private void HandleStatusResponse(ServerMatchmakingStatusResponse statusResponse)
         {
             StatusLobby.SetStatus(statusResponse.Status);
 
             if (statusResponse.Error)
                 IntiializeDelayedCancel();
-            else if (statusResponse.GameFound)
-                IssueServerResponse(PackageType.ServerPlayerIDResponse);
             else
-                IssueServerResponse(PackageType.ServerMatchmakingStatusResponse, 15000);
+                Timeout.Restart();
         }
 
         private void HandleInitResponse(ServerInitializeGameResponse initResponse)
         {
-            ParentControl.CancelResponseRequest();
-
             if (initResponse.m_players == null || initResponse.m_ball == null || initResponse.m_field == null)
             {
                 IntiializeDelayedCancel();
@@ -102,7 +94,7 @@ namespace PingPongClient.ControlLayer
             ParentControl.SwitchMode(GameMode.Game);
         }
 
-        protected override void ResponseTimeoutActions(PackageType requestedPackageType)
+        private void TimeoutActions()
         {
             StatusLobby.SetStatus("Timeout!");
             IntiializeDelayedCancel();
@@ -110,7 +102,7 @@ namespace PingPongClient.ControlLayer
 
         private void IntiializeDelayedCancel()
         {
-            ParentControl.CancelResponseRequest();
+            Timeout.Reset();
             CancelTimer.Restart();
         }
 
