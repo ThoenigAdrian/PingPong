@@ -64,19 +64,12 @@
     <Compile Include="NetworkImplementations\Network\NetworkConnectionPool.cs" />
     <Compile Include="NetworkImplementations\Network\NetworkOutput.cs" />
     <Compile Include="PackageAdapters\JSONAdapter.cs" />
-    <Compile Include="Utility\DataContainer\DataContainer.cs" />
-    <Compile Include="Utility\DataContainer\DataWrapper.cs" />
-    <Compile Include="Utility\DataContainer\SafeList.cs" />
-    <Compile Include="Utility\DataContainer\SingleBuffer.cs" />
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="NetworkImplementations\Network\NetworkInterface.cs" />
     <Compile Include="DataPackages\ServerSourcePackages\ServerDataPackage.cs" />
     <Compile Include="NetworkConstants.cs" />
     <Compile Include="PackageAdapters\PackageAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\DataContainer\DoubleBuffer.cs" />
-    <Compile Include="Utility\DataContainer\SafeStack.cs" />
-    <Compile Include="Utility\OneShotTimer.cs" />
     <Compile Include="Utility\ResponseHandlerWithTimeout.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +80,10 @@
     <ProjectReference Include="..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj">
       <Project>{36a1d62e-ea81-4b77-ab0b-6753a7f394ed}</Project>
       <Name>XSNetwork</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XSLibrary\XSLibrary\XSThreadSafety\XSThreadSafety.csproj">
+      <Project>{1364168d-0353-49f5-9dac-2a501fd8055a}</Project>
+      <Name>XSThreadSafety</Name>
     </ProjectReference>
     <ProjectReference Include="..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
       <Project>{a37c8bf1-08e7-46bb-8f9e-536a82365fed}</Project>

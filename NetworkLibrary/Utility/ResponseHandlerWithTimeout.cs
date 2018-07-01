@@ -1,4 +1,5 @@
 ﻿using NetworkLibrary.DataPackages;
+using XSLibrary.Utility;
 
 namespace NetworkLibrary.Utility
 {

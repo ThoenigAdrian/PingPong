@@ -1,9 +1,9 @@
 ﻿using NetworkLibrary.DataPackages.ClientSourcePackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using NetworkLibrary.Utility;
 using PingPongServer.Matchmaking;
 using System.Collections.Generic;
+using XSLibrary.Utility;
 
 namespace PingPongServer
 {
