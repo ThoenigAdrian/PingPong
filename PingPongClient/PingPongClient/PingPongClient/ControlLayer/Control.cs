@@ -139,7 +139,7 @@ namespace PingPongClient
                 }
                 else
                 {
-                    Disonnect();
+                    Disconnect();
                 }
             }
         }
@@ -156,22 +156,28 @@ namespace PingPongClient
 
         private void CheckResponse()
         {
-            if(CurrentResponseRequest != null && CurrentResponseRequest.State != ResponseRequest.ResponseState.Pending)
+            if (CurrentResponseRequest != null && CurrentResponseRequest.State != ResponseRequest.ResponseState.Pending)
             {
                 GameMode issuer = CurrentResponseRequest.Issuer;
 
-                if (CurrentResponseRequest.State == ResponseRequest.ResponseState.Received)
+                switch (CurrentResponseRequest.State)
                 {
-                    PackageInterface package = CurrentResponseRequest.ResponsePackage;
-                    CurrentResponseRequest = null;
-                    GetSubControl(issuer).ProcessServerResponse(package);
+                    case ResponseRequest.ResponseState.Received:
+                        PackageInterface package = CurrentResponseRequest.ResponsePackage;
+                        GetSubControl(issuer).ProcessServerResponse(package);
+                        break;
+
+                    case ResponseRequest.ResponseState.Timeout:
+                        PackageType type = CurrentResponseRequest.ResponsePackageType;
+                        GetSubControl(issuer).HandleResponseTimeout(type);
+                        break;
+
+                    case ResponseRequest.ResponseState.Canceled:
+                        // don't do anything, the subcontrol is aware if it canceled the request
+                        break;
                 }
-                else
-                {
-                    PackageType type = CurrentResponseRequest.ResponsePackageType;
-                    CurrentResponseRequest = null;
-                    GetSubControl(issuer).HandleResponseTimeout(type);
-                }
+
+                CurrentResponseRequest = null;
             }
         }
 
@@ -206,7 +212,7 @@ namespace PingPongClient
             m_networkDied = true;
         }
 
-        void Disonnect()
+        public void Disconnect()
         {
             if (Network != null)
             {

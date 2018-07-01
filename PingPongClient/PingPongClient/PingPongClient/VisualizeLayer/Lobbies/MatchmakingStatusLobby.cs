@@ -13,7 +13,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         {
             Status = new DrawableString("", new Vector2(117, 200), Color.White);
             Strings.Add(Status);
-            Strings.Add(new DrawableString("Press BACKSPACE to cancel", new Vector2(250, 350), Color.White));
+            Strings.Add(new DrawableString("Press ESC to cancel", new Vector2(250, 350), Color.White));
 
             ResetStatus();
         }

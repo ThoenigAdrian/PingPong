@@ -187,7 +187,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             foreach (ResponseRequest responseRequest in m_openResponses.Entries)
             {
-                if (responseRequest.InspectPackage(package) || responseRequest.State == ResponseRequest.ResponseState.Timeout)
+                if (responseRequest.InspectPackage(package)
+                    || responseRequest.State == ResponseRequest.ResponseState.Timeout
+                    || responseRequest.State == ResponseRequest.ResponseState.Canceled)
                 {
                     m_openResponses.Remove(responseRequest);
                     return true;

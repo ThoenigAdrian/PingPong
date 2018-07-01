@@ -5,7 +5,7 @@ namespace NetworkLibrary.Utility
     public class OneShotTimer
     {
         DateTime m_start;
-        bool m_started = false;
+        public bool Started { get; private set; } = false;
         bool m_timerOverflow;
         long m_timerEnd;
 
@@ -25,14 +25,25 @@ namespace NetworkLibrary.Utility
 
         public void Restart()
         {
-            m_start = DateTime.Now;
-            m_started = true;
+            Reset();
+            Start();
+        }
+
+        public void Reset()
+        {
             m_timerOverflow = false;
+            Started = false;
+        }
+
+        private void Start()
+        {
+            m_start = DateTime.Now;
+            Started = true;
         }
 
         private bool TimerOverflow()
         {
-            if (!m_started)
+            if (!Started)
                 return false;
 
             if (m_timerOverflow)

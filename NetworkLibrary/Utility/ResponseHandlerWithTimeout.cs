@@ -8,6 +8,7 @@ namespace NetworkLibrary.Utility
         {
             Pending,
             Timeout,
+            Canceled,
             Received
         }
 
@@ -54,6 +55,11 @@ namespace NetworkLibrary.Utility
             }
 
             return ResponsePackage != null;
+        }
+
+        public void Cancel()
+        {
+            m_state = ResponseState.Canceled;
         }
     }
 }
