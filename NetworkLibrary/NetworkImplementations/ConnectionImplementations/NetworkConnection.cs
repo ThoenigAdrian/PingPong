@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using XSLibrary.Network.Connections;
+using XSLibrary.ThreadSafety.Containers;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {

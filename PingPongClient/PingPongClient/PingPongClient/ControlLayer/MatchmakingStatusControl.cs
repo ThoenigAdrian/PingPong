@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
-using NetworkLibrary.Utility;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
+using XSLibrary.Utility;
 
 namespace PingPongClient.ControlLayer
 {
