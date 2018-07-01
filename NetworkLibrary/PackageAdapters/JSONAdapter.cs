@@ -56,10 +56,6 @@ namespace NetworkLibrary.PackageAdapters
 
         private PackageInterface CreatePackageFromJSONString(string jsonString)
         {
-            // If it's a keep alive package return null 
-            if (jsonString == "{}" || jsonString == "[]")
-                return null;
-
             PackageType type = GetPackageType(jsonString);
 
             switch (type)
@@ -88,8 +84,12 @@ namespace NetworkLibrary.PackageAdapters
                     return JsonConvert.DeserializeObject<ClientRejoinGamePackage>(jsonString);
                 case PackageType.ServerPlayerIDResponse:
                     return JsonConvert.DeserializeObject<ServerInitializeGameResponse>(jsonString);
+                case PackageType.ServerMatchmakingStatusResponse:
+                    return JsonConvert.DeserializeObject<ServerMatchmakingStatusResponse>(jsonString);
             }
-
+#if DEBUG
+            throw new NotImplementedException();
+#endif
             return null;
         }
 

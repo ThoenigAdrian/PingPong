@@ -19,7 +19,6 @@ using PingPongServer.ServerGame;
 using Newtonsoft.Json.Linq;
 using XSLibrary.Network.Accepters;
 using PingPongServer.Matchmaking;
-using NetworkLibrary.DataPackages.ServerSourcePackages.Matchmaking;
 
 namespace PingPongServer
 {

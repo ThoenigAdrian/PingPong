@@ -1,4 +1,4 @@
-﻿namespace NetworkLibrary.DataPackages.ServerSourcePackages.Matchmaking
+﻿namespace NetworkLibrary.DataPackages.ServerSourcePackages
 {
     public class ServerMatchmakingStatusResponse : PackageInterface
     {

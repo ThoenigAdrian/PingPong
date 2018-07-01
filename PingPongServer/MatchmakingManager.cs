@@ -1,5 +1,5 @@
 ﻿using NetworkLibrary.DataPackages.ClientSourcePackages;
-using NetworkLibrary.DataPackages.ServerSourcePackages.Matchmaking;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using PingPongServer.Matchmaking;
@@ -13,7 +13,9 @@ namespace PingPongServer
         public event MatchFoundHandler OnMatchFound;
         private int MatchmakingRefreshIntervalInSeconds = 5;
         private OneShotTimer UpdateMatchmakingQueue;
-        
+
+        const string WAITING_IN_QUEUE = "Waiting for additional players to start the game";
+        const string INVALID_REQUEST = "Invalid game options. Check your configuration!";
 
         public class MatchData
         {
@@ -40,10 +42,10 @@ namespace PingPongServer
             if (Matchmaking.AddRequestToQueue(clientConnection.ClientSession.SessionID, initData.GamePlayerCount, initData.PlayerTeamwish))
             {
                 m_waitingClientConnections.Add(clientConnection);
-                SendMatchmakingStatus(clientConnection, "Added to Queue. Waiting for additional players to start the game");
+                SendMatchmakingStatus(clientConnection, WAITING_IN_QUEUE);
             }
             else
-                SendMatchmakingError(clientConnection, "Invalid game options. Check your configuration!");
+                SendMatchmakingError(clientConnection, INVALID_REQUEST);
         }
 
         public void Update()
@@ -74,7 +76,7 @@ namespace PingPongServer
         private void BroadcastMatchmakingStatus()
         {
             foreach (NetworkConnection clientConnection in m_waitingClientConnections)
-                SendMatchmakingStatus(clientConnection, "Waiting for additional players to start the game");
+                SendMatchmakingStatus(clientConnection, WAITING_IN_QUEUE);
         }
 
         private void SendMatchmakingStatus(NetworkConnection clientConnection, string statusMessage)

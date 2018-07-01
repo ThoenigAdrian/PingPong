@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
-using NetworkLibrary.DataPackages.ServerSourcePackages.Matchmaking;
 using PingPongClient.InputLayer.KeyboardInputs;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.VisualizeLayer.Visualizers;
