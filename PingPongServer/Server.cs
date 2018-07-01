@@ -159,8 +159,11 @@ namespace PingPongServer
                 GameFoundPackage.Error = false;
                 client.m_clientConnection.SendTCP(GameFoundPackage);
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
+                ConnectionsReadyForJoingAndStartingGames.Remove(client.m_clientConnection);
+                
             }
 
+            
             // this makes the server very unsresponsive, invastigate
             ThreadPool.QueueUserWorkItem(newGame.StartGame, this);
         }
