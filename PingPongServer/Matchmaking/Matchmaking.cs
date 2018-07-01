@@ -1,5 +1,4 @@
-﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PingPongServer.Matchmaking
 {
