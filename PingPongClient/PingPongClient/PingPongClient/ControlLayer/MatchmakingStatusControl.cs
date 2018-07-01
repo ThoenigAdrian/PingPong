@@ -40,6 +40,22 @@ namespace PingPongClient.ControlLayer
                 CancelTimer.Reset();
                 Cancel();
             }
+
+            foreach (PackageInterface package in Network.GetTCPPackages())
+                ProcessTCPPackage(package);
+        }
+
+        private void ProcessTCPPackage(PackageInterface package)
+        {
+            switch (package.PackageType)
+            {
+                case PackageType.ServerPlayerIDResponse:
+                    HandleInitResponse(package as ServerInitializeGameResponse);
+                    break;
+                case PackageType.ServerMatchmakingStatusResponse:
+                    HandleStatusResponse(package as ServerMatchmakingStatusResponse);
+                    break;
+            }
         }
 
         protected override void ServerResponseActions(PackageInterface responsePackage)
@@ -73,6 +89,8 @@ namespace PingPongClient.ControlLayer
 
         private void HandleInitResponse(ServerInitializeGameResponse initResponse)
         {
+            ParentControl.CancelResponseRequest();
+
             if (initResponse.m_players == null || initResponse.m_ball == null || initResponse.m_field == null)
             {
                 IntiializeDelayedCancel();
@@ -92,6 +110,7 @@ namespace PingPongClient.ControlLayer
 
         private void IntiializeDelayedCancel()
         {
+            ParentControl.CancelResponseRequest();
             CancelTimer.Restart();
         }
 

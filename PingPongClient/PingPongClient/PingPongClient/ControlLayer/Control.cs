@@ -154,6 +154,12 @@ namespace PingPongClient
             return true;
         }
 
+        public void CancelResponseRequest()
+        {
+            CurrentResponseRequest.Cancel();
+            CurrentResponseRequest = null;
+        }
+
         private void CheckResponse()
         {
             if (CurrentResponseRequest != null && CurrentResponseRequest.State != ResponseRequest.ResponseState.Pending)
