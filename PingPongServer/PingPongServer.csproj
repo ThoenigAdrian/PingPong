@@ -78,6 +78,10 @@
       <Project>{36a1d62e-ea81-4b77-ab0b-6753a7f394ed}</Project>
       <Name>XSNetwork</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XSLibrary\XSLibrary\XSThreadSafety\XSThreadSafety.csproj">
+      <Project>{1364168d-0353-49f5-9dac-2a501fd8055a}</Project>
+      <Name>XSThreadSafety</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj">
       <Project>{a37c8bf1-08e7-46bb-8f9e-536a82365fed}</Project>
       <Name>XSUtility</Name>

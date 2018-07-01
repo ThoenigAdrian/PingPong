@@ -164,20 +164,20 @@ namespace PingPongClient
                 {
                     case ResponseRequest.ResponseState.Received:
                         PackageInterface package = CurrentResponseRequest.ResponsePackage;
-                        GetSubControl(issuer).ProcessServerResponse(package);
+                        CurrentResponseRequest = null;  // set this null before processing because there might be a new response request
+                        GetSubControl(issuer).ProcessServerResponse(package);   
                         break;
 
                     case ResponseRequest.ResponseState.Timeout:
                         PackageType type = CurrentResponseRequest.ResponsePackageType;
+                        CurrentResponseRequest = null;
                         GetSubControl(issuer).HandleResponseTimeout(type);
                         break;
 
                     case ResponseRequest.ResponseState.Canceled:
-                        // don't do anything, the subcontrol is aware if it canceled the request
+                        CurrentResponseRequest = null;
                         break;
                 }
-
-                CurrentResponseRequest = null;
             }
         }
 
