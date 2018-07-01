@@ -4,6 +4,7 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using PingPongServer.Matchmaking;
 using System;
 using System.Collections.Generic;
+using XSLibrary.ThreadSafety.Containers;
 using XSLibrary.Utility;
 
 namespace PingPongServer
@@ -37,19 +38,19 @@ namespace PingPongServer
             
         }
         private Matchmaker Matchmaking { get; set; } = new Matchmaker();
-        public List<NetworkConnection> m_waitingClientConnections = new List<NetworkConnection>();
+        public SafeList<NetworkConnection> m_waitingClientConnections = new SafeList<NetworkConnection>();
 
         public void AddClientToQueue(NetworkConnection clientConnection, ClientInitializeGamePackage initData)
         {
             if (Matchmaking.AddRequestToQueue(clientConnection.ClientSession.SessionID, initData.GamePlayerCount, initData.PlayerTeamwish))
             {
                 m_waitingClientConnections.Add(clientConnection);
+                clientConnection.ConnectionDiedEvent += Matchmaking.RemoveSearchingClient;
                 SendMatchmakingStatus(clientConnection, string.Format(WAITING_IN_QUEUE, TotalPlayersOnline, TotalPlayersSearching()));
-                Matchmaking.TotalPlayersSearching();
             }
             else
                 SendMatchmakingError(clientConnection, INVALID_REQUEST);
-        }
+        }        
         
         public int TotalPlayersSearching()
         {
@@ -83,7 +84,7 @@ namespace PingPongServer
         
         private void BroadcastMatchmakingStatus()
         {
-            foreach (NetworkConnection clientConnection in m_waitingClientConnections)
+            foreach (NetworkConnection clientConnection in m_waitingClientConnections.Entries)
                 SendMatchmakingStatus(clientConnection, string.Format(WAITING_IN_QUEUE, TotalPlayersOnline, TotalPlayersSearching()));
         }
 
@@ -136,7 +137,7 @@ namespace PingPongServer
 
         private NetworkConnection FindClientConnection(int clientID)
         {
-            foreach(NetworkConnection connection in m_waitingClientConnections)
+            foreach(NetworkConnection connection in m_waitingClientConnections.Entries)
             {
                 if (connection.ClientSession.SessionID == clientID)
                     return connection;

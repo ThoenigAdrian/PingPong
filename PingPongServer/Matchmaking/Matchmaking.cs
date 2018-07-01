@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using System.Collections.Generic;
 
 namespace PingPongServer.Matchmaking
 {
@@ -22,6 +23,27 @@ namespace PingPongServer.Matchmaking
             return true;
         }
         
+        public void RemoveSearchingClient(int clientSessionID)
+        {
+            List<Request> requestsToBeRemoved = new List<Request>();
+            foreach (KeyValuePair<int, Filter> keyvalue in m_waitingForMatch)
+            {
+                foreach (RequestGroup requestGroup in keyvalue.Value.RequestGroups)
+                {
+                    foreach (Request request in requestGroup.m_requests)
+                    {
+                        if(request.ID == clientSessionID)
+                        {
+                            requestsToBeRemoved.Add(request);
+                        }
+                    }
+                    foreach (Request requestToBeRemoved in requestsToBeRemoved)
+                        requestGroup.m_requests.Remove(requestToBeRemoved);
+                }
+            }
+
+        }
+        
         private void AddSearchingClient(Request client)
         {
             int maxPlayerCount = client.MaxPlayerCount;
@@ -41,6 +63,7 @@ namespace PingPongServer.Matchmaking
 
             sameSizedFilter.AddRequest(client);
         }
+
 
         public int TotalPlayersSearching()
         {

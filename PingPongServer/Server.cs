@@ -29,7 +29,7 @@ namespace PingPongServer
         // Network 
         private TCPAccepter ConnectionAccepter;
         private UDPConnection MasterUDPSocket;
-        private SafeList<NetworkConnection> ConnectionsReadyForJoingAndStartingGames = new SafeList<NetworkConnection>();
+        private SafeList<NetworkConnection> ConnectionsReadyForQueingUpToMatchmaking = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
         private MatchmakingManager MatchManager = new MatchmakingManager();
 
@@ -150,8 +150,7 @@ namespace PingPongServer
                 GameFoundPackage.Error = false;
                 client.m_clientConnection.SendTCP(GameFoundPackage);
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
-                ConnectionsReadyForJoingAndStartingGames.Remove(client.m_clientConnection);
-                
+                ConnectionsReadyForQueingUpToMatchmaking.Remove(client.m_clientConnection);                
             }
             StartGame(newGame);
         }
@@ -164,19 +163,14 @@ namespace PingPongServer
                 numberOfPlayersOnline += game.maxPlayers;
             }
             numberOfPlayersOnline += MatchManager.TotalPlayersSearching();
-            numberOfPlayersOnline += ConnectionsReadyForJoingAndStartingGames.Count;
-            foreach (NetworkConnection connection in MatchManager.m_waitingClientConnections)
-            {
-                if (ConnectionsReadyForJoingAndStartingGames.Contains(connection))
-                    numberOfPlayersOnline -= 1;
-            }
-            
+            numberOfPlayersOnline += ConnectionsReadyForQueingUpToMatchmaking.Count;
+           
             return numberOfPlayersOnline;
         }
 
         private void ServeClientGameRequests()
         {
-            foreach (NetworkConnection conn in ConnectionsReadyForJoingAndStartingGames.Entries)
+            foreach (NetworkConnection conn in ConnectionsReadyForQueingUpToMatchmaking.Entries)
             {
                 PackageInterface packet = conn.ReadTCP();
                 if (packet == null)
@@ -190,6 +184,7 @@ namespace PingPongServer
                         case ClientInitializeGamePackage.RequestType.Matchmaking:
                             MatchManager.AddClientToQueue(conn, initPackage);
                             SendMatchmakingInitResponse(conn, initPackage);
+                            ConnectionsReadyForQueingUpToMatchmaking.Remove(conn);
                             break;
                     }
                 }
@@ -222,7 +217,7 @@ namespace PingPongServer
             Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
             networkConnection.ClientSession = new Session(new Random().Next());
             Logger.NetworkLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
-            ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
+            ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
         }
 
@@ -231,7 +226,7 @@ namespace PingPongServer
             // still need to handle if client requests a session which is already in use
             Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + packet.ReconnectSessionID.ToString());
             networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
-            ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
+            ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
             RejoinClientToGame(networkConnection);
         }
@@ -253,7 +248,7 @@ namespace PingPongServer
                 if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
                 {
                     game.RejoinClient(conn);
-                    ConnectionsReadyForJoingAndStartingGames.Remove(conn);
+                    ConnectionsReadyForQueingUpToMatchmaking.Remove(conn);
                     couldRejoin = true;
                     break;
                 }
@@ -271,6 +266,14 @@ namespace PingPongServer
                 {
                     Logger.NetworkLog("Removing disconnected connection from Accepted Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
                     AcceptedConnections.Remove(networkConnection);
+                }
+            }
+            foreach (NetworkConnection networkConnection in ConnectionsReadyForQueingUpToMatchmaking.Entries)
+            {
+                if (!networkConnection.Connected)
+                {
+                    Logger.NetworkLog("Removing disconnected connection from ConnectionsReadyForJoiningAndStarting Games Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
+                    ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
                 }
             }
         }
