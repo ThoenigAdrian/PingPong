@@ -161,7 +161,8 @@ namespace PingPongServer
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
             }
 
-            newGame.StartGame(this);
+            // this makes the server very unsresponsive, invastigate
+            ThreadPool.QueueUserWorkItem(newGame.StartGame, this);
         }
 
         private void ServeClientGameRequests()
