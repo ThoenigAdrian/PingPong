@@ -34,14 +34,11 @@ namespace PingPongServer
         private MatchmakingManager MatchManager = new MatchmakingManager();
 
         // Game
-        private SafeList<Game> PendingGames = new SafeList<Game>();
         private SafeList<Game> RunningGames = new SafeList<Game>();
         private static List<bool> StateOfRunningGames = new List<bool>();
+
         // Logging
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
-
-        
-
         public bool ServerStopping { get { return m_stopServer; } }
         volatile bool m_stopServer = false;
 
@@ -132,15 +129,9 @@ namespace PingPongServer
         {
             while (!m_stopServer)
             {
-                foreach (Game game in PendingGames.Entries)
-                {
-                    if (game.GameState == GameStates.Ready)
-                        StartGame(game);
-                }
                 ServeClientGameRequests();
+                MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
                 MatchManager.Update();
-
-
                 Thread.Sleep(10);
             }
         }
@@ -162,10 +153,25 @@ namespace PingPongServer
                 ConnectionsReadyForJoingAndStartingGames.Remove(client.m_clientConnection);
                 
             }
+            StartGame(newGame);
+        }
 
+        private int NumberOfPlayersOnline()
+        {
+            int numberOfPlayersOnline = 0;
+            foreach(Game game in RunningGames.Entries)
+            {
+                numberOfPlayersOnline += game.maxPlayers;
+            }
+            numberOfPlayersOnline += MatchManager.TotalPlayersSearching();
+            numberOfPlayersOnline += ConnectionsReadyForJoingAndStartingGames.Count;
+            foreach (NetworkConnection connection in MatchManager.m_waitingClientConnections)
+            {
+                if (ConnectionsReadyForJoingAndStartingGames.Contains(connection))
+                    numberOfPlayersOnline -= 1;
+            }
             
-            // this makes the server very unsresponsive, invastigate
-            ThreadPool.QueueUserWorkItem(newGame.StartGame, this);
+            return numberOfPlayersOnline;
         }
 
         private void ServeClientGameRequests()
@@ -181,16 +187,6 @@ namespace PingPongServer
                     ClientInitializeGamePackage initPackage = packet as ClientInitializeGamePackage;
                     switch (initPackage.Request)
                     {
-                        case ClientInitializeGamePackage.RequestType.StartNew:
-                            Logger.NetworkLog("Received a Client Initialize Game Package from : " + conn.RemoteEndPoint.ToString());
-                            Logger.GameLog("Creating a new game");
-                            CreateNewGame(conn, packet);
-                            break;
-                        case ClientInitializeGamePackage.RequestType.Join:
-                            if (!JoinClientToGame(conn, packet))
-                                throw new NotImplementedException(); // Need to have an error handling package for client
-                            break;
-
                         case ClientInitializeGamePackage.RequestType.Matchmaking:
                             MatchManager.AddClientToQueue(conn, initPackage);
                             SendMatchmakingInitResponse(conn, initPackage);
@@ -237,6 +233,7 @@ namespace PingPongServer
             networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
             ConnectionsReadyForJoingAndStartingGames.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
+            RejoinClientToGame(networkConnection);
         }
 
         private void StartGame(Game game)
@@ -244,39 +241,6 @@ namespace PingPongServer
             Logger.GameLog("Found a Game which is ready to start ID: " + game.GameID);
             ThreadPool.QueueUserWorkItem(game.StartGame, this);
             RunningGames.Add(game);
-            PendingGames.Remove(game);
-        }
-        
-        // Returns true if the Game was valid and could be created
-        private bool CreateNewGame(NetworkConnection conn, PackageInterface packet)
-        {
-            ClientInitializeGamePackage initPackage = (ClientInitializeGamePackage)(packet);
-            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            Game newGame = new Game(newGameNetwork, initPackage.GamePlayerCount);
-            newGame.GameID = new Random().Next();
-            newGame.AddClient(conn, initPackage.PlayerTeamwish);
-            ConnectionsReadyForJoingAndStartingGames.Remove(conn);
-            PendingGames.Add(newGame);
-            Logger.Log("Created a new Game with the following details: " + newGame.ToString());
-            return true;
-                
-        }
-
-        // Returns true if client could be added to a game
-        private bool JoinClientToGame(NetworkConnection conn, PackageInterface packet)
-        {
-            ClientInitializeGamePackage pack = (ClientInitializeGamePackage)packet;
-
-            foreach (Game game in PendingGames.Entries)
-            {
-                if (game.AddClient(conn, pack.PlayerTeamwish))
-                {
-                    ConnectionsReadyForJoingAndStartingGames.Remove(conn);
-                    return true;
-                }
-                    
-            }
-            return false;
         }
 
         // Return true if client could rejoin the game
@@ -298,7 +262,6 @@ namespace PingPongServer
 
             return couldRejoin;           
         }
-        
 
         private void RemoveDeadConnections()
         {

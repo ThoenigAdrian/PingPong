@@ -40,7 +40,23 @@ namespace PingPongServer.Matchmaking
             }
 
             sameSizedFilter.AddRequest(client);
-        } 
+        }
+
+        public int TotalPlayersSearching()
+        {
+            int TotalPlayers = 0;
+            foreach (KeyValuePair<int, Filter> keyvalue in m_waitingForMatch)
+            {
+                foreach (RequestGroup requestGroup in keyvalue.Value.RequestGroups)
+                {
+                    foreach (Request request in requestGroup.m_requests)
+                    {
+                        TotalPlayers += request.ClientPlayerCount;
+                    }
+                }
+            }
+            return TotalPlayers;
+        }
 
         private bool GameSizeOpen(int maxPlayerCount)
         {

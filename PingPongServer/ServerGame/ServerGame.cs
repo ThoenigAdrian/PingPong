@@ -21,7 +21,7 @@ namespace PingPongServer.ServerGame
         public GameStates GameState { get; private set; }
         List<Client> Clients = new List<Client>();
 
-        private int maxPlayers;
+        public int maxPlayers;
         private int NeededNumberOfPlayersForGameToStart;
 
         public GameNetwork Network;

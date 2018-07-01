@@ -2,6 +2,7 @@
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using PingPongServer.Matchmaking;
+using System;
 using System.Collections.Generic;
 using XSLibrary.Utility;
 
@@ -11,10 +12,11 @@ namespace PingPongServer
     {
         public delegate void MatchFoundHandler(object sender, MatchData matchData);
         public event MatchFoundHandler OnMatchFound;
+        public int TotalPlayersOnline = 0;
         private int MatchmakingRefreshIntervalInSeconds = 5;
         private OneShotTimer UpdateMatchmakingQueue;
 
-        const string WAITING_IN_QUEUE = "Waiting for additional players to start the game";
+        const string WAITING_IN_QUEUE = "Waiting for additional players to start the game... \nPlayers online: {0} \nPlayers searching: {1} ";
         const string INVALID_REQUEST = "Invalid game options. Check your configuration!";
 
         public class MatchData
@@ -32,20 +34,26 @@ namespace PingPongServer
         public MatchmakingManager()
         {
             UpdateMatchmakingQueue = new OneShotTimer(MatchmakingRefreshIntervalInSeconds * 1000000, true);
+            
         }
-
         private Matchmaker Matchmaking { get; set; } = new Matchmaker();
-        private List<NetworkConnection> m_waitingClientConnections = new List<NetworkConnection>();
+        public List<NetworkConnection> m_waitingClientConnections = new List<NetworkConnection>();
 
         public void AddClientToQueue(NetworkConnection clientConnection, ClientInitializeGamePackage initData)
         {
             if (Matchmaking.AddRequestToQueue(clientConnection.ClientSession.SessionID, initData.GamePlayerCount, initData.PlayerTeamwish))
             {
                 m_waitingClientConnections.Add(clientConnection);
-                SendMatchmakingStatus(clientConnection, WAITING_IN_QUEUE);
+                SendMatchmakingStatus(clientConnection, string.Format(WAITING_IN_QUEUE, TotalPlayersOnline, TotalPlayersSearching()));
+                Matchmaking.TotalPlayersSearching();
             }
             else
                 SendMatchmakingError(clientConnection, INVALID_REQUEST);
+        }
+        
+        public int TotalPlayersSearching()
+        {
+            return Matchmaking.TotalPlayersSearching();
         }
 
         public void Update()
@@ -72,11 +80,11 @@ namespace PingPongServer
             }
 
         }
-
+        
         private void BroadcastMatchmakingStatus()
         {
             foreach (NetworkConnection clientConnection in m_waitingClientConnections)
-                SendMatchmakingStatus(clientConnection, WAITING_IN_QUEUE);
+                SendMatchmakingStatus(clientConnection, string.Format(WAITING_IN_QUEUE, TotalPlayersOnline, TotalPlayersSearching()));
         }
 
         private void SendMatchmakingStatus(NetworkConnection clientConnection, string statusMessage)
