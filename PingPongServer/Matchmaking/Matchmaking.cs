@@ -64,8 +64,11 @@ namespace PingPongServer.Matchmaking
 
         private void UpdateFilter(Filter filter)
         {
-            filter.SearchNewCombinations();
-            filter.SearchValidCombinations();
+            if (filter.Changes)
+            {
+                filter.SearchNewCombinations();
+                filter.SearchValidCombinations();
+            }
         }
 
         private void HandleFoundMatch(object sender, Request[] requests)

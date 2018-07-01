@@ -13,10 +13,12 @@ namespace PingPongServer.Matchmaking
             List<ValidCombination> m_validCombinations = new List<ValidCombination>();
 
             public int MaxPlayerCount { get; private set; }
+            public bool Changes { get; private set; }
 
             public Filter (int maxPlayerCount)
             {
                 MaxPlayerCount = maxPlayerCount;
+                Changes = false;
             }
 
             public void AddRequest(Request request)
@@ -29,6 +31,7 @@ namespace PingPongServer.Matchmaking
 
                 RequestGroup newGroup = new RequestGroup(request);
                 RequestGroups.Add(newGroup);
+                Changes = true;
             }
 
             public void SearchValidCombinations()
@@ -47,6 +50,7 @@ namespace PingPongServer.Matchmaking
             {
                 PuzzleBox puzzleBox = new PuzzleBox(MaxPlayerCount, RequestGroups.ToArray());
                 AddToValidCombinations(puzzleBox.SearchNewCombinations());
+                Changes = false;
             }
 
             private void AddToValidCombinations(ValidCombination[] foundCombinations)
