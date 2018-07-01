@@ -38,12 +38,12 @@ namespace PingPongClient.NetworkLayer
 
         public bool GetResponse()
         {
-            HandleSessionRespone();
+            HandleSessionResponse();
 
             return Connected;
         }
 
-        private void HandleSessionRespone()
+        private void HandleSessionResponse()
         {
             TCPPacketConnection tcpConnection;
             try
