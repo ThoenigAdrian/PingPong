@@ -191,6 +191,7 @@ namespace PingPongServer
             }
         }
 
+        // Do we still need this ??? I think this is done now in the MatchmakinManager
         private void SendMatchmakingInitResponse(NetworkConnection clientConnection, ClientInitializeGamePackage initPackage)
         {
             ServerMatchmakingStatusResponse response = new ServerMatchmakingStatusResponse();
