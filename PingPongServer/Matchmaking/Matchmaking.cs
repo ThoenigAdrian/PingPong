@@ -119,6 +119,9 @@ namespace PingPongServer.Matchmaking
             if (request.MaxPlayerCount % 2 != 0)
                 return false;
 
+            if (request.ClientPlayerCount < 1)
+                return false;
+
             if (request.ClientPlayerCount > request.MaxPlayerCount)
                 return false;
 
