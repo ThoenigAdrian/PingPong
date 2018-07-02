@@ -9,7 +9,7 @@ namespace PingPongServer.Matchmaking
             public Request GroupType { get; private set; }
             public int Count { get { return m_requests.Count; } }
 
-            List<Request> m_requests = new List<Request>();
+            public List<Request> m_requests = new List<Request>();
 
             public int CombinationMaxDepth { get; set; } = -1;
 
@@ -58,6 +58,7 @@ namespace PingPongServer.Matchmaking
 
                 return poppedRequest;
             }
+            
         }
     }
 }

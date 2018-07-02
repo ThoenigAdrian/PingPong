@@ -21,7 +21,7 @@ namespace PingPongServer.ServerGame
         public GameStates GameState { get; private set; }
         List<Client> Clients = new List<Client>();
 
-        private int maxPlayers;
+        public int maxPlayers;
         private int NeededNumberOfPlayersForGameToStart;
 
         public GameNetwork Network;
@@ -50,6 +50,13 @@ namespace PingPongServer.ServerGame
 
         }
 
+        ~Game()
+        {
+            // Not sure if i need this Destructor Thing
+            Logger.NetworkLog("Tearing Down Network");
+            Network.Close();
+        }
+
         private void OnTeamScored(object sender, EventArgs e)
         {
             Logger.GameLog("Team Scored");
@@ -61,15 +68,30 @@ namespace PingPongServer.ServerGame
             Network.BroadcastScore(scoreData);
         }
 
-        private void OnGameFinished(object sender, EventArgs e)
+        private void GameFinishedCleanup()
         {
             Logger.GameLog("This was the final point");
-            Logger.GameLog("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());            
+            Logger.GameLog("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
 
-            GameState = GameStates.Finished;
+            ServerGameControlPackage gameFinishedPackage = new ServerGameControlPackage();
+            gameFinishedPackage.Command = ServerControls.GameFinished;
+            gameFinishedPackage.Score.Team1 = GameStructure.GameTeams[0].score;
+            gameFinishedPackage.Score.Team2 = GameStructure.GameTeams[1].score;
+            if (GameStructure.GameTeams[0].score > GameStructure.GameTeams[1].score)
+                gameFinishedPackage.Winner = Teams.Team1;
+            else
+                gameFinishedPackage.Winner = Teams.Team2;
+
             Logger.GameLog("Game finished");
-            Logger.NetworkLog("Tearing Down Network");            
+            Logger.NetworkLog("Tearing Down Network");
+            Network.Close();
+            GameState = GameStates.Finished;
+            GameFinished?.Invoke(this, EventArgs.Empty);
+        }
 
+        private void OnGameFinished(object sender, EventArgs e)
+        {
+            GameFinishedCleanup();
         }
 
         private void OnClientLost(object sender, EventArgs e)
@@ -96,7 +118,7 @@ namespace PingPongServer.ServerGame
 
             if (gameOver)
             {
-                OnGameFinished();
+                GameFinishedCleanup();
             }
                 
         }
@@ -136,9 +158,7 @@ namespace PingPongServer.ServerGame
                 Network.BroadcastFramesToClients(ServerPackage);
                 Thread.Sleep(5);
             }
-            OnGameFinished();
-            Network.Close();
-            GameState = GameStates.Finished; // Move to somewhere else game logic e.g score reached
+            
         }
 
         public bool AddClient(NetworkConnection client, int[] playerTeamWish)
@@ -201,12 +221,6 @@ namespace PingPongServer.ServerGame
             packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
         }
         
-        protected virtual void OnGameFinished()
-        {
-            
-        }
-
-
         private PackageInterface[] GetClientData(int sessionID)
         {
             List<PackageInterface> ps = new List<PackageInterface>();

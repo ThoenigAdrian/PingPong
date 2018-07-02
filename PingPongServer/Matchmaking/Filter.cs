@@ -23,6 +23,8 @@ namespace PingPongServer.Matchmaking
 
             public void AddRequest(Request request)
             {
+                Changes = true;
+
                 foreach (RequestGroup group in RequestGroups)
                 {
                     if (group.Push(request))
@@ -31,7 +33,6 @@ namespace PingPongServer.Matchmaking
 
                 RequestGroup newGroup = new RequestGroup(request);
                 RequestGroups.Add(newGroup);
-                Changes = true;
             }
 
             public void SearchValidCombinations()
