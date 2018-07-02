@@ -57,6 +57,11 @@ namespace PingPongServer.ServerGame
             Network.Close();
         }
 
+        public void BroadcastStartGamePackage(ServerMatchmakingStatusResponse GameFoundPackage)
+        {
+            Network.BroadcastStartGamePackage(GameFoundPackage);
+        }
+
         private void OnTeamScored(object sender, EventArgs e)
         {
             Logger.GameLog("Team Scored");
@@ -143,7 +148,7 @@ namespace PingPongServer.ServerGame
         public void StartGame(object caller)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();            
-            GameFinished += (caller as Server).OnGameFinished;
+            GameFinished += (caller as GamesManager).OnGameFinished;
             GameState = GameStates.Running;
 
             foreach (Client client in Clients)

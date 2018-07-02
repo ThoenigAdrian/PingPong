@@ -41,6 +41,9 @@ namespace PingPongServer
         public bool ServerStopping { get { return m_stopServer; } }
         volatile bool m_stopServer = false;
 
+        // Configuration
+        private string ConfigurationFile = "server_config.json";
+
         private int maximumNumberOfIncomingConnections = 1000;
 
         public Server()
@@ -51,11 +54,10 @@ namespace PingPongServer
             MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
+
             ReadConfigurationFromConfigurationFile();
-
-            GamesManager = new GamesManager();
-
-            MatchManager.OnMatchFound += StartMatchmadeGame;
+            GamesManager = new GamesManager(MasterUDPSocket);
+            MatchManager.OnMatchFound += GamesManager.StartMatchmadeGame;
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
@@ -123,38 +125,9 @@ namespace PingPongServer
             }
         }
 
-        
-
-        private void StartMatchmadeGame(object sender, MatchmakingManager.MatchData match)
-        {
-            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            Game newGame = new Game(newGameNetwork, match.MaxPlayerCount);
-            newGame.GameID = new Random().Next();
-
-            foreach (MatchmakingManager.ClientData client in match.Clients)
-            {
-                ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
-                GameFoundPackage.GameFound = true;
-                GameFoundPackage.Status = "Game will start soon...";
-                GameFoundPackage.Error = false;
-                client.m_clientConnection.SendTCP(GameFoundPackage);
-                newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
-                ConnectionsReadyForQueingUpToMatchmaking.Remove(client.m_clientConnection);                
-            }
-            StartGame(newGame);
-        }
-
         private int NumberOfPlayersOnline()
         {
-            int numberOfPlayersOnline = 0;
-            foreach(Game game in RunningGames.Entries)
-            {
-                numberOfPlayersOnline += game.maxPlayers;
-            }
-            numberOfPlayersOnline += MatchManager.TotalPlayersSearching();
-            numberOfPlayersOnline += ConnectionsReadyForQueingUpToMatchmaking.Count;
-           
-            return numberOfPlayersOnline;
+            return GamesManager.PlayersCurrentlyInGames() + MatchManager.TotalPlayersSearching() + ConnectionsReadyForQueingUpToMatchmaking.Count;
         }
 
         private void ServeClientGameRequests()
@@ -195,35 +168,12 @@ namespace PingPongServer
             networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
             ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
-            RejoinClientToGame(networkConnection);
-        }
-
-        private void StartGame(Game game)
-        {
-            Logger.GameLog("Found a Game which is ready to start ID: " + game.GameID);
-            ThreadPool.QueueUserWorkItem(game.StartGame, this);
-            RunningGames.Add(game);
-        }
-
-        // Return true if client could rejoin the game
-        private bool RejoinClientToGame(NetworkConnection conn)
-        {
-            bool couldRejoin = false;
-
-           foreach(Game game in RunningGames.Entries)
-           {
-                if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
-                {
-                    game.RejoinClient(conn);
-                    ConnectionsReadyForQueingUpToMatchmaking.Remove(conn);
-                    couldRejoin = true;
-                    break;
-                }
-                 
+            if (GamesManager.RejoinClientToGame(networkConnection))
+            {
+                ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
             }
-
-            return couldRejoin;           
         }
+        
 
         private void RemoveDeadConnections()
         {
@@ -245,25 +195,13 @@ namespace PingPongServer
             }
         }
 
-        public void OnGameFinished(object sender, EventArgs e)
-        {
-            RemoveFinishedGames();
-        }
 
         public void ReadConfigurationFromConfigurationFile()
-        {
-            // Configuration filename must be server_config.json
-            string filename = "server_config.json";
-            ReadConfigurationFromConfigurationFile(filename);
-
-        }
-
-        public void ReadConfigurationFromConfigurationFile(string filename)
         {
             string serverConfig = "";
             try
             {
-                using (StreamReader serverConfigReadStream = new StreamReader(File.Open(filename, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)))
+                using (StreamReader serverConfigReadStream = new StreamReader(File.Open(ConfigurationFile, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)))
                 {
                     serverConfig = serverConfigReadStream.ReadToEnd();
                 }
@@ -272,13 +210,13 @@ namespace PingPongServer
                 {
                     maximumNumberOfIncomingConnections = (int)parsedServerConfiguration["maximumNumberOfIncomingConnections"];
                 }
-                    
-                catch(Exception exception)
+
+                catch (Exception exception)
                 {
                     Logger.Log("Couldn't read maximumNumberOfConnections from configuration file , details : ");
                     Logger.Log(exception.Message);
                 }
-                    
+
             }
             catch (FileNotFoundException)
             {
@@ -290,9 +228,8 @@ namespace PingPongServer
                 Logger.Log(exception.Message);
                 Logger.Log("[Warning] Default Configuraiton will be used instead !\n");
             }
-            
-        }
 
+        }
         
 
         public void Dispose()

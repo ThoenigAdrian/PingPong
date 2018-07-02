@@ -54,6 +54,11 @@ namespace PingPongServer
             Out.BroadCastTCP(score);
         }
 
+        public void BroadcastStartGamePackage(ServerMatchmakingStatusResponse GameFoundPackage)
+        {
+            Out.BroadCastTCP(GameFoundPackage);
+        }
+
         private PackageInterface[] GetAllOfPackagesOfClient(int sessionID)
         {
             return In.GetAllDataTCP(sessionID);

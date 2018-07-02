@@ -8,7 +8,7 @@ using XSLibrary.Utility;
 
 namespace PingPongServer
 {
-    class MatchmakingManager
+    public class MatchmakingManager
     {
         public delegate void MatchFoundHandler(object sender, MatchData matchData);
         public event MatchFoundHandler OnMatchFound;
