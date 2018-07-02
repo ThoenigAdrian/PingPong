@@ -183,33 +183,10 @@ namespace PingPongServer
                     {
                         case ClientInitializeGamePackage.RequestType.Matchmaking:
                             MatchManager.AddClientToQueue(conn, initPackage);
-                            SendMatchmakingInitResponse(conn, initPackage);
                             ConnectionsReadyForQueingUpToMatchmaking.Remove(conn);
                             break;
                     }
                 }
-            }
-        }
-
-        // Do we still need this ??? I think this is done now in the MatchmakinManager
-        private void SendMatchmakingInitResponse(NetworkConnection clientConnection, ClientInitializeGamePackage initPackage)
-        {
-            ServerMatchmakingStatusResponse response = new ServerMatchmakingStatusResponse();
-            Request clientRequest = new Request(clientConnection.ClientSession.SessionID, initPackage.GamePlayerCount, initPackage.PlayerTeamwish);
-            if (MatchManager.IsRequestValid(clientRequest))
-            {
-                
-                response.Error = false;
-                response.Status = "Waiting for additional players to start the game";
-                response.GameFound = false;
-                clientConnection.SendTCP(response);
-            }
-            else
-            {
-                response.Error = true;
-                response.GameFound = false;
-                response.Status = "Could not start matchmaking because of an invalid request\n";
-                response.Status += "Received Request: PlayerCount(" + initPackage.GamePlayerCount.ToString() + ") TeamWishes (" + initPackage.PlayerTeamwish.ToString() + ")";
             }
         }
 

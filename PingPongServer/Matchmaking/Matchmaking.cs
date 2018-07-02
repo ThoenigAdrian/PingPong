@@ -87,13 +87,6 @@ namespace PingPongServer.Matchmaking
 
         public void FindMatches()
         {
-            //int maxPlayerCount = 8;
-
-            //AddSearchingClient(new Request(0, maxPlayerCount, new int[2] { 0, 0 }));
-            //AddSearchingClient(new Request(1, maxPlayerCount, new int[3] { 0, 0, 1 }));
-            //AddSearchingClient(new Request(2, maxPlayerCount, new int[3] { 0, 0, 1 }));
-
-
             foreach (Filter entry in m_waitingForMatch.Values)
             {
                 UpdateFilter(entry);
