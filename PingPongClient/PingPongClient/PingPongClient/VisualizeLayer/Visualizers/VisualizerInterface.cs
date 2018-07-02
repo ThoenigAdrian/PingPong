@@ -110,5 +110,21 @@ namespace PingPongClient.VisualizeLayer.Visualizers
                     (int)selector.Size.Y),
                 selector.SelectorColor);
         }
+
+        public void DrawCircle(int radius, Vector2 position, Color color)
+        {
+            SpriteBatchMain.Draw(CircleSelector,
+                new Rectangle(
+                    (int)position.X,
+                    (int)position.Y,
+                    2 * radius,
+                    2 * radius),
+                color);
+        }
+
+        public Vector2 GetCenter()
+        {
+            return new Vector2(Graphics.Viewport.Width / 2, Graphics.Viewport.Height / 2);
+        }
     }
 }

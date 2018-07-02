@@ -108,7 +108,7 @@ namespace GameLogicLibrary
             {
                 if (GameStructure.GameTeams[index].score >= GameInitializers.SCORE_NEEDED_FOR_VICTORY)
                 {
-                    GameFinishedHandler(this, EventArgs.Empty);
+                    GameFinishedHandler?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
