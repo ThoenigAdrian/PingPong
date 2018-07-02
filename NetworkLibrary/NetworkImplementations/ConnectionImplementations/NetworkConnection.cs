@@ -81,6 +81,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             m_disconnectLock.WaitOne();
 
+            bool raiseEvent = m_connected;
             try
             {
                 if (m_connected)
@@ -93,20 +94,20 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                         UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
                     TcpConnection.Disconnect();
-
-                    RaiseConnectionDiedEvent();
                 }
             }
             finally
             {
                 m_disconnectLock.Release();
             }
+
+            if(raiseEvent)
+                RaiseConnectionDiedEvent();
         }
 
         private void RaiseConnectionDiedEvent()
         {
-            if (ConnectionDiedEvent != null)
-                ConnectionDiedEvent.Invoke(this);
+            ConnectionDiedEvent?.Invoke(this);
         }
 
         public void SendTCP(PackageInterface package)
@@ -158,6 +159,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
+            // not threadsafe - one thread can set "Read" after the other thread checks flag here --- not an issue here though as it will just evaluate UDP twice which is... fine
             DataWrapper<byte[]> dataWrapper = dataWrapper = UdpData.Read();
             if (dataWrapper != null && !dataWrapper.Read)
                 return Adapter.CreatePackageFromNetworkData(dataWrapper.Data);

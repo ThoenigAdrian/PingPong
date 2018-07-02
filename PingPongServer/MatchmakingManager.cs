@@ -2,7 +2,6 @@
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using PingPongServer.Matchmaking;
-using System;
 using System.Collections.Generic;
 using XSLibrary.ThreadSafety.Containers;
 using XSLibrary.Utility;
@@ -13,9 +12,13 @@ namespace PingPongServer
     {
         public delegate void MatchFoundHandler(object sender, MatchData matchData);
         public event MatchFoundHandler OnMatchFound;
+
+        public SafeList<NetworkConnection> m_waitingClientConnections = new SafeList<NetworkConnection>();
         public int TotalPlayersOnline = 0;
+
         private int MatchmakingRefreshIntervalInSeconds = 5;
         private OneShotTimer UpdateMatchmakingQueue;
+        private Matchmaker Matchmaking { get; set; } = new Matchmaker();
 
         const string WAITING_IN_QUEUE = "Waiting for additional players to start the game... \nPlayers online: {0} \nPlayers searching: {1} ";
         const string INVALID_REQUEST = "Invalid game options. Check your configuration!";
@@ -37,8 +40,6 @@ namespace PingPongServer
             UpdateMatchmakingQueue = new OneShotTimer(MatchmakingRefreshIntervalInSeconds * 1000000, true);
             
         }
-        private Matchmaker Matchmaking { get; set; } = new Matchmaker();
-        public SafeList<NetworkConnection> m_waitingClientConnections = new SafeList<NetworkConnection>();
 
         public void AddClientToQueue(NetworkConnection clientConnection, ClientInitializeGamePackage initData)
         {
