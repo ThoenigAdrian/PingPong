@@ -7,6 +7,8 @@ namespace NetworkLibrary.Utility
     {
         public abstract void NetworkLog(string text);
         public abstract void GameLog(string text);
+        public abstract void GamesManagerLog(string text);
+        public abstract void ServerLog(string text);
     }
 
     public class LogWriterConsole : GameLogger
@@ -16,14 +18,24 @@ namespace NetworkLibrary.Utility
             Console.Out.WriteLine(text);
         }
 
+        public override void ServerLog(string text)
+        {
+            Log("[SERVER]  " + text);
+        }
+
+        public override void GamesManagerLog(string text)
+        {
+            Log("[GAMES_MANAGER_LOG]  " + text);
+        }
+
         public override void NetworkLog(string text)
         {
-            Log("[NETWORK] " + text);
+            Log("[NETWORK]  " + text);
         }
 
         public override void GameLog(string text)
         {
-            Log("[GAME] " + text);
+            Log("[GAME]  " + text);
         }
     }
 }

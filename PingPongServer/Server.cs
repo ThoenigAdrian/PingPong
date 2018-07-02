@@ -34,8 +34,7 @@ namespace PingPongServer
         private MatchmakingManager MatchManager = new MatchmakingManager();
 
         // Game
-        private SafeList<Game> RunningGames = new SafeList<Game>();
-        private static List<bool> StateOfRunningGames = new List<bool>();
+        private GamesManager GamesManager;
 
         // Logging
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
@@ -54,6 +53,8 @@ namespace PingPongServer
             MasterUDPSocket.Logger = Logger;
             ReadConfigurationFromConfigurationFile();
 
+            GamesManager = new GamesManager();
+
             MatchManager.OnMatchFound += StartMatchmadeGame;
         }
 
@@ -66,7 +67,7 @@ namespace PingPongServer
         public void Run()
         {
             ConnectionAccepter.Run();
-            StartGameManagerThread();
+            GamesManager.Run();
 
             Logger.Log("Server is now running\n");
 
@@ -76,6 +77,8 @@ namespace PingPongServer
                     ProcessClientSessionRequest(networkConnection);
 
                 RemoveDeadConnections();
+                MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
+                MatchManager.Update();
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
@@ -96,12 +99,7 @@ namespace PingPongServer
             AcceptedConnections.Add(newNetworkConnection);
         }
 
-        private void StartGameManagerThread()
-        {
-            Logger.Log("Starting Thread which takes Care of the Games");
-            Thread ManageGamesThread = new Thread(new ThreadStart(ManageGames));
-            ManageGamesThread.Start();
-        }
+        
 
         private void ProcessClientSessionRequest(NetworkConnection networkConnection)
         {
@@ -125,16 +123,7 @@ namespace PingPongServer
             }
         }
 
-        private void ManageGames()
-        {
-            while (!m_stopServer)
-            {
-                ServeClientGameRequests();
-                MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
-                MatchManager.Update();
-                Thread.Sleep(10);
-            }
-        }
+        
 
         private void StartMatchmadeGame(object sender, MatchmakingManager.MatchData match)
         {
@@ -304,17 +293,7 @@ namespace PingPongServer
             
         }
 
-        private void RemoveFinishedGames()
-        {   
-            foreach(Game game in RunningGames.Entries)
-            {
-                if (game.GameState == GameStates.Finished)
-                {
-                   Logger.GameLog("Found a finished Game removing it now\n" + game.ToString());
-                   RunningGames.Remove(game);
-                }                                        
-            }
-        }
+        
 
         public void Dispose()
         {
