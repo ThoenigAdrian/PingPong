@@ -86,6 +86,7 @@ namespace PingPongServer.ServerGame
             Logger.NetworkLog("Tearing Down Network");
             Network.Close();
             GameState = GameStates.Finished;
+            GameFinished?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnGameFinished(object sender, EventArgs e)
