@@ -86,6 +86,7 @@ namespace PingPongServer
         {
             while (!shutdownGameManager)
             {
+                StartGamesWhichAreReady();
                 RemoveFinishedGames();
                 Thread.Sleep(10);
             }
