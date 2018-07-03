@@ -109,6 +109,9 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 
         private void ChangeState (State newState)
         {
+            if (AnimationState == newState)
+                return;
+
             _animationChange = new AnimationChange(Offset, Offset + 1, Offset + 91);
             AnimationState = newState;
         }
