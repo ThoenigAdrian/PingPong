@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -12,7 +11,7 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using XSLibrary.Network.Connections;
 
-using Newtonsoft.Json.Linq;
+
 using XSLibrary.Network.Accepters;
 using XSLibrary.ThreadSafety.Containers;
 
@@ -33,24 +32,24 @@ namespace PingPongServer
 
         // Logging
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
+        private bool m_stopServer;
         public bool ServerStopping { get { return m_stopServer; } }
-        volatile bool m_stopServer = false;
 
-        // Configuration
-        private string ConfigurationFile = "server_config.json";
+        // Configuration 
+        private ServerConfiguration ServerConfiguration;
 
-        private int maximumNumberOfIncomingConnections = 1000;
 
         public Server()
         {
-            ConnectionAccepter = new TCPAccepter(NetworkConstants.SERVER_PORT, maximumNumberOfIncomingConnections);
+            ServerConfiguration = new ServerConfiguration();
+
+            ConnectionAccepter = new TCPAccepter(ServerConfiguration.ServerPort, ServerConfiguration.MaximumNumberOfIncomingConnections);
             ConnectionAccepter.ClientConnected += OnSocketAccept;
 
-            MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, NetworkConstants.SERVER_PORT));
+            MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
-
-            ReadConfigurationFromConfigurationFile();
+            
             GamesManager = new GamesManager(MasterUDPSocket);
             MatchManager.OnMatchFound += GamesManager.StartMatchmadeGame;
         }
@@ -193,40 +192,7 @@ namespace PingPongServer
         }
 
 
-        public void ReadConfigurationFromConfigurationFile()
-        {
-            string serverConfig = "";
-            try
-            {
-                using (StreamReader serverConfigReadStream = new StreamReader(File.Open(ConfigurationFile, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)))
-                {
-                    serverConfig = serverConfigReadStream.ReadToEnd();
-                }
-                JObject parsedServerConfiguration = JObject.Parse(serverConfig);
-                try
-                {
-                    maximumNumberOfIncomingConnections = (int)parsedServerConfiguration["maximumNumberOfIncomingConnections"];
-                }
-
-                catch (Exception exception)
-                {
-                    Logger.Log("Couldn't read maximumNumberOfConnections from configuration file , details : ");
-                    Logger.Log(exception.Message);
-                }
-
-            }
-            catch (FileNotFoundException)
-            {
-                Logger.Log("No configuration file for server found using default configuration");
-            }
-            catch (Newtonsoft.Json.JsonReaderException exception)
-            {
-                Logger.Log("Server configuration file is invalid, Additional Information : ");
-                Logger.Log(exception.Message);
-                Logger.Log("[Warning] Default Configuraiton will be used instead !\n");
-            }
-
-        }
+        
         
 
         public void Dispose()
