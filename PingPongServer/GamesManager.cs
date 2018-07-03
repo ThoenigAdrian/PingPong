@@ -4,9 +4,6 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using PingPongServer.ServerGame;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using XSLibrary.Network.Connections;
 using XSLibrary.ThreadSafety.Containers;
@@ -28,6 +25,14 @@ namespace PingPongServer
         public void Run()
         {
             StartGameManagerThread();
+        }
+
+        private void StartGameManagerThread()
+        {
+            Logger.Log("Starting Thread which takes Care of the Games");
+            Thread ManageGamesThread = new Thread(new ThreadStart(ManageGames));
+            ManageGamesThread.Name = "Game manager";
+            ManageGamesThread.Start();
         }
 
         private void StartGame(Game game)
@@ -64,15 +69,13 @@ namespace PingPongServer
 
         public void Shutdown()
         {
-
+            shutdownGameManager = true;
         }
-
 
         private void ManageGames()
         {
             while (!shutdownGameManager)
             {
-
                 RemoveFinishedGames();
                 Thread.Sleep(10);
             }
@@ -118,13 +121,6 @@ namespace PingPongServer
             newGame.BroadcastStartGamePackage(GameFoundPackage);
 
             StartGame(newGame);
-        }
-
-        private void StartGameManagerThread()
-        {
-            Logger.Log("Starting Thread which takes Care of the Games");
-            Thread ManageGamesThread = new Thread(new ThreadStart(ManageGames));
-            ManageGamesThread.Start();
         }
     }
 }
