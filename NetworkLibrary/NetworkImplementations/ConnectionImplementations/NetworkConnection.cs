@@ -175,17 +175,14 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         private void ReceiveTCP(object sender, byte[] data)
         {
-            PackageInterface[] packages = Adapter.CreatePackagesFromStream(data);
-            if (packages == null)
+            PackageInterface package = Adapter.CreatePackageFromNetworkData(data);
+            if (package == null)
                 return;
 
-            foreach (PackageInterface package in packages)
-            {
-                if(!CheckForResponse(package))
-                    TcpPackages.Write(package);
-            }
+            if (!CheckForResponse(package))
+                TcpPackages.Write(package);
         }
-        
+
         private bool CheckForResponse(PackageInterface package)
         {
             foreach (ResponseRequest responseRequest in m_openResponses.Entries)
