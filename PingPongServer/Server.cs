@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Collections.Generic;
 
 using NetworkLibrary;
 using NetworkLibrary.Utility;
@@ -13,12 +12,8 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using XSLibrary.Network.Connections;
 
-using GameLogicLibrary;
-using PingPongServer.ServerGame;
-
 using Newtonsoft.Json.Linq;
 using XSLibrary.Network.Accepters;
-using PingPongServer.Matchmaking;
 using XSLibrary.ThreadSafety.Containers;
 
 namespace PingPongServer
@@ -77,6 +72,8 @@ namespace PingPongServer
             {
                 foreach (NetworkConnection networkConnection in AcceptedConnections.Entries)
                     ProcessClientSessionRequest(networkConnection);
+
+                ServeClientGameRequests();
 
                 RemoveDeadConnections();
                 MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
