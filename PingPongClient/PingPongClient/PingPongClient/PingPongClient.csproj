@@ -79,7 +79,6 @@
     <Compile Include="ControlLayer\ConnectionControl.cs" />
     <Compile Include="ControlLayer\Control.cs" />
     <Compile Include="ControlLayer\GameControl.cs" />
-    <Compile Include="ControlLayer\Interpolation.cs" />
     <Compile Include="ControlLayer\GameOptionsControl.cs" />
     <Compile Include="ControlLayer\MatchmakingStatusControl.cs" />
     <Compile Include="ControlLayer\PlayerRegistrationControl.cs" />

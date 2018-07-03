@@ -17,16 +17,12 @@ namespace PingPongClient.ControlLayer
         GameField Field { get { return Structure.Field; } }
         List<Player> Players { get { return Structure.Players; } }
 
-        Interpolation Interpolation { get; set; }
-
         public override GameMode GetMode { get { return GameMode.Game; } }
-
 
         public GameControl(Control parent) : base(parent)
         {
             Visualizer = new GameStructureVisualizer();
             Structure = null;
-            Interpolation = new Interpolation();
 
             (Visualizer as GameStructureVisualizer).SetGameStructure(Structure);
         }
@@ -47,8 +43,6 @@ namespace PingPongClient.ControlLayer
                 ApplyServerPositions();
                 UpdateScore();
             }
-
-            Interpolation.Interpolate(gameTime);
         }
 
         public void InitializeGame(Player[] players, GameField field, Ball ball)
