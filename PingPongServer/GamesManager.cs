@@ -30,9 +30,14 @@ namespace PingPongServer
             StartGameManagerThread();
         }
 
+        public void Stop()
+        {
+            Logger.GamesManagerLog("GamesManager Stop has been requested");
+        }
+
         private void StartGame(Game game)
         {
-            Logger.GameLog("Found a Game which is ready to start ID: " + game.GameID);
+            Logger.GamesManagerLog("Found a Game which is ready to start ID: " + game.GameID);
             ThreadPool.QueueUserWorkItem(game.StartGame, this);
             RunningGames.Add(game);
         }
@@ -61,12 +66,6 @@ namespace PingPongServer
 
             return couldRejoin;
         }
-
-        public void Shutdown()
-        {
-
-        }
-
 
         private void ManageGames()
         {
@@ -111,18 +110,21 @@ namespace PingPongServer
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
             }
 
-            ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
-            GameFoundPackage.GameFound = true;
-            GameFoundPackage.Status = "Game will start soon...";
-            GameFoundPackage.Error = false;
-            newGame.BroadcastStartGamePackage(GameFoundPackage);
-
+            for(int counter=0; counter < 5; counter++)
+            {
+                ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
+                GameFoundPackage.GameFound = true;
+                GameFoundPackage.Status = "Game will start soon...";
+                GameFoundPackage.Error = false;
+                newGame.BroadcastStartGamePackage(GameFoundPackage);
+            }
+            
             StartGame(newGame);
         }
 
         private void StartGameManagerThread()
         {
-            Logger.Log("Starting Thread which takes Care of the Games");
+            Logger.GamesManagerLog("Starting Thread which takes Care of the Games");
             Thread ManageGamesThread = new Thread(new ThreadStart(ManageGames));
             ManageGamesThread.Start();
         }

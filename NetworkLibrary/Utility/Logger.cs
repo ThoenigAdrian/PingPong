@@ -9,6 +9,7 @@ namespace NetworkLibrary.Utility
         public abstract void GameLog(string text);
         public abstract void GamesManagerLog(string text);
         public abstract void ServerLog(string text);
+        public abstract void ConfigurationLog(string text);
     }
 
     public class LogWriterConsole : GameLogger
@@ -16,6 +17,11 @@ namespace NetworkLibrary.Utility
         public override void Log(string text)
         {
             Console.Out.WriteLine(text);
+        }
+
+        public override void ConfigurationLog(string text)
+        {
+            Log("[CONFIGURATION]  " + text);
         }
 
         public override void ServerLog(string text)

@@ -57,15 +57,19 @@ namespace PingPongServer
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
         {
             if (!ServerStopping)
-                throw new Exception("y u du dis");
+                throw new Exception("UDP Socket got disconnected");
         }
 
         public void Run()
         {
+            Logger.Log("\n\n");
+            Logger.ServerLog("Entering Server Run Method");
+            Logger.ServerLog("Starting Connection Accepter");
             ConnectionAccepter.Run();
+            Logger.ServerLog("Starting Games Manager");
             GamesManager.Run();
 
-            Logger.Log("Server is now running\n");
+            Logger.ServerLog("Server is now entering it's main Loop\n");
 
             while (!m_stopServer)
             {
@@ -83,9 +87,12 @@ namespace PingPongServer
 
         public void Stop()
         {
+            Logger.ServerLog("Server Stop has been requested");
             m_stopServer = true;
-
+            Logger.ServerLog("Stopping Connection Accepter");
             ConnectionAccepter.Stop();
+            Logger.ServerLog("Stopping Games Manager");
+            GamesManager.Stop();
         }
 
         private void OnSocketAccept(object sender, Socket acceptedSocket)
@@ -93,11 +100,10 @@ namespace PingPongServer
             Logger.NetworkLog("Client connected " + acceptedSocket.RemoteEndPoint.ToString());
             TCPPacketConnection tcp = new TCPPacketConnection(acceptedSocket);
             NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
-
+            Logger.ServerLog("Adding Client to Accepted Connections");
             AcceptedConnections.Add(newNetworkConnection);
         }
 
-        
 
         private void ProcessClientSessionRequest(NetworkConnection networkConnection)
         {
@@ -190,11 +196,7 @@ namespace PingPongServer
                 }
             }
         }
-
-
         
-        
-
         public void Dispose()
         {
             Stop();

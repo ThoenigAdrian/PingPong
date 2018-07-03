@@ -18,15 +18,17 @@ namespace PingPongServer
 
         public ServerConfiguration()
         {
-            ServerPort = NetworkConstants.SERVER_PORT;
+            ApplyDefaultConfiguration();
+            ReadConfigurationFile();
         }
 
         private void ApplyDefaultConfiguration()
         {
+            ServerPort = NetworkConstants.SERVER_PORT;
             MaximumNumberOfIncomingConnections = 1000;
         }
 
-        public void ReadConfigurationFromConfigurationFile()
+        public void ReadConfigurationFile()
         {
             string serverConfig = "";
             try
@@ -34,32 +36,32 @@ namespace PingPongServer
                 using (StreamReader serverConfigReadStream = new StreamReader(File.Open(ConfigurationFile, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)))
                 {
                     serverConfig = serverConfigReadStream.ReadToEnd();
-                    Logger.Log("Configuration file " + ConfigurationFile + " was read.");
+                    Logger.ConfigurationLog("Configuration file " + ConfigurationFile + " was read.");
                 }
                 JObject parsedServerConfiguration = JObject.Parse(serverConfig);
-                Logger.Log("Configuration file " + ConfigurationFile + " was parsed by Json Parser.");
+                Logger.ConfigurationLog("Configuration file " + ConfigurationFile + " was parsed by Json Parser.");
                 try
                 {
                     MaximumNumberOfIncomingConnections = (int)parsedServerConfiguration["maximumNumberOfIncomingConnections"];
-                    Logger.Log("Applied all configurations from configuration file successfully");
+                    Logger.ConfigurationLog("Applied all configurations from configuration file successfully");
                 }
 
                 catch (Exception exception)
                 {
-                    Logger.Log("Couldn't read maximumNumberOfConnections from configuration file , details : ");
-                    Logger.Log(exception.Message);
+                    Logger.ConfigurationLog("Couldn't read maximumNumberOfConnections from configuration file ");
+                    Logger.ConfigurationLog("Details : " + exception.Message);
                 }
 
             }
             catch (FileNotFoundException)
             {
-                Logger.Log("No configuration file for server found using default configuration");
+                Logger.ConfigurationLog("No configuration file for server found using default configuration");
             }
             catch (Newtonsoft.Json.JsonReaderException exception)
             {
-                Logger.Log("Server configuration file is invalid, Additional Information : ");
-                Logger.Log(exception.Message);
-                Logger.Log("[Warning] Default Configuraiton will be used instead !\n");
+                Logger.ConfigurationLog("Server configuration file is invalid");
+                Logger.ConfigurationLog("Additional Information : " + exception.Message);
+                Logger.ConfigurationLog("[Warning] Default Configuraiton will be used instead !\n");
             }
 
         }
