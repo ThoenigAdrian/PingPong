@@ -3,21 +3,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-using NetworkLibrary;
 using NetworkLibrary.Utility;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+
 using XSLibrary.Network.Connections;
-
-
 using XSLibrary.Network.Accepters;
 using XSLibrary.ThreadSafety.Containers;
 
 namespace PingPongServer
 {
-
     public class Server : IDisposable
     {
         // Network 
@@ -37,7 +34,6 @@ namespace PingPongServer
 
         // Configuration 
         private ServerConfiguration ServerConfiguration;
-
 
         public Server()
         {
@@ -103,7 +99,6 @@ namespace PingPongServer
             Logger.ServerLog("Adding Client to Accepted Connections");
             AcceptedConnections.Add(newNetworkConnection);
         }
-
 
         private void ProcessClientSessionRequest(NetworkConnection networkConnection)
         {
@@ -175,7 +170,6 @@ namespace PingPongServer
                 ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
             }
         }
-        
 
         private void RemoveDeadConnections()
         {
@@ -187,6 +181,7 @@ namespace PingPongServer
                     AcceptedConnections.Remove(networkConnection);
                 }
             }
+
             foreach (NetworkConnection networkConnection in ConnectionsReadyForQueingUpToMatchmaking.Entries)
             {
                 if (!networkConnection.Connected)
@@ -196,11 +191,10 @@ namespace PingPongServer
                 }
             }
         }
-        
+
         public void Dispose()
         {
             Stop();
-        }
-                
+        }             
     }
 }
