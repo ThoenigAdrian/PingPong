@@ -20,7 +20,12 @@ namespace PingPongClient.ControlLayer
         {
             StatusLobby = new MatchmakingStatusLobby();
             Visualizer = new LobbyVisualizer(StatusLobby);
-            CancelTimer = new OneShotTimer(3 * 1000* 1000, false);
+#if DEBUG
+            const int CancelTime = 900;
+#else
+            const int CancelTime = 3;
+#endif
+            CancelTimer = new OneShotTimer(CancelTime * 1000* 1000, false);
             Timeout = new OneShotTimer(15 * 1000 * 1000, false);
         }
 

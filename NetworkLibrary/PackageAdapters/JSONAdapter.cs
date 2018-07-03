@@ -89,8 +89,9 @@ namespace NetworkLibrary.PackageAdapters
             }
 #if DEBUG
             throw new NotImplementedException();
-#endif
+#else
             return null;
+#endif
         }
 
         private string[] ConvertStreamToValidJsonStrings(string json)
