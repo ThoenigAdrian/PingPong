@@ -78,7 +78,12 @@ namespace PingPongClient.ControlLayer
             if (statusResponse.Error)
                 IntiializeDelayedCancel();
             else
+            {
+                if (statusResponse.GameFound)
+                    StatusLobby.SetSuccess();
+
                 Timeout.Restart();
+            }
         }
 
         private void HandleInitResponse(ServerInitializeGameResponse initResponse)
@@ -102,6 +107,7 @@ namespace PingPongClient.ControlLayer
 
         private void IntiializeDelayedCancel()
         {
+            StatusLobby.SetError();
             Timeout.Reset();
             CancelTimer.Restart();
         }
