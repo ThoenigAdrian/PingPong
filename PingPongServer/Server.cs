@@ -29,8 +29,7 @@ namespace PingPongServer
 
         // Logging
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
-        private bool m_stopServer;
-        public bool ServerStopping { get { return m_stopServer; } }
+        public bool ServerStopping { get; private set; }
 
         // Configuration 
         private ServerConfiguration ServerConfiguration;
@@ -67,7 +66,7 @@ namespace PingPongServer
 
             Logger.ServerLog("Server is now entering it's main Loop\n");
 
-            while (!m_stopServer)
+            while (!ServerStopping)
             {
                 foreach (NetworkConnection networkConnection in AcceptedConnections.Entries)
                     ProcessClientSessionRequest(networkConnection);
@@ -84,7 +83,7 @@ namespace PingPongServer
         public void Stop()
         {
             Logger.ServerLog("Server Stop has been requested");
-            m_stopServer = true;
+            ServerStopping = true;
             Logger.ServerLog("Stopping Connection Accepter");
             ConnectionAccepter.Stop();
             Logger.ServerLog("Stopping Games Manager");
@@ -112,7 +111,6 @@ namespace PingPongServer
 
                 if (packet.Reconnect)
                     ReconnectClientWithPreviousSession(networkConnection, packet);
-
                 else
                     ConnectClientWithNewSession(networkConnection);
 
