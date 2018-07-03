@@ -155,6 +155,7 @@ namespace PingPongServer.ServerGame
                 SendServerInitResponse(client);
 
             Logger.GameLog("Game started");
+            GameEngine.PauseBall(3000);
 
             while (GameState == GameStates.Running)
             {

@@ -46,7 +46,7 @@ namespace PingPongServer
         {
             Game gameToBeStarted = (Game)game;
             Logger.GamesManagerLog("Found a Game which is ready to start ID: " + gameToBeStarted.GameID);
-            for (int counter = 5; counter >= 0; counter--)
+            for (int counter = 5; counter > 0; counter--)
             {
                 ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
                 GameFoundPackage.GameFound = true;

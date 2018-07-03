@@ -64,6 +64,11 @@ namespace GameLogicLibrary
                 player.PositionY = 0;
         }
 
+        public void PauseBall(int millisecs)
+        {
+            GameOngoingTimer = new OneShotTimer(millisecs * 1000, true);
+        }
+
         private void ResetBall()
         {
             GameStructure.Ball.PositionX = GameInitializers.BALL_POSX;
@@ -71,7 +76,7 @@ namespace GameLogicLibrary
             RandomizeBallDirection();
             GameStructure.Ball.LastTouchedTeam = -1;
             GameStructure.Ball.resetToInitialSpeed();
-            GameOngoingTimer = new OneShotTimer(1000 * 1000, true);
+            PauseBall(1000);
         }
 
         

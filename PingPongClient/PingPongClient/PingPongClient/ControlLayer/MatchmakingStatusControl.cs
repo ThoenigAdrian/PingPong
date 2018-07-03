@@ -42,13 +42,15 @@ namespace PingPongClient.ControlLayer
 
         public override void Update(GameTime gameTime)
         {
-            if(Canceled && CancelTimer == true)
+            if(Canceled)
             {
-                CancelTimer.Reset();
-                Cancel();
+                if (CancelTimer == true)
+                {
+                    CancelTimer.Reset();
+                    Cancel();
+                }
             }
-
-            if (Timeout == true)
+            else if (Timeout == true)
                 TimeoutActions();
             else
                 ProcessAllTCPPackages();
