@@ -16,6 +16,7 @@ namespace PingPongServer
     public class GamesManager
     {
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
+        private SafeList<Game> GamesReadyToBeStarted = new SafeList<Game>();
         private SafeList<Game> RunningGames = new SafeList<Game>();
         private UDPConnection MasterUDPSocket;
         private bool shutdownGameManager = false;
@@ -35,11 +36,21 @@ namespace PingPongServer
             Logger.GamesManagerLog("GamesManager Stop has been requested");
         }
 
-        private void StartGame(Game game)
+        private void StartGame(object game)
         {
-            Logger.GamesManagerLog("Found a Game which is ready to start ID: " + game.GameID);
-            ThreadPool.QueueUserWorkItem(game.StartGame, this);
-            RunningGames.Add(game);
+            Game gameToBeStarted = (Game)game;
+            Logger.GamesManagerLog("Found a Game which is ready to start ID: " + gameToBeStarted.GameID);
+            for (int counter = 0; counter < 5; counter++)
+            {
+                ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
+                GameFoundPackage.GameFound = true;
+                GameFoundPackage.Status = "Game will start in " + counter.ToString() + "seconds ...";
+                GameFoundPackage.Error = false;
+                Thread.Sleep(1);
+                
+            }
+            ThreadPool.QueueUserWorkItem(gameToBeStarted.StartGame, this);
+            RunningGames.Add(gameToBeStarted);
         }
 
         public void OnGameFinished(object sender, EventArgs e)
@@ -61,9 +72,7 @@ namespace PingPongServer
                     couldRejoin = true;
                     break;
                 }
-
             }
-
             return couldRejoin;
         }
 
@@ -71,7 +80,6 @@ namespace PingPongServer
         {
             while (!shutdownGameManager)
             {
-
                 RemoveFinishedGames();
                 Thread.Sleep(10);
             }
@@ -99,7 +107,19 @@ namespace PingPongServer
             }
         }
 
-        public void StartMatchmadeGame(object sender, MatchmakingManager.MatchData match)
+        private void StartGamesWhichAreReady()
+        {
+            foreach(Game readyGame in GamesReadyToBeStarted.Entries)
+            {
+                Thread GameStarting = new Thread(new ParameterizedThreadStart(StartGame));
+                GameStarting.Start(readyGame);
+                GamesReadyToBeStarted.Remove(readyGame);
+            }
+            
+            
+        }
+
+        public void OnMatchmadeGameFound(object sender, MatchmakingManager.MatchData match)
         {
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             Game newGame = new Game(newGameNetwork, match.MaxPlayerCount);
@@ -110,16 +130,8 @@ namespace PingPongServer
                 newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
             }
 
-            for(int counter=0; counter < 5; counter++)
-            {
-                ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
-                GameFoundPackage.GameFound = true;
-                GameFoundPackage.Status = "Game will start soon...";
-                GameFoundPackage.Error = false;
-                newGame.BroadcastStartGamePackage(GameFoundPackage);
-            }
+            GamesReadyToBeStarted.Add(newGame);
             
-            StartGame(newGame);
         }
 
         private void StartGameManagerThread()

@@ -51,7 +51,7 @@ namespace PingPongServer
             MasterUDPSocket.Logger = Logger;
             
             GamesManager = new GamesManager(MasterUDPSocket);
-            MatchManager.OnMatchFound += GamesManager.StartMatchmadeGame;
+            MatchManager.OnMatchFound += GamesManager.OnMatchmadeGameFound;
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
