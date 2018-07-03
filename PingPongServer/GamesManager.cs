@@ -30,7 +30,7 @@ namespace PingPongServer
 
         private void StartGameManagerThread()
         {
-            Logger.Log("Starting Thread which takes Care of the Games");
+            Logger.GamesManagerLog("Starting Thread which takes Care of the Games");
             Thread ManageGamesThread = new Thread(new ThreadStart(ManageGames));
             ManageGamesThread.Name = "Game manager";
             ManageGamesThread.Start();
@@ -46,14 +46,14 @@ namespace PingPongServer
         {
             Game gameToBeStarted = (Game)game;
             Logger.GamesManagerLog("Found a Game which is ready to start ID: " + gameToBeStarted.GameID);
-            for (int counter = 0; counter < 5; counter++)
+            for (int counter = 5; counter >= 0; counter--)
             {
                 ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
                 GameFoundPackage.GameFound = true;
-                GameFoundPackage.Status = "Game will start in " + counter.ToString() + "seconds ...";
+                GameFoundPackage.Status = "Game will start in " + counter.ToString() + " seconds ...";
                 GameFoundPackage.Error = false;
-                Thread.Sleep(1);
-                
+                gameToBeStarted.BroadcastStartGamePackage(GameFoundPackage);
+                Thread.Sleep(1000);                
             }
             ThreadPool.QueueUserWorkItem(gameToBeStarted.StartGame, this);
             RunningGames.Add(gameToBeStarted);
