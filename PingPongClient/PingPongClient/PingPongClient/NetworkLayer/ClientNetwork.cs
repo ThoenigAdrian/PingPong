@@ -43,19 +43,14 @@ namespace PingPongClient.NetworkLayer
             IssueResponse(responseRequest, ClientSession);
         }
 
-        public void SendClientStart(int playerCount, int[] playerTeamWish)
-        {
-            SendClientInitializePackage(ClientInitializeGamePackage.RequestType.StartNew, playerCount, playerTeamWish);
-        }
-
-        public void SendClientJoin(int playerCount, int[] playerTeamWish)
-        {
-            SendClientInitializePackage(ClientInitializeGamePackage.RequestType.Join, playerCount, playerTeamWish);
-        }
-
         public void SendClientQueueMatchmaking(int playerCount, int[] playerTeamWish)
         {
             SendClientInitializePackage(ClientInitializeGamePackage.RequestType.Matchmaking, playerCount, playerTeamWish);
+        }
+
+        public void SendClientObserve(int playerCount)
+        {
+            SendClientInitializePackage(ClientInitializeGamePackage.RequestType.Observe, playerCount, new int[playerCount]);
         }
 
         private void SendClientInitializePackage(ClientInitializeGamePackage.RequestType requestType, int playerCount, int[] teamwishes)

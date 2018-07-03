@@ -1,10 +1,7 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using NetworkLibrary.DataPackages;
+﻿using Microsoft.Xna.Framework;
 using PingPongClient.VisualizeLayer.Visualizers;
 using PingPongClient.VisualizeLayer.Lobbies;
 using PingPongClient.InputLayer.KeyboardInputs;
-using NetworkLibrary.DataPackages.ServerSourcePackages;
 
 namespace PingPongClient.ControlLayer
 {
@@ -12,7 +9,6 @@ namespace PingPongClient.ControlLayer
     {
         public override GameMode GetMode { get { return GameMode.Registration; } }
 
-        public RequestOptions RequestType { get; set; }
         public int MaxPlayers
         {
             get { return RegistrationLobby.MaxPlayers; }
@@ -27,7 +23,6 @@ namespace PingPongClient.ControlLayer
             RegistrationLobby.RegistrationFinishedEvent += OnReady;
             ResetSelection();
             Visualizer = new LobbyVisualizer(RegistrationLobby);
-            RequestType = RequestOptions.Start;
         }
 
         public void ResetSelection()
@@ -67,21 +62,7 @@ namespace PingPongClient.ControlLayer
 
         private void OnReady()
         {
-            switch (RequestType)
-            {
-                case RequestOptions.Start:
-                    Network.SendClientStart(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
-                    break;
-
-                case RequestOptions.Join:
-                    Network.SendClientJoin(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
-                    break;
-
-                case RequestOptions.Matchmaking:
-                    Network.SendClientQueueMatchmaking(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
-                    break;
-            }
-
+            Network.SendClientQueueMatchmaking(MaxPlayers, RegistrationLobby.PlayerTeamWishes);
             ParentControl.SwitchMode(GameMode.Status);
         }
 

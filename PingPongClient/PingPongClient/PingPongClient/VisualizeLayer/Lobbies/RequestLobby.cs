@@ -8,8 +8,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
     public enum RequestOptions
     {
         Matchmaking,
-        Start,
-        Join
+        Observe
     }
 
     class GameOptions : LobbyInterface
@@ -37,12 +36,12 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         public int Selection
         {
-            get { return StartJoinSelection.Selection; }
-            set { StartJoinSelection.Selection = value; }
+            get { return QueueingOptions.Selection; }
+            set { QueueingOptions.Selection = value; }
         }
 
         DrawableString DrawableStatus;
-        StartJoinSelection StartJoinSelection;
+        QueueSelection QueueingOptions;
         DrawableString DrawablePlayerCount;
 
         public GameOptions()
@@ -51,15 +50,15 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
             DrawableStatus = new DrawableString("", new Vector2(100, 100), Color.White);
             DrawablePlayerCount = new DrawableString("", new Vector2(100, 300), Color.White);
-            StartJoinSelection = new StartJoinSelection(new Vector2(100, 180));
+            QueueingOptions = new QueueSelection(new Vector2(100, 180));
 
             Strings.Add(DrawableStatus);
             Strings.Add(DrawablePlayerCount);
-            Lists.Add(StartJoinSelection);
+            Lists.Add(QueueingOptions);
 
             UpdatePlayerCount();
 
-            StartJoinSelection.SelectionChanged += UpdatePlayerCount;
+            QueueingOptions.SelectionChanged += UpdatePlayerCount;
         }
 
         public override Color GetBackgroundColor { get { return Color.Black; } }
@@ -71,14 +70,11 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
             switch (SelectedOption)
             {
-                case RequestOptions.Start:
-                    DrawablePlayerCount.Value = "Start a new game with a maximum of <" + m_playerCount + "> players.";
-                    break;
-                case RequestOptions.Join:
-                    DrawablePlayerCount.Value = "Join a game with a maximum of <" + m_playerCount + "> players.";
-                    break;
                 case RequestOptions.Matchmaking:
                     DrawablePlayerCount.Value = "Queue for matchmaking with a maximum of <" + m_playerCount + "> players.";
+                    break;
+                case RequestOptions.Observe:
+                    DrawablePlayerCount.Value = "Watch a game with a maximum of <" + m_playerCount + "> players.";
                     break;
             }
         } 

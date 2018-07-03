@@ -6,9 +6,8 @@
 
         public enum RequestType
         {
-            StartNew,
-            Join,
-            Matchmaking
+            Matchmaking,
+            Observe
         }
 
         public RequestType Request { get; set; }

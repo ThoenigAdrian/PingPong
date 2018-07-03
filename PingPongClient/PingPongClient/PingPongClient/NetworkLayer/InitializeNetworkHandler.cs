@@ -51,7 +51,7 @@ namespace PingPongClient.NetworkLayer
                 {
                     connectionSocket.Close();
                     Error = true;
-                    Message = "Connect timeout!";
+                    Message = "Failed to connect!";
                     return;
                 }
 

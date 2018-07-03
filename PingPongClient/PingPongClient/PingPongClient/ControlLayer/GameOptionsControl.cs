@@ -60,10 +60,20 @@ namespace PingPongClient.ControlLayer
 
         private void ApplyConfiguration()
         {
-            ParentControl.RegistrationControl.MaxPlayers = GameOptionLobby.PlayerCount;
-            ParentControl.RegistrationControl.RequestType = GameOptionLobby.SelectedOption;
-            ParentControl.RegistrationControl.ResetSelection();
-            ParentControl.SwitchMode(GameMode.Registration);
+            switch (GameOptionLobby.SelectedOption)
+            {
+                case RequestOptions.Matchmaking:
+                    ParentControl.RegistrationControl.MaxPlayers = GameOptionLobby.PlayerCount;
+                    ParentControl.RegistrationControl.ResetSelection();
+                    ParentControl.SwitchMode(GameMode.Registration);
+                    break;
+                case RequestOptions.Observe:
+                    Network.SendClientObserve(GameOptionLobby.PlayerCount);
+                    ParentControl.SwitchMode(GameMode.Status);
+                    break;
+            }
+
+
         }
 
         protected override void ServerResponseActions(PackageInterface responsePackage)

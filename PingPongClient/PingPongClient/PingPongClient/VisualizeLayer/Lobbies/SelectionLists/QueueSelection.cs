@@ -3,9 +3,9 @@ using PingPongClient.VisualizeLayer.Visualizers.DrawableElements;
 
 namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
 {
-    class StartJoinSelection : SelectionListInterface
+    class QueueSelection : SelectionListInterface
     {
-        public StartJoinSelection(Vector2 position)
+        public QueueSelection(Vector2 position)
         {
             TopLeft = position;
             Background = Color.Black;
@@ -13,10 +13,9 @@ namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
 
         protected override SelectionEntry[] CreateInitialListEntries()
         {
-            SelectionEntry[] entries = new SelectionEntry[3];
+            SelectionEntry[] entries = new SelectionEntry[2];
             entries[0] = new SelectionEntry(new DrawableString("Queue up for matchmaking", new Vector2(0, 0), Color.White), new Selector());
-            entries[1] = new SelectionEntry(new DrawableString("Start a new game", new Vector2(0, 30), Color.White), new Selector());
-            entries[2] = new SelectionEntry(new DrawableString("Join an existing game", new Vector2(0, 60), Color.White), new Selector());
+            entries[1] = new SelectionEntry(new DrawableString("Observe a game", new Vector2(0, 30), Color.White), new Selector());
             return entries;
         }
     }
