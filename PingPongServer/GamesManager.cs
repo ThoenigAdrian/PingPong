@@ -123,12 +123,17 @@ namespace PingPongServer
 
         private void AddObserversToGame()
         {
+
             foreach (NetworkConnection observer in WaitingObservers.Entries)
             {
                 foreach (Game game in RunningGames.Entries)
                 {
                     if (game.AddObserver(observer))
+                    {
+                        WaitingObservers.Remove(observer);
                         break;
+                    }
+                        
                 }
             }
             

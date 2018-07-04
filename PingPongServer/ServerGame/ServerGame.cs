@@ -65,10 +65,15 @@ namespace PingPongServer.ServerGame
         public bool AddObserver(NetworkConnection connection)
         {
             bool added = false;
-            if(GameState == GameStates.Finished)
+            if(GameState != GameStates.Finished)
             {
+                ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
+                packet.m_field = GameStructure.GameField;
+                packet.m_ball = GameStructure.Ball;
+                packet.m_players = new Player[GameStructure.PlayersCount];
+                connection.SendTCP(packet);
                 Network.AddObserver(connection);
-                added = false;
+                added = true;
             }
             return added;
         }

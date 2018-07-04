@@ -167,7 +167,7 @@ namespace PingPongServer
                     break;
                 case ClientInitializeGamePackage.RequestType.Observe:
                     ConnectionsReadyForQueingUpToMatchmaking.Remove(connection);
-                    OnMatchmakingRequest?.Invoke(this, connection, request);
+                    OnObserverRequest?.Invoke(this, connection);
                     break;
 
             }
