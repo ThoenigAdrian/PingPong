@@ -88,6 +88,10 @@ namespace PingPongServer.ServerGame
                 gameFinishedPackage.Winner = Teams.Team2;
 
             Logger.GameLog("Game finished");
+            Logger.GameLog("Sending final Game finished to the Clients");
+            Network.BroadcastGenericTCPPackage(gameFinishedPackage);
+            Logger.GameLog("Game Finished Package has been sent waiting 5 seconds before tearing down the network");
+            Thread.Sleep(5000);
             Logger.NetworkLog("Tearing Down Network");
             Network.Close();
             GameState = GameStates.Finished;

@@ -68,14 +68,18 @@ namespace PingPongServer
         {
             Disconnect();
         }
-                
-        public void BroadcastGenericPackage(PackageInterface package, SocketType type)
+
+        public void BroadcastGenericTCPPackage(PackageInterface package)
         {
-            if (type == SocketType.Dgram)
-                Out.BroadCastTCP(package);
-            if (type == SocketType.Stream)
-                Out.BroadCastUDP(package);
+            Out.BroadCastTCP(package);
         }
+
+        public void BroadcastGenericUDPPackage(PackageInterface package)
+        {
+            Out.BroadCastUDP(package);
+        }
+
+        
 
     }
 }
