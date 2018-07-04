@@ -77,7 +77,7 @@ namespace PingPongClient.ControlLayer
             Structure.Players.Add(player);
         }
 
-        protected void SendMovementInputs()
+        private void SendMovementInputs()
         {
             PlayerInputs[] playerInputs = Input.GetMovementInput();
 
@@ -108,7 +108,7 @@ namespace PingPongClient.ControlLayer
             }
         }
 
-        protected void ApplyServerPositions()
+        private void ApplyServerPositions()
         {
             ServerDataPackage data = Network.GetServerData();
 
@@ -131,14 +131,23 @@ namespace PingPongClient.ControlLayer
             Structure.Ball.PositionY = data.Ball.PositionY;
         }
 
-        protected void UpdateScore()
+        private void UpdateScore()
         {
-            ServerGameControlPackage score = Network.GetScore();
-            if (score == null)
+            ServerGameControlPackage gameStatus = Network.GetGameStatus();
+            if (gameStatus == null)
                 return;
 
-            Structure._score.Score_Team1 = score.Score.Team1;
-            Structure._score.Score_Team2 = score.Score.Team2;
+            Structure._score.Score_Team1 = gameStatus.Score.Team1;
+            Structure._score.Score_Team2 = gameStatus.Score.Team2;
+
+            if (gameStatus.Command == ServerControls.GameFinished)
+                SetGameFinished(gameStatus);
+        }
+
+        private void SetGameFinished(ServerGameControlPackage package)
+        {
+            ParentControl.FinishControl.ProcessFinishPackage(package);
+            ParentControl.SwitchMode(GameMode.Finish);
         }
 
         private Player GetPlayerWithID(int ID)
