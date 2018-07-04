@@ -71,6 +71,9 @@ namespace PingPongServer.ServerGame
                 packet.m_field = GameStructure.GameField;
                 packet.m_ball = GameStructure.Ball;
                 packet.m_players = new Player[GameStructure.PlayersCount];
+                Array.Copy(GameStructure.GetAllPlayers(), packet.m_players, GameStructure.PlayersCount);
+                foreach (Player player in packet.m_players)
+                    player.Controllable = false;
                 connection.SendTCP(packet);
                 Network.AddObserver(connection);
                 added = true;
