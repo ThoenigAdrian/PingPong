@@ -84,7 +84,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         protected void DrawScore()
         {
             DrawableString scoreString = new DrawableString("Team 1   " + Structure._score.Score_Team1 + "-" + Structure._score.Score_Team2 + "   Team 2",
-                new Vector2(0, 0),
+                new Vector2(0, 10),
                 Color.White);
 
             Vector2 measurements = scoreString.GetMeasurements(Font);

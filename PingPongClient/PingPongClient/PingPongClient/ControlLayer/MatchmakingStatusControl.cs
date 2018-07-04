@@ -122,6 +122,7 @@ namespace PingPongClient.ControlLayer
         private void Cancel()
         {
             ParentControl.Disconnect();
+            ParentControl.SwitchMode(GameMode.Connect);
         }
     }
 }

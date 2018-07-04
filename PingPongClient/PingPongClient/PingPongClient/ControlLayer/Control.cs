@@ -114,6 +114,7 @@ namespace PingPongClient
             {
                 ConnectionControl.SetStatus("Connection died.");
                 CleanUpNetwork();
+                SwitchMode(GameMode.Connect);
             }
 
             InputManager.Update();
@@ -144,9 +145,7 @@ namespace PingPongClient
                 else
                 {
                     Disconnect();
-
-                    if (Mode == GameMode.Finish)
-                        SwitchMode(GameMode.Connect);
+                    SwitchMode(GameMode.Connect);
                 }
             }
         }
@@ -242,9 +241,6 @@ namespace PingPongClient
             Network = null;
             CurrentResponseRequest = null;
             m_networkDied = false;
-
-            if (Mode != GameMode.Finish)
-                Mode = GameMode.Connect;
         }
 
         protected override void OnExiting(object sender, EventArgs args)

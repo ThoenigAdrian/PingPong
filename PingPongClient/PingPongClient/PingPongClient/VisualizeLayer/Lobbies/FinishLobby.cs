@@ -7,7 +7,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
     {
         public override Color GetBackgroundColor { get { return Color.White; } }
 
-        DrawableString FinishText { get; set; } = new DrawableString("", new Vector2(310, 150), Color.Black);
+        DrawableString FinishText { get; set; } = new DrawableString("", new Vector2(305, 150), Color.Black);
 
         public FinishLobby()
         {
