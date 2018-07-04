@@ -19,7 +19,8 @@ namespace PingPongClient
         Options,
         Registration,
         Status,
-        Game
+        Game,
+        Finish
     }
 
     public class Control : Game
