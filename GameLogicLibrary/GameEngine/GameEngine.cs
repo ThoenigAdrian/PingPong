@@ -16,7 +16,7 @@ namespace GameLogicLibrary
         public delegate void TeamScoredEventHandler(object sender, EventArgs e);
         public event TeamScoredEventHandler TeamScoredHandler;
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
-        public event GameFinishedEventHandler GameFinishedHandler;
+        public event GameFinishedEventHandler OnGameFinished;
         private PingPongCollisionDetector Collisions;
 
         OneShotTimer GameOngoingTimer;
@@ -110,7 +110,7 @@ namespace GameLogicLibrary
             {
                 if (GameStructure.GameTeams[index].score >= GameInitializers.SCORE_NEEDED_FOR_VICTORY)
                 {
-                    GameFinishedHandler?.Invoke(this, EventArgs.Empty);
+                    OnGameFinished?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
