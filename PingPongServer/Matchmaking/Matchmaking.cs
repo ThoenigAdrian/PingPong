@@ -88,18 +88,7 @@ namespace PingPongServer.Matchmaking
         public void FindMatches()
         {
             foreach (Filter entry in m_waitingForMatch.Values)
-            {
-                UpdateFilter(entry);
-            }
-        }
-
-        private void UpdateFilter(Filter filter)
-        {
-            if (filter.Changes)
-            {
-                filter.SearchNewCombinations();
-                filter.SearchValidCombinations();
-            }
+                entry.FindMatches();
         }
 
         private void HandleFoundMatch(object sender, Request[] requests)

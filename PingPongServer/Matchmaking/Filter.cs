@@ -13,7 +13,7 @@ namespace PingPongServer.Matchmaking
             List<ValidCombination> m_validCombinations = new List<ValidCombination>();
 
             public int MaxPlayerCount { get; private set; }
-            public bool Changes { get; private set; }
+            bool Changes { get; set; }
 
             public Filter (int maxPlayerCount)
             {
@@ -35,7 +35,20 @@ namespace PingPongServer.Matchmaking
                 RequestGroups.Add(newGroup);
             }
 
-            public void SearchValidCombinations()
+            public void FindMatches()
+            {
+                if (Changes)
+                {
+                    SearchValidCombinations();      // combine what we already found 
+
+                    if (SearchNewCombinations())    // look for new combinations
+                        SearchValidCombinations();  // combine latest findings as well
+                }
+
+                Changes = false;
+            }
+
+            private void SearchValidCombinations()
             {
                 foreach(ValidCombination combination in m_validCombinations)
                 {
@@ -47,20 +60,25 @@ namespace PingPongServer.Matchmaking
                 }
             }
 
-            public void SearchNewCombinations()
+            private bool SearchNewCombinations()
             {
                 PuzzleBox puzzleBox = new PuzzleBox(MaxPlayerCount, RequestGroups.ToArray());
-                AddToValidCombinations(puzzleBox.SearchNewCombinations());
-                Changes = false;
+                return AddToValidCombinations(puzzleBox.SearchNewCombinations());
             }
 
-            private void AddToValidCombinations(ValidCombination[] foundCombinations)
+            private bool AddToValidCombinations(ValidCombination[] foundCombinations)
             {
+                bool changes = false;
                 foreach (ValidCombination combination in foundCombinations)
                 {
                     if (!Contains(combination))
+                    {
                         m_validCombinations.Add(combination);
+                        changes = true;
+                    }
                 }
+
+                return changes;
             }
 
             private bool Contains(ValidCombination combination)
