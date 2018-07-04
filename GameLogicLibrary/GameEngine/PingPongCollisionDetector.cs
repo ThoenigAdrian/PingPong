@@ -79,15 +79,22 @@ namespace GameLogicLibrary
             {
                 foreach (Player player in Team.Value.PlayerList)
                 {
-                    if ((GameStructure.Ball.LastTouchedTeam == player.Team) && !GameStructure.friendlyFire)
-                        continue;
+                    if(GameStructure.Ball.LastTouchedPlayer != null)
+                    {
+                        if ((GameStructure.Ball.LastTouchedPlayer.Team == player.Team) && !GameStructure.friendlyFire)
+                            continue;
+                        if (player == GameStructure.Ball.LastTouchedPlayer)
+                            continue;
+                    }
                     if (BallInPlayerBar(player))
                     {
-                        GameStructure.Ball.LastTouchedTeam = player.Team;
+                        GameStructure.Ball.LastTouchedPlayer = player;
                         float Angle = GetNewAngleOfBall(player);
                         ApplyPlayerBallCollision(Angle);
                         return; // ASSUMING ONLY ONE PLAYER CAN TOUCH THE BALL !
                     }
+                    
+                    
 
                 }
             }
