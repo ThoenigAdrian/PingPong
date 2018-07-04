@@ -13,18 +13,19 @@ namespace PingPongServer.Matchmaking
             List<ValidCombination> m_validCombinations = new List<ValidCombination>();
 
             public int MaxPlayerCount { get; private set; }
-            bool RequestChanges { get; set; }
-            bool GroupChanges { get; set; }
+            bool NewRequests { get; set; }
+            bool NewGroups { get; set; }
 
             public Filter (int maxPlayerCount)
             {
                 MaxPlayerCount = maxPlayerCount;
-                GroupChanges = false;
+                NewRequests = false;
+                NewGroups = false;
             }
 
             public void AddRequest(Request request)
             {
-                RequestChanges = true;
+                NewRequests = true;
 
                 foreach (RequestGroup group in RequestGroups)
                 {
@@ -32,24 +33,21 @@ namespace PingPongServer.Matchmaking
                         return;
                 }
 
-                GroupChanges = true;
+                NewGroups = true;
                 RequestGroup newGroup = new RequestGroup(request);
                 RequestGroups.Add(newGroup);
             }
 
             public void FindMatches()
             {
-                if (RequestChanges)
+                if (NewGroups)
+                    SearchNewCombinations();
+
+                if (NewRequests)
                     SearchValidCombinations();
 
-                if (GroupChanges)
-                {
-                    if (SearchNewCombinations())    // look for new combinations
-                        SearchValidCombinations();  // combine latest findings as well
-                }
-
-                RequestChanges = false;
-                GroupChanges = false;
+                NewRequests = false;
+                NewGroups = false;
             }
 
             private void SearchValidCombinations()
