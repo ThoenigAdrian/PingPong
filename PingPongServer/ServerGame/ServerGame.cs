@@ -62,6 +62,17 @@ namespace PingPongServer.ServerGame
             Network.BroadcastStartGamePackage(GameFoundPackage);
         }
 
+        public bool AddObserver(NetworkConnection connection)
+        {
+            bool added = false;
+            if(GameState == GameStates.Finished)
+            {
+                Network.AddObserver(connection);
+                added = false;
+            }
+            return added;
+        }
+
         private void OnTeamScored(object sender, EventArgs e)
         {
             Logger.GameLog("Team Scored");

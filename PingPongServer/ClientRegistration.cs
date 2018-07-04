@@ -23,6 +23,9 @@ namespace PingPongServer
         public event ClientRequestHandler OnGameRequest;
         public event ClientRequestHandler OnMatchmakingRequest;
 
+        public delegate void ObserverRequestHandler(object sender, NetworkConnection connection);
+        public event ObserverRequestHandler OnObserverRequest;
+
         private TCPAccepter ConnectionAccepter;
         private SafeList<NetworkConnection> ConnectionsReadyForQueingUpToMatchmaking = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
@@ -162,6 +165,11 @@ namespace PingPongServer
                     ConnectionsReadyForQueingUpToMatchmaking.Remove(connection);
                     OnMatchmakingRequest?.Invoke(this, connection, request);
                     break;
+                case ClientInitializeGamePackage.RequestType.Observe:
+                    ConnectionsReadyForQueingUpToMatchmaking.Remove(connection);
+                    OnMatchmakingRequest?.Invoke(this, connection, request);
+                    break;
+
             }
         }
 

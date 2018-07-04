@@ -38,7 +38,12 @@ namespace PingPongServer
         {
             AddClientConnection(connection); // from Inherited Class
         }
-                
+
+        public void AddObserver(NetworkConnection connection)
+        {
+            AddClientConnection(connection);
+        }
+
         public Dictionary<int, PackageInterface[]> GrabAllNetworkDataForNextFrame()
         {
             return In.GetDataFromEverySessionTCP();            

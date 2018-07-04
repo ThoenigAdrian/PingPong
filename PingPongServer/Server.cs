@@ -48,6 +48,7 @@ namespace PingPongServer
 
             Registration = new ClientRegistration(ServerConfiguration, Logger);
             Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
+            Registration.OnObserverRequest += HandleObserveRequest;
 
             UDPConnection MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
@@ -95,6 +96,11 @@ namespace PingPongServer
             ServerStopping = true;
             Logger.ServerLog("Stopping Games Manager");
             GamesManager.Stop();
+        }
+
+        private void HandleObserveRequest(object sender, NetworkConnection connection)
+        {
+            GamesManager.AddObserver(connection);
         }
 
         private void HandleMatchmakingRequest(object sender, NetworkConnection connection, PackageInterface request)

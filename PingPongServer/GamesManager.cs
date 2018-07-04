@@ -15,6 +15,7 @@ namespace PingPongServer
         private LogWriterConsole Logger { get; set; } = new LogWriterConsole();
         private SafeList<Game> GamesReadyToBeStarted = new SafeList<Game>();
         private SafeList<Game> RunningGames = new SafeList<Game>();
+        private SafeList<NetworkConnection> WaitingObservers = new SafeList<NetworkConnection>();
         private UDPConnection MasterUDPSocket;
         private bool shutdownGameManager = false;
 
@@ -88,6 +89,7 @@ namespace PingPongServer
             {
                 StartGamesWhichAreReady();
                 RemoveFinishedGames();
+                AddObserversToGame();
                 Thread.Sleep(10);
             }
         }
@@ -114,6 +116,25 @@ namespace PingPongServer
             }
         }
 
+        public void AddObserver(NetworkConnection observerConnection)
+        {
+            WaitingObservers.Add(observerConnection);
+        }
+
+        private void AddObserversToGame()
+        {
+            foreach (NetworkConnection observer in WaitingObservers.Entries)
+            {
+                foreach (Game game in RunningGames.Entries)
+                {
+                    if (game.AddObserver(observer))
+                        break;
+                }
+            }
+            
+            
+        }
+
         private void StartGamesWhichAreReady()
         {
             foreach(Game readyGame in GamesReadyToBeStarted.Entries)
@@ -122,7 +143,6 @@ namespace PingPongServer
                 GameStarting.Start(readyGame);
                 GamesReadyToBeStarted.Remove(readyGame);
             }
-            
             
         }
 
