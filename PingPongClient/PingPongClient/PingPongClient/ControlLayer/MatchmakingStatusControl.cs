@@ -23,7 +23,7 @@ namespace PingPongClient.ControlLayer
 #if DEBUG
             const int CancelTime = 900;
 #else
-            const int CancelTime = 3;
+            const int CancelTime = 5;
 #endif
             CancelTimer = new OneShotTimer(CancelTime * 1000* 1000, false);
             Timeout = new OneShotTimer(15 * 1000 * 1000, false);
