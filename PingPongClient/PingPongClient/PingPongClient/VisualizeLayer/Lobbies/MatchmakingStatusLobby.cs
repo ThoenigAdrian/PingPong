@@ -24,7 +24,8 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         public void SetSuccess()
         {
-            Animation.AnimateSuccess();
+            if(Animation.AnimationState != State.Success)
+                Animation.AnimateSuccess();
         }
 
         public void SetError()

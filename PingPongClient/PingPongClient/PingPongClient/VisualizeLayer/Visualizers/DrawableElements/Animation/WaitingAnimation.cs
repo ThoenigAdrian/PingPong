@@ -3,16 +3,16 @@ using System;
 
 namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 {
+    enum State
+    {
+        Waiting,
+        Error,
+        Success
+    }
+
     class WaitingAnimation : DrawableElement
     {
-        enum State
-        {
-            Waiting,
-            Error,
-            Success
-        }
-
-        State AnimationState { get; set; }
+        public State AnimationState { get; private set; }
         VisualizerInterface Visualizer { get; set; }
         Vector2 Center { get; set; }
         int ElementCount { get; set; }
