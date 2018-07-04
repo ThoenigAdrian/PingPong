@@ -38,7 +38,6 @@ namespace PingPongServer
         public MatchmakingManager()
         {
             UpdateMatchmakingQueue = new OneShotTimer(MatchmakingRefreshIntervalInSeconds * 1000000, true);
-            
         }
 
         public void AddClientToQueue(NetworkConnection clientConnection, ClientInitializeGamePackage initData)

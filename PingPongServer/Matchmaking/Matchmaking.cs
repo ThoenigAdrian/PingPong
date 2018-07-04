@@ -22,7 +22,7 @@ namespace PingPongServer.Matchmaking
             return true;
         }
         
-        public void RemoveSearchingClient(int clientSessionID)
+        public void RemoveSearchingClient(int requestID)
         {
             List<Request> requestsToBeRemoved = new List<Request>();
             foreach (KeyValuePair<int, Filter> keyvalue in m_waitingForMatch)
@@ -31,7 +31,7 @@ namespace PingPongServer.Matchmaking
                 {
                     foreach (Request request in requestGroup.m_requests)
                     {
-                        if(request.ID == clientSessionID)
+                        if(request.ID == requestID)
                         {
                             requestsToBeRemoved.Add(request);
                         }

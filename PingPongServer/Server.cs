@@ -17,14 +17,9 @@ namespace PingPongServer
 {
     public class Server : IDisposable
     {
-        // Network 
-        private TCPAccepter ConnectionAccepter;
-        private UDPConnection MasterUDPSocket;
-        private SafeList<NetworkConnection> ConnectionsReadyForQueingUpToMatchmaking = new SafeList<NetworkConnection>();
-        private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
-        private MatchmakingManager MatchManager = new MatchmakingManager();
 
-        // Game
+        private ClientRegistration Registration { get; set; }
+        private MatchmakingManager MatchManager = new MatchmakingManager();
         private GamesManager GamesManager;
 
         // Logging
@@ -34,14 +29,27 @@ namespace PingPongServer
         // Configuration 
         private ServerConfiguration ServerConfiguration;
 
+        class QueueRequest
+        {
+            public NetworkConnection Connection { get; private set; }
+            public ClientInitializeGamePackage InitData { get; private set; }
+
+            public QueueRequest(NetworkConnection connection, ClientInitializeGamePackage initData)
+            {
+                Connection = connection;
+                InitData = initData;
+            }
+        }
+        SafeStack<QueueRequest> MatchmakingRequests = new SafeStack<QueueRequest>();
+
         public Server()
         {
             ServerConfiguration = new ServerConfiguration();
 
-            ConnectionAccepter = new TCPAccepter(ServerConfiguration.ServerPort, ServerConfiguration.MaximumNumberOfIncomingConnections);
-            ConnectionAccepter.ClientConnected += OnSocketAccept;
+            Registration = new ClientRegistration(ServerConfiguration, Logger);
+            Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
 
-            MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
+            UDPConnection MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
             
@@ -60,7 +68,7 @@ namespace PingPongServer
             Logger.Log("\n\n");
             Logger.ServerLog("Entering Server Run Method");
             Logger.ServerLog("Starting Connection Accepter");
-            ConnectionAccepter.Run();
+            Registration.Run();
             Logger.ServerLog("Starting Games Manager");
             GamesManager.Run();
 
@@ -68,14 +76,15 @@ namespace PingPongServer
 
             while (!ServerStopping)
             {
-                foreach (NetworkConnection networkConnection in AcceptedConnections.Entries)
-                    ProcessClientSessionRequest(networkConnection);
-
-                ServeClientGameRequests();
-
-                RemoveDeadConnections();
                 MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
                 MatchManager.Update();
+
+                QueueRequest request;
+                while ((request = MatchmakingRequests.Read()) != null)
+                {
+                    MatchManager.AddClientToQueue(request.Connection, request.InitData);
+                }
+
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
@@ -84,110 +93,18 @@ namespace PingPongServer
         {
             Logger.ServerLog("Server Stop has been requested");
             ServerStopping = true;
-            Logger.ServerLog("Stopping Connection Accepter");
-            ConnectionAccepter.Stop();
             Logger.ServerLog("Stopping Games Manager");
             GamesManager.Stop();
         }
 
-        private void OnSocketAccept(object sender, Socket acceptedSocket)
+        private void HandleMatchmakingRequest(object sender, NetworkConnection connection, PackageInterface request)
         {
-            Logger.NetworkLog("Client connected " + acceptedSocket.RemoteEndPoint.ToString());
-            TCPPacketConnection tcp = new TCPPacketConnection(acceptedSocket);
-            NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
-            Logger.ServerLog("Adding Client to Accepted Connections");
-            AcceptedConnections.Add(newNetworkConnection);
-        }
-
-        private void ProcessClientSessionRequest(NetworkConnection networkConnection)
-        {
-            PackageInterface newPacket = networkConnection.ReadTCP();
-            if (newPacket == null)
-                return;
-
-            if (newPacket.PackageType == PackageType.ClientSessionRequest)
-            {
-                ClientSessionRequest packet = (ClientSessionRequest)newPacket;
-
-                if (packet.Reconnect)
-                    ReconnectClientWithPreviousSession(networkConnection, packet);
-                else
-                    ConnectClientWithNewSession(networkConnection);
-
-                ServerSessionResponse response = new ServerSessionResponse();
-                response.ClientSessionID = networkConnection.ClientSession.SessionID;
-                networkConnection.SendTCP(response);
-            }
+            MatchmakingRequests.Write(new QueueRequest(connection, request as ClientInitializeGamePackage));
         }
 
         private int NumberOfPlayersOnline()
         {
-            return GamesManager.PlayersCurrentlyInGames() + MatchManager.TotalPlayersSearching() + ConnectionsReadyForQueingUpToMatchmaking.Count;
-        }
-
-        private void ServeClientGameRequests()
-        {
-            foreach (NetworkConnection conn in ConnectionsReadyForQueingUpToMatchmaking.Entries)
-            {
-                PackageInterface packet = conn.ReadTCP();
-                if (packet == null)
-                    continue;
-
-                if (packet.PackageType == PackageType.ClientInitalizeGamePackage)
-                {
-                    ClientInitializeGamePackage initPackage = packet as ClientInitializeGamePackage;
-                    switch (initPackage.Request)
-                    {
-                        case ClientInitializeGamePackage.RequestType.Matchmaking:
-                            MatchManager.AddClientToQueue(conn, initPackage);
-                            ConnectionsReadyForQueingUpToMatchmaking.Remove(conn);
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void ConnectClientWithNewSession(NetworkConnection networkConnection)
-        {
-            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
-            networkConnection.ClientSession = new Session(new Random().Next());
-            Logger.NetworkLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
-            ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
-            AcceptedConnections.Remove(networkConnection);
-        }
-
-        private void ReconnectClientWithPreviousSession(NetworkConnection networkConnection, ClientSessionRequest packet)
-        {
-            // still need to handle if client requests a session which is already in use
-            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + packet.ReconnectSessionID.ToString());
-            networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
-            ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
-            AcceptedConnections.Remove(networkConnection);
-            if (GamesManager.RejoinClientToGame(networkConnection))
-            {
-                ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
-            }
-        }
-
-        private void RemoveDeadConnections()
-        {
-            foreach(NetworkConnection networkConnection in AcceptedConnections.Entries)
-            {
-                if (!networkConnection.Connected)
-                {
-                    Logger.NetworkLog("Removing disconnected connection from Accepted Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
-                    AcceptedConnections.Remove(networkConnection);
-                }
-            }
-
-            foreach (NetworkConnection networkConnection in ConnectionsReadyForQueingUpToMatchmaking.Entries)
-            {
-                if (!networkConnection.Connected)
-                {
-                    Logger.NetworkLog("Removing disconnected connection from ConnectionsReadyForJoiningAndStarting Games Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
-                    ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
-                }
-            }
+            return GamesManager.PlayersCurrentlyInGames() + MatchManager.TotalPlayersSearching() + Registration.RegisteredPlayersCount;
         }
 
         public void Dispose()

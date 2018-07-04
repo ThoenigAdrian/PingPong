@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientRegistration.cs" />
     <Compile Include="GamesManager.cs" />
     <Compile Include="MatchmakingManager.cs" />
     <Compile Include="Matchmaking\Game.cs" />
