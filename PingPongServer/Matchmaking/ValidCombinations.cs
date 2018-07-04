@@ -91,6 +91,21 @@ namespace PingPongServer.Matchmaking
                     }
                 }
             }
+
+            public override string ToString()
+            {
+                string str = "";
+
+                foreach (Entry entry in Combination)
+                {
+                    if (str.Length > 0)
+                        str += " | ";
+
+                    str += entry.Group.GroupType.Team1Count + "-" + entry.Group.GroupType.Team2Count;
+                }
+
+                return str;
+            }
         }
     }
 }
