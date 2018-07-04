@@ -74,12 +74,10 @@ namespace GameLogicLibrary
             GameStructure.Ball.PositionX = GameInitializers.BALL_POSX;
             GameStructure.Ball.PositionY = GameInitializers.BALL_POSY;
             RandomizeBallDirection();
-            GameStructure.Ball.LastTouchedTeam = -1;
-            GameStructure.Ball.resetToInitialSpeed();
+            GameStructure.Ball.ResetBall();
             PauseBall(1000);
         }
 
-        
         
         private void RandomizeBallDirection()
         {
@@ -98,7 +96,6 @@ namespace GameLogicLibrary
             GameStructure.Ball.ChangeAngleOfBall(radiant);
         }
 
-        
 
         private void OnTeamScored()
         {
@@ -120,7 +117,7 @@ namespace GameLogicLibrary
 
         private void IncreaseBallSpeed()
         {
-            GameStructure.Ball.increaseSpeed(GameOngoingTimer.TimePassed);
+            GameStructure.Ball.IncreaseSpeed(GameOngoingTimer.TimePassed);
         }
 
         private float Max(Tuple<float, float> floatTuple)

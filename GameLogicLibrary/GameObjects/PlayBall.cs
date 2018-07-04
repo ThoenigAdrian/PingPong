@@ -15,6 +15,7 @@ namespace GameLogicLibrary.GameObjects
         public int Radius { get; set; }
         public int LastTouchedTeam;
         private float internal_speed = GameInitializers.BALL_SPEED;
+        public Player LastTouchedPlayer { get; set; }
 
         public Ball()
         {
@@ -23,6 +24,7 @@ namespace GameLogicLibrary.GameObjects
             DirectionX = GameInitializers.BALL_DIRX;
             DirectionY = GameInitializers.BALL_DIRY;
             Speed = GameInitializers.BALL_SPEED;
+            LastTouchedPlayer = null;
             LastTouchedTeam = -1; // = No Team        + refactor Teams stuff e.g Team Blue , Team Red or something different but it doesn't make sense to have a enum like this (Team1,Team2,Team3)
             Radius = GameInitializers.BALL_RADIUS;
         }
@@ -37,12 +39,23 @@ namespace GameLogicLibrary.GameObjects
             DirectionY *= -1;
         }
 
-        public void resetToInitialSpeed()
+        public void ResetBall()
+        {
+            ResetLastTouchedPlayer();
+            ResetToInitialSpeed();
+        }
+
+        public void ResetLastTouchedPlayer()
+        {
+            LastTouchedPlayer = null;
+        }
+
+        public void ResetToInitialSpeed()
         {
             Speed = GameInitializers.BALL_SPEED;
         }
 
-        public void increaseSpeed(TimeSpan timePassed)
+        public void IncreaseSpeed(TimeSpan timePassed)
         {
             Speed = GameInitializers.BALL_SPEED + ((float)timePassed.TotalSeconds / 180);
         }
@@ -72,5 +85,7 @@ namespace GameLogicLibrary.GameObjects
                 DirectionY *= internal_speed;
             }
         }
+
+        
     }
 }
