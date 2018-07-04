@@ -48,6 +48,7 @@ namespace PingPongServer.Matchmaking
                         SearchValidCombinations();  // combine latest findings as well
                 }
 
+                RequestChanges = false;
                 GroupChanges = false;
             }
 
