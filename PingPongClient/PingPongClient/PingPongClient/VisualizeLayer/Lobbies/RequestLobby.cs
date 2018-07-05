@@ -48,8 +48,8 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         {
             m_playerCount = 2;
 
-            DrawableStatus = new DrawableString("", new Vector2(100, 100), Color.White);
-            DrawablePlayerCount = new DrawableString("", new Vector2(100, 300), Color.White);
+            DrawableStatus = new DrawableString(new DrawingOptions() { Position = new Vector2(100, 100) });
+            DrawablePlayerCount = new DrawableString(new DrawingOptions() { Position = new Vector2(100, 300) });
             QueueingOptions = new QueueSelection(new Vector2(100, 180));
 
             Strings.Add(DrawableStatus);

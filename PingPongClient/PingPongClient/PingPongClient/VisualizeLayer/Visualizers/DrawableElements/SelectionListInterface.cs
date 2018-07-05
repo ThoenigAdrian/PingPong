@@ -74,16 +74,14 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
     {
         public Selector Selector { get; set; }
         public DrawableString DrawString { get; set; }
-        public Vector2 Position
-        {
-            get { return DrawString.Postion; }
-            set { DrawString.Postion = value; }
-        }
+        public Vector2 Position { get; set; }
 
         protected float SpaceSelectorToString { get; set; }
 
         public SelectionEntry(DrawableString drawString, Selector selector)
         {
+            Position = drawString.Options.Position;
+
             Selector = selector;
             DrawString = drawString;
             SpaceSelectorToString = 5;

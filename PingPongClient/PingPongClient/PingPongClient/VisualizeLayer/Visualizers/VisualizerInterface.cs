@@ -68,13 +68,25 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected void DrawString(DrawableString drawString)
         {
-            DrawString(drawString, drawString.Postion);
+            if (drawString.Visible)
+            {
+                float x;
+                if (drawString.Options.DrawCentered)
+                    x = GetCenteredXValue(drawString);
+                else
+                    x = drawString.Options.Position.X;
+
+                SpriteBatchMain.DrawString(
+                    Font,
+                    drawString.Value,
+                    new Vector2(x, drawString.Options.Position.Y),
+                    drawString.Options.StringColor);
+            }
         }
 
-        protected void DrawString(DrawableString drawString, Vector2 position)
+        private float GetCenteredXValue(DrawableString drawString)
         {
-            if(drawString.Visible)
-                SpriteBatchMain.DrawString(Font, drawString.Value, position, drawString.StringColor);
+            return GetCenter().X - (drawString.GetMeasurements(Font).X / 2);
         }
 
         protected void DrawSelectionList(SelectionListInterface selectionList)
@@ -90,7 +102,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers
                 if (selection == selectionList.Selection)
                     DrawSelector(entry.Selector, selectionList.TopLeft + entry.Position + entry.SelectorPosition(Font));
 
-                DrawString(entry.DrawString, selectionList.TopLeft + entry.Position + entry.StringPosition(Font));
+                entry.DrawString.Options.Position = selectionList.TopLeft + entry.Position + entry.StringPosition(Font);
+                DrawString(entry.DrawString);
                 selection++;
             }
         }

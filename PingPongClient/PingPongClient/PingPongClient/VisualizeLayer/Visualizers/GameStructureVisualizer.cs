@@ -15,6 +15,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         Texture2D FieldTexture;
         Texture2D BallTexture;
         Texture2D PlayerTexture;
+        DrawableString ScoreString;
 
         public Vector2 FieldSize { get { return new Vector2(Structure.Field.Width, Structure.Field.Height); } }
 
@@ -25,6 +26,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         public GameStructureVisualizer()
         {
             DrawingTranslation = new DrawingOffsetTranslation();
+            ScoreString = new DrawableString(new DrawingOptions() { Position = new Vector2(0, 10), DrawCentered = true });
         }
 
         public void SetGameStructure(BasicStructure structure)
@@ -83,16 +85,16 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected void DrawScore()
         {
-            DrawableString scoreString = new DrawableString("Team 1   " + Structure._score.Score_Team1 + "-" + Structure._score.Score_Team2 + "   Team 2",
-                new Vector2(0, 10),
-                Color.White);
+            string score = "Team 1   " + Structure._score.Score_Team1 + "-" + Structure._score.Score_Team2 + "   Team 2";
+            ScoreString.Value = score;
+            
 
-            Vector2 measurements = scoreString.GetMeasurements(Font);
+            Vector2 measurements = ScoreString.GetMeasurements(Font);
             float x = DrawingTranslation.GetAbsoluteX(FieldSize.X / 2);
             x -= measurements.X / 2;
-            scoreString.Postion.X = x;
+            ScoreString.Options.Position.X = x;
 
-            DrawString(scoreString);
+            DrawString(ScoreString);
         }
 
         protected void DrawBall()

@@ -7,12 +7,16 @@ namespace PingPongClient.VisualizeLayer.Lobbies
     {
         public override Color GetBackgroundColor { get { return Color.White; } }
 
-        DrawableString FinishText { get; set; } = new DrawableString("", new Vector2(305, 150), Color.Black);
+        DrawableString FinishText { get; set; }
 
         public FinishLobby()
         {
+            DrawingOptions options = new DrawingOptions() { Position = new Vector2(305, 150), StringColor = Color.Black, DrawCentered = true };
+            FinishText = new DrawableString(options);
             Strings.Add(FinishText);
-            Strings.Add(new DrawableString("Press ESC to return to main menu.", new Vector2(220, 350), Color.Black));
+
+            options = new DrawingOptions() { Position = new Vector2(220, 350), StringColor = Color.Black, DrawCentered = true };
+            Strings.Add(new DrawableString(options, "Press ESC to return to main menu."));
         }
 
         public void SetFinishText(string text)
