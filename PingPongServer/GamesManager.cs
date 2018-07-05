@@ -51,7 +51,7 @@ namespace PingPongServer
             {
                 ServerMatchmakingStatusResponse GameFoundPackage = new ServerMatchmakingStatusResponse();
                 GameFoundPackage.GameFound = true;
-                GameFoundPackage.Status = "Game will start in " + counter.ToString() + " seconds ...";
+                GameFoundPackage.Status = "Game will start in " + counter.ToString() + " seconds...";
                 GameFoundPackage.Error = false;
                 gameToBeStarted.BroadcastStartGamePackage(GameFoundPackage);
                 Thread.Sleep(1000);                
