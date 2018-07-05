@@ -13,8 +13,6 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
     class WaitingAnimation : Animation
     {
         public State AnimationState { get; private set; }
-        VisualizerInterface Visualizer { get; set; }
-        Vector2 Center { get; set; }
         int ElementCount { get; set; }
         Color AnimationColor { get; set; }
         float Offset { get; set; }
@@ -38,10 +36,10 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
             MovementStep = 0;
             MovementWavelength = 30;
 
-            ResetState();
+            Reset();
         }
 
-        public void ResetState()
+        public override void Reset()
         {
             AnimationState = State.Waiting;
             AnimationColor = new Color(255, 255, 255);

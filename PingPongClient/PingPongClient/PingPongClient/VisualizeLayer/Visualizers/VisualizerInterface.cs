@@ -108,9 +108,14 @@ namespace PingPongClient.VisualizeLayer.Visualizers
             }
         }
 
-        protected void DrawRectangle(Vector2 position, Vector2 size, Color color)
+        public void DrawRectangle(Vector2 position, Vector2 size, Color color)
         {
-            SpriteBatchMain.Draw(TextureRectangle, new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), color);
+            DrawRectangle(new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), color);
+        }
+
+        public void DrawRectangle(Rectangle rectangle, Color color)
+        {
+            SpriteBatchMain.Draw(TextureRectangle, rectangle, color);
         }
 
         protected void DrawSelector(Selector selector, Vector2 position)
@@ -128,8 +133,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         {
             SpriteBatchMain.Draw(CircleSelector,
                 new Rectangle(
-                    (int)position.X,
-                    (int)position.Y,
+                    (int)position.X - radius,
+                    (int)position.Y - radius,
                     2 * radius,
                     2 * radius),
                 color);

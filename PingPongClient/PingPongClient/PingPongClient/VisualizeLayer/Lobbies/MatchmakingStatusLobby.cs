@@ -46,7 +46,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         {
             Status.Value = "Waiting for match...";
             Status.Visible = true;
-            Animation.ResetState();
+            Animation.Reset();
         }
     }
 }

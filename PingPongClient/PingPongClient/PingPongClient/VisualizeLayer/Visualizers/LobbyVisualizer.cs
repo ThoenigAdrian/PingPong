@@ -51,7 +51,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
                 DrawSelectionList(list);
             }
 
-            foreach (WaitingAnimation animation in DrawableLobby.GetAnimationList)
+            foreach (Animation animation in DrawableLobby.GetAnimationList)
             {
                 animation.Update();
                 animation.Draw(this);

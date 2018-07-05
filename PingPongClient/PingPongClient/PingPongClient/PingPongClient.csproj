@@ -115,6 +115,7 @@
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\Animation.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\DrawableElement.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\DrawableString.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\FinishAnimation.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\SelectionListInterface.cs" />
     <Compile Include="VisualizeLayer\Lobbies\SelectionLists\QueueSelection.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\AnimationChange.cs" />
