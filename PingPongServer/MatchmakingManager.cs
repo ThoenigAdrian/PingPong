@@ -45,19 +45,13 @@ namespace PingPongServer
             if (Matchmaking.AddRequestToQueue(clientConnection.ClientSession.SessionID, initData.GamePlayerCount, initData.PlayerTeamwish))
             {
                 m_waitingClientConnections.Add(clientConnection);
-                clientConnection.ConnectionDiedEvent += RemoveClientFromQueue;
+                clientConnection.ConnectionDiedEvent += RemoveConnection;
                 SendMatchmakingStatus(clientConnection, string.Format(WAITING_IN_QUEUE, TotalPlayersOnline, TotalPlayersSearching()));
             }
             else
                 SendMatchmakingError(clientConnection, INVALID_REQUEST);
         }
 
-        private void RemoveClientFromQueue(NetworkConnection client)
-        {
-            Matchmaking.RemoveSearchingClient(client.ClientSession.SessionID);
-            m_waitingClientConnections.Remove(client);
-        }
-        
         public int TotalPlayersSearching()
         {
             return Matchmaking.TotalPlayersSearching();
@@ -67,17 +61,12 @@ namespace PingPongServer
         {
             Matchmaking.FindMatches();
 
-            for (int i = 0; i < Matchmaking.Matches.Count; i++)
+            CombineConnectionsWithMatches();
+
+            foreach (NetworkConnection connection in m_waitingClientConnections.Entries)
             {
-                MatchData matchData = GenerateMatchData(Matchmaking.Matches[i]);
-                if (matchData == null)
-                    continue;
-
-                RemoveClientsFromQueue(matchData);
-                Matchmaking.Matches.RemoveAt(i);
-                i--;
-
-                OnMatchFound?.Invoke(this, matchData);
+                if (!connection.Connected)
+                    RemoveClientFromQueue(connection);
             }
 
             if (UpdateMatchmakingQueue == true)
@@ -85,9 +74,53 @@ namespace PingPongServer
                 BroadcastMatchmakingStatus();
                 UpdateMatchmakingQueue.Restart();
             }
-
         }
-        
+
+        private bool IsRequestValid(Request request)
+        {
+            return Matchmaking.IsRequestValid(request);
+        }
+
+        private void CombineConnectionsWithMatches()
+        {
+            Request[] combination;
+            while ((combination = Matchmaking.Matches.Read()) != null)
+            {
+                MatchData matchData = GenerateMatchData(combination);
+                if (matchData == null)
+                    continue;
+
+                RemoveConnectionsFromQueue(matchData);
+                OnMatchFound?.Invoke(this, matchData);
+            }
+        }
+
+        private MatchData GenerateMatchData(Request[] combination)
+        {
+            MatchData matchData = new MatchData();
+            matchData.MaxPlayerCount = combination[0].MaxPlayerCount;
+
+            foreach (Request request in combination)
+            {
+                NetworkConnection clientConnection = FindClientConnection(request.ID);
+                if (clientConnection == null)
+                {
+                    HandleConnectionNotFound(combination, request.ID);
+                    return null;
+                }
+
+                ClientData clientData = new ClientData()
+                {
+                    m_clientConnection = clientConnection,
+                    m_request = request
+                };
+
+                matchData.Clients.Add(clientData);
+            }
+
+            return matchData;
+        }
+
         private void BroadcastMatchmakingStatus()
         {
             foreach (NetworkConnection clientConnection in m_waitingClientConnections.Entries)
@@ -113,37 +146,35 @@ namespace PingPongServer
 
             clientConnection.SendTCP(response);
         }
-        
 
-        private MatchData GenerateMatchData(Request[] match)
+        private void RemoveConnectionsFromQueue(MatchData matchData)
         {
-            MatchData matchData = new MatchData();
-            matchData.MaxPlayerCount = match[0].MaxPlayerCount;
+            foreach (ClientData client in matchData.Clients)
+                RemoveConnection(client.m_clientConnection);
+        }
 
-            foreach (Request request in match)
-            {
-                NetworkConnection clientConnection = FindClientConnection(request.ID);
-                if (clientConnection == null) // todo
-                {
-                    HandleConnectionNotFound(match);
-                    return null;
-                }
+        private void RemoveClientFromQueue(NetworkConnection client)
+        {
+            RemoveConnection(client);
+            Matchmaking.RemoveSearchingClient(client.ClientSession.SessionID);
+        }
 
-                ClientData clientData = new ClientData()
-                {
-                    m_clientConnection = clientConnection,
-                    m_request = request
-                };
+        private void RemoveConnection(int clientID)
+        {
+            NetworkConnection connection = FindClientConnection(clientID);
+            if (connection != null)
+                RemoveConnection(connection);
+        }
 
-                matchData.Clients.Add(clientData);
-            }
-
-            return matchData;
+        private void RemoveConnection(NetworkConnection client)
+        {
+            client.ConnectionDiedEvent -= RemoveConnection;
+            m_waitingClientConnections.Remove(client);
         }
 
         private NetworkConnection FindClientConnection(int clientID)
         {
-            foreach(NetworkConnection connection in m_waitingClientConnections.Entries)
+            foreach (NetworkConnection connection in m_waitingClientConnections.Entries)
             {
                 if (connection.ClientSession.SessionID == clientID)
                     return connection;
@@ -152,22 +183,19 @@ namespace PingPongServer
             return null;
         }
 
-        private void RemoveClientsFromQueue(MatchData matchData)
+        private void HandleConnectionNotFound(Request[] combination, int invalidID)
         {
-            foreach (ClientData client in matchData.Clients)
+            foreach (Request request in combination)
             {
-                m_waitingClientConnections.Remove(client.m_clientConnection);
+                if(request.ID != invalidID)
+                    Requeue(request);
             }
         }
 
-        public bool IsRequestValid(Request request)
+        private void Requeue(Request request)
         {
-            return Matchmaking.IsRequestValid(request);
-        }
-
-        private void HandleConnectionNotFound(Request[] match)
-        {
-            // todo
+            if (!Matchmaking.AddRequestToQueue(request))
+                RemoveConnection(request.ID);
         }
     }
 }

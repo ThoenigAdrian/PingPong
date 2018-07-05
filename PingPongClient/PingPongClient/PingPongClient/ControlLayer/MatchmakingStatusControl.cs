@@ -122,11 +122,11 @@ namespace PingPongClient.ControlLayer
             StatusLobby.SetError();
             Timeout.Reset();
             CancelTimer.Restart();
+            ParentControl.Disconnect();
         }
 
         private void Cancel()
         {
-            ParentControl.Disconnect();
             ParentControl.SwitchMode(GameMode.Connect);
         }
     }
