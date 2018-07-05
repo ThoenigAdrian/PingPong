@@ -56,6 +56,11 @@ namespace PingPongClient.ControlLayer
                 ProcessAllTCPPackages();
         }
 
+        public void SetReconnecting()
+        {
+            //StatusLobby.SetSuccess();
+        }
+
         private void ProcessAllTCPPackages()
         {
             if (Network == null)

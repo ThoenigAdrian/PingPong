@@ -32,9 +32,7 @@ namespace PingPongClient.NetworkLayer
         public void InitializeNetwork()
         {
             Connect();
-
-            if (NetworkInitializingFinished != null)
-                NetworkInitializingFinished.Invoke(this);
+            NetworkInitializingFinished?.Invoke(this);
         }
 
         private void Connect()

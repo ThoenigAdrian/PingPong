@@ -19,8 +19,9 @@ namespace PingPongClient.NetworkLayer
 
         public Socket AcceptedSocket { get; private set; }
         PackageAdapter Adapter { get; set; }
-        public NetworkConnection ServerConnection { get; private set; }
+        public NetworkConnection Connection { get; private set; }
         public int SessionID { get; private set; }
+        public bool GameReconnect { get; private set; }
         public bool Connected { get; private set; }
 
         private bool Error { get; set; }
@@ -38,12 +39,12 @@ namespace PingPongClient.NetworkLayer
 
         public bool GetResponse()
         {
-            HandleSessionResponse();
+            HandleSessionRequest();
 
             return Connected;
         }
 
-        private void HandleSessionResponse()
+        private void HandleSessionRequest()
         {
             TCPPacketConnection tcpConnection;
             try
@@ -62,8 +63,8 @@ namespace PingPongClient.NetworkLayer
 
                 if (ReceivedEvent.WaitOne(5000) && !Error)
                 {
-                    ServerConnection = new NetworkConnection(tcpConnection);
-                    ServerConnection.ClientSession = new Session(SessionID);
+                    Connection = new NetworkConnection(tcpConnection);
+                    Connection.ClientSession = new Session(SessionID);
                     Connected = true;
                     return;
                 }
@@ -82,6 +83,9 @@ namespace PingPongClient.NetworkLayer
                 (sender as TCPConnection).DataReceivedEvent -= ReadIDResponse;
                 ServerSessionResponse responsePackage = Adapter.CreatePackagesFromStream(data)[0] as ServerSessionResponse;
                 SessionID = responsePackage.ClientSessionID;
+
+                if(responsePackage.GameReconnect)
+                    ConnectParameters.SetGameReconnect();
             }
             catch
             {

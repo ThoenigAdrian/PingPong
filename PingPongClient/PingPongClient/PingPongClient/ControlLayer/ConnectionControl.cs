@@ -14,7 +14,7 @@ namespace PingPongClient.ControlLayer
 
         LobbyVisualizer LobbyVisualizer { get { return Visualizer as LobbyVisualizer; } }
 
-        public SessionConnectParameters Reconnect;
+        public SessionConnectParameters SessionInformation;
 
         bool Connecting { get; set; }
 
@@ -75,7 +75,7 @@ namespace PingPongClient.ControlLayer
                 {
                     InitializeNetwork(ConnectionLobby.ConnectOptions.Selection == 1);
                 }
-                else if (Reconnect != null)
+                else if (SessionInformation != null)
                 {
                     switch (selectionInput)
                     {
@@ -114,7 +114,7 @@ namespace PingPongClient.ControlLayer
                 SessionConnectParameters connectParams;
 
                 if (reconnect)
-                    connectParams = Reconnect;
+                    connectParams = SessionInformation;
                 else
                     connectParams = new SessionConnectParameters(serverIP, ParentControl.NetworkDeathHandler);
 
@@ -129,8 +129,8 @@ namespace PingPongClient.ControlLayer
 
         private void ShowReconnectOptions()
         {
-            if (Reconnect != null)
-                ConnectionLobby.SetReconnect(Reconnect.ServerIP.ToString(), Reconnect.SessionID.ToString());
+            if (SessionInformation != null)
+                ConnectionLobby.SetReconnect(SessionInformation.ServerIP.ToString(), SessionInformation.SessionID.ToString());
             ConnectionLobby.ConnectOptions.Visible = true;
         }
 
@@ -146,11 +146,19 @@ namespace PingPongClient.ControlLayer
                 {
                     Network = handler.Network;
 
-                    Reconnect = new SessionConnectParameters(handler.ConnectParameters.ServerIP, ParentControl.NetworkDeathHandler, Network.ClientSession);
+                    SessionInformation = new SessionConnectParameters(handler.ConnectParameters.ServerIP, ParentControl.NetworkDeathHandler, Network.ClientSession);
                     ShowReconnectOptions();
 
-                    ParentControl.OptionControl.SetServerIP(handler.ConnectParameters.ServerIP.ToString());
-                    ParentControl.SwitchMode(GameMode.Options);
+                    if (handler.ConnectParameters.GameReconnect)
+                    {
+                        ParentControl.StatusControl.SetReconnecting();
+                        ParentControl.SwitchMode(GameMode.Status);
+                    }
+                    else
+                    {
+                        ParentControl.OptionControl.SetServerIP(handler.ConnectParameters.ServerIP.ToString());
+                        ParentControl.SwitchMode(GameMode.Options);
+                    }
                 }
             }
             finally

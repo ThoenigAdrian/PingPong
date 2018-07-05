@@ -29,7 +29,7 @@ namespace PingPongClient.NetworkLayer
             if (response)
             {
                 ClientSession = ResponseHandler.SessionID;
-                AddClientConnection(ResponseHandler.ServerConnection);
+                AddClientConnection(ResponseHandler.Connection);
             }
             else
             {
