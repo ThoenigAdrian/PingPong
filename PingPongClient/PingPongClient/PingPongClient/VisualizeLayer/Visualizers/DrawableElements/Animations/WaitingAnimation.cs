@@ -10,7 +10,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
         Success
     }
 
-    class WaitingAnimation : DrawableElement
+    class WaitingAnimation : Animation
     {
         public State AnimationState { get; private set; }
         VisualizerInterface Visualizer { get; set; }
@@ -47,7 +47,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
             AnimationColor = new Color(255, 255, 255);
         }
 
-        public void Update()
+        public override void Update()
         {
             float offsetIncrement = 1.2F;
 
@@ -61,7 +61,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
             Radius = WavelengthMinimum + (MovementWavelength / 2) + ((float)Math.Sin(GetRadiant(Offset * 2F)) * MovementWavelength / 2);
         }
 
-        public void Draw(VisualizerInterface Visualizer)
+        public override void Draw(VisualizerInterface Visualizer)
         {
             Center = Visualizer.GetCenter();
 
