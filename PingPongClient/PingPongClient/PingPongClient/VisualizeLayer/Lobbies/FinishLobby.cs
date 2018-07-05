@@ -16,7 +16,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             Strings.Add(FinishText);
 
             options = new DrawingOptions() { Position = new Vector2(220, 350), StringColor = Color.Black, DrawCentered = true };
-            Strings.Add(new DrawableString(options, "Press ESC to return to main menu."));
+            Strings.Add(new DrawableString(options, "Press ESC to return to main menu"));
 
             FinishAnimation animation = new FinishAnimation(new Vector2(0, 250));
             Animations.Add(animation);
