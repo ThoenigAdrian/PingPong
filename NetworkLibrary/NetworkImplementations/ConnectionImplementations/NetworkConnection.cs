@@ -50,10 +50,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
-            TcpConnection.ReceiveErrorEvent += HandleTCPReceiveError;
+            TcpConnection.OnReceiveError += HandleTCPReceiveError;
             TcpConnection.InitializeReceiving();
 
-            RemoteEndPoint = new IPEndPoint(TcpConnection.GetEndPoint.Address, TcpConnection.GetEndPoint.Port);
+            RemoteEndPoint = tcpConnection.Remote;
 
             m_connected = true;
             m_disconnectLock = new Semaphore(1, 1);
@@ -88,7 +88,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 {
                     m_connected = false;
 
-                    TcpConnection.ReceiveErrorEvent -= HandleTCPReceiveError;
+                    TcpConnection.OnReceiveError -= HandleTCPReceiveError;
                     TcpConnection.DataReceivedEvent -= ReceiveTCP;
                     if(UdpConnection != null)
                         UdpConnection.DataReceivedEvent -= ReceiveUDP;
@@ -112,11 +112,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void SendTCP(PackageInterface package)
         {
-            try { TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package)); }
-            catch (SocketException)
-            { CloseConnection(); }
-            catch (IOException)
-            { CloseConnection(); }
+            TcpConnection.Send(Adapter.CreateNetworkDataFromPackage(package));
         }
 
         public void SendUDP(PackageInterface package)
@@ -124,29 +120,17 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection == null)
                 throw new ConnectionException("Network connection does not have an UDP connection!");
 
-            try { UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint); }
-            catch (SocketException)
-            { CloseConnection(); }
-            catch (IOException)
-            { CloseConnection(); }
+            UdpConnection.Send(Adapter.CreateNetworkDataFromPackage(package), RemoteEndPoint);
         }
 
         public void SendKeepAlive()
         {
-            try { TcpConnection.SendKeepAlive(); }
-            catch (SocketException)
-            { CloseConnection(); }
-            catch (IOException)
-            { CloseConnection(); }
+            TcpConnection.SendKeepAlive();
         }
 
         public void SendHolePunching()
         {
-            try { UdpConnection.HolePunching(RemoteEndPoint); }
-            catch (SocketException)
-            { CloseConnection(); }
-            catch (IOException)
-            { CloseConnection(); }
+            UdpConnection.HolePunching(RemoteEndPoint);
         }
 
         public PackageInterface ReadTCP()
