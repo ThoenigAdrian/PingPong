@@ -248,7 +248,6 @@ namespace PingPongServer.ServerGame
             bool couldRejoin = false;
             // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
             bool rejoinJustified = !Network.ClientStillConnected(client.ClientSession.SessionID);
-            bool clientBelongedToThisGame = false;
             Client correctClient = null;
             foreach (Client c in Clients)
             {
@@ -282,7 +281,7 @@ namespace PingPongServer.ServerGame
                 client.SendTCP(packet);
                 couldRejoin = true;
                 Logger.GameLog("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
-                Thread.Sleep(100);
+                Thread.Sleep(100);  // Client can't handle instant score package right away after joining therefore waiting 100 milli seconds.
                 client.SendTCP(GenerateScorePackage());
                 Network.RemoveClientConnection(client.ClientSession.SessionID);
                 Network.AddClientConnection(client);
