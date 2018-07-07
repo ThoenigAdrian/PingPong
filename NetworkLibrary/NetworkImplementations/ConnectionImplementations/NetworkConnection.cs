@@ -53,7 +53,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             TcpConnection.OnReceiveError += HandleTCPReceiveError;
             TcpConnection.InitializeReceiving();
 
-            RemoteEndPoint = new IPEndPoint(TcpConnection.GetEndPoint.Address, TcpConnection.GetEndPoint.Port);
+            RemoteEndPoint = tcpConnection.Remote;
 
             m_connected = true;
             m_disconnectLock = new Semaphore(1, 1);
