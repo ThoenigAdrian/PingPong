@@ -45,7 +45,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             UdpConnection = udpConnection;
             UdpConnection.Logger = logger;
-            UdpConnection.ReceiveErrorEvent += ErrorHandling.HandleUDPReceiveError;
+            UdpConnection.OnReceiveError += ErrorHandling.HandleUDPReceiveError;
             UdpConnection.InitializeReceiving();
 
             KeepAliveInterval = 1000;
@@ -126,7 +126,7 @@ namespace NetworkLibrary.NetworkImplementations
                 clientCon.CloseConnection();
             }
 
-            UdpConnection.ReceiveErrorEvent -= ErrorHandling.HandleUDPReceiveError;
+            UdpConnection.OnReceiveError -= ErrorHandling.HandleUDPReceiveError;
             PostDisconnectActions();
         }
 
@@ -149,7 +149,7 @@ namespace NetworkLibrary.NetworkImplementations
 
         protected void TerminateUDPConnection()
         {
-            UdpConnection.ReceiveErrorEvent -= ErrorHandling.HandleUDPReceiveError;
+            UdpConnection.OnReceiveError -= ErrorHandling.HandleUDPReceiveError;
             UdpConnection.Disconnect();
         }
 

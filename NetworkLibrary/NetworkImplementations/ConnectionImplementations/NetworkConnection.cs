@@ -50,7 +50,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
-            TcpConnection.ReceiveErrorEvent += HandleTCPReceiveError;
+            TcpConnection.OnReceiveError += HandleTCPReceiveError;
             TcpConnection.InitializeReceiving();
 
             RemoteEndPoint = new IPEndPoint(TcpConnection.GetEndPoint.Address, TcpConnection.GetEndPoint.Port);
@@ -88,7 +88,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 {
                     m_connected = false;
 
-                    TcpConnection.ReceiveErrorEvent -= HandleTCPReceiveError;
+                    TcpConnection.OnReceiveError -= HandleTCPReceiveError;
                     TcpConnection.DataReceivedEvent -= ReceiveTCP;
                     if(UdpConnection != null)
                         UdpConnection.DataReceivedEvent -= ReceiveUDP;
