@@ -76,6 +76,30 @@ namespace NetworkLibrary.NetworkImplementations
                 throw new ConnectionException("Adding the connection failed!");
         }
 
+        public void RemoveClientConnection(int SessionID)
+        {
+            if (!ClientConnections.TryRemove(SessionID, out _))
+                throw new ConnectionException("Couldn't remove Client with Session ID: " + SessionID.ToString());
+
+            // CaptainOachkatzl how to do this properly ?? Event unsubscribe ? 
+            //clientConnection.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
+            //clientConnection.SetUDPConnection(UdpConnection);
+            //clientConnection.ClientSession.SessionID = sessionID;
+        }
+
+        public bool ClientStillConnected(int sessionID)
+        {
+            bool clientConnected = false;
+            foreach(NetworkConnection clientCon in ClientConnections.Values)
+            {
+                if(clientCon.ClientSession.SessionID == sessionID)
+                {
+                    clientConnected = clientCon.Connected;
+                }
+            }
+            return clientConnected;
+        }
+
         public void UpdateConnections()
         {
             List<NetworkConnection> deadCons = new List<NetworkConnection>();

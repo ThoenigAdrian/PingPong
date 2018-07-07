@@ -9,6 +9,7 @@ namespace NetworkLibrary.Utility
         public abstract void GameLog(string text);
         public abstract void GamesManagerLog(string text);
         public abstract void ServerLog(string text);
+        public abstract void RegistrationLog(string text);
         public abstract void ConfigurationLog(string text);
     }
 
@@ -37,6 +38,11 @@ namespace NetworkLibrary.Utility
         public override void NetworkLog(string text)
         {
             Log("[NETWORK]  " + text);
+        }
+
+        public override void RegistrationLog(string text)
+        {
+            Log("[REGISTRATION]  " + text);
         }
 
         public override void GameLog(string text)

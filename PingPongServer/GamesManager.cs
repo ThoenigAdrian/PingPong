@@ -74,8 +74,7 @@ namespace PingPongServer
             {
                 if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
                 {
-                    game.RejoinClient(conn);
-                    
+                    game.RejoinClient(conn);                    
                     couldRejoin = true;
                     break;
                 }

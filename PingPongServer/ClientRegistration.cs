@@ -26,6 +26,9 @@ namespace PingPongServer
         public delegate void ObserverRequestHandler(object sender, NetworkConnection connection);
         public event ObserverRequestHandler OnObserverRequest;
 
+        public delegate bool RejoinClientToGame(NetworkConnection connection);
+        private RejoinClientToGame RejoinCallback;
+
         private TCPAccepter ConnectionAccepter;
         private SafeList<NetworkConnection> ConnectionsReadyForQueingUpToMatchmaking = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
@@ -37,10 +40,11 @@ namespace PingPongServer
 
         public int RegisteredPlayersCount { get { return ConnectionsReadyForQueingUpToMatchmaking.Count; } }
 
-        public ClientRegistration(ServerConfiguration config, GameLogger log)
+        public ClientRegistration(ServerConfiguration config, GameLogger log, RejoinClientToGame rejoinCallback)
         {
             Logger = log;
             InitRegistration(config);
+            RejoinCallback = rejoinCallback;
         }
 
         private void InitRegistration(ServerConfiguration config)
@@ -58,7 +62,6 @@ namespace PingPongServer
             m_registrationThread = new Thread(RegistrationLoop);
             m_registrationThread.Name = "Registration";
             m_registrationThread.Start();
-
             ConnectionAccepter.Run();
         }
 
@@ -81,14 +84,14 @@ namespace PingPongServer
         public void Stop()
         {
             m_abort = true;
-            Logger.ServerLog("Stopping Connection Accepter");
+            Logger.RegistrationLog("Stopping Connection Accepter");
             ConnectionAccepter.Stop();
             m_registrationThread.Join();
         }
 
         private void OnSocketAccept(object sender, Socket acceptedSocket)
         {
-            Logger.NetworkLog("Client connected " + acceptedSocket.RemoteEndPoint.ToString());
+            Logger.RegistrationLog("Client connected " + acceptedSocket.RemoteEndPoint.ToString());
             TCPPacketConnection tcp = new TCPPacketConnection(acceptedSocket);
             NetworkConnection newNetworkConnection = new NetworkConnection(tcp);
             Logger.ServerLog("Adding Client to Accepted Connections");
@@ -126,23 +129,31 @@ namespace PingPongServer
 
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)
         {
-            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
+            Logger.RegistrationLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
             networkConnection.ClientSession = new Session(new Random().Next());
-            Logger.NetworkLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
+            Logger.RegistrationLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
             ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
         }
 
         private void ReconnectClientWithPreviousSession(NetworkConnection networkConnection, ClientSessionRequest packet)
         {
-            // still need to handle if client requests a session which is already in use
-            Logger.NetworkLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + packet.ReconnectSessionID.ToString());
+            Logger.RegistrationLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") want's to reconnect with Session ID " + packet.ReconnectSessionID.ToString());
             networkConnection.ClientSession = new Session(packet.ReconnectSessionID);
             AcceptedConnections.Remove(networkConnection);
-            //if (GamesManager.RejoinClientToGame(networkConnection))
-            //    return;
-
-            ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
+            if (RejoinCallback(networkConnection))
+            {
+                Logger.RegistrationLog("According to callback client could rejoin the game. Therefore Removing it from Accepted Connections List");
+                AcceptedConnections.Remove(networkConnection);
+            }
+            else
+            {
+                Logger.RegistrationLog("According to callback client could NOT rejoin the game. ");
+                Logger.RegistrationLog("Removing it from Accepted Connections List and adding it to Conections Ready for Matchmaking.");
+                AcceptedConnections.Remove(networkConnection);
+                ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
+            }                
+            
         }
 
 
@@ -180,7 +191,7 @@ namespace PingPongServer
             {
                 if (!networkConnection.Connected)
                 {
-                    Logger.NetworkLog("Removing disconnected connection from Accepted Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
+                    Logger.RegistrationLog("Removing disconnected connection from Accepted Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
                     AcceptedConnections.Remove(networkConnection);
                 }
             }
@@ -189,7 +200,7 @@ namespace PingPongServer
             {
                 if (!networkConnection.Connected)
                 {
-                    Logger.NetworkLog("Removing disconnected connection from ConnectionsReadyForJoiningAndStarting Games Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
+                    Logger.RegistrationLog("Removing disconnected connection from ConnectionsReadyForJoiningAndStarting Games Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
                     ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
                 }
             }

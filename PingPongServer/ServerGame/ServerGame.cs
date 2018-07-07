@@ -240,9 +240,42 @@ namespace PingPongServer.ServerGame
             Network.SendTCPPackageToClient(packet, client.SessionID);
         }
         
-        public void RejoinClient(NetworkConnection client)
+        public bool RejoinClient(NetworkConnection client)
         {
-            Network.AddClientConnection(client);
+            bool couldRejoin = false;
+            // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
+            bool rejoinJustified = Network.ClientStillConnected(client.ClientSession.SessionID);
+            if (GameState != GameStates.Finished && rejoinJustified)
+            {
+                ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
+                packet.m_field = GameStructure.GameField;
+                packet.m_ball = GameStructure.Ball;
+                packet.m_players = new Player[GameStructure.PlayersCount];
+                Array.Copy(GameStructure.GetAllPlayers(), packet.m_players, GameStructure.PlayersCount);
+                Client correctClient = null;
+                foreach(Client c in Clients)
+                {
+                    if(c.SessionID == client.ClientSession.SessionID)
+                    {
+                        correctClient = c;
+                    }
+                }
+                foreach(Player p in packet.m_players)
+                {
+                    foreach (Player player in correctClient.Players)
+                    {
+                        p.Controllable = (player.ID == p.ID);
+                    }
+                }
+                    
+                client.SendTCP(packet);
+                couldRejoin = true;
+
+                Network.RemoveClientConnection(client.ClientSession.SessionID);
+                Network.AddClientConnection(client);
+            }
+            return couldRejoin;
+
         }
         
         private void GetNetworkDataForNextFrame()

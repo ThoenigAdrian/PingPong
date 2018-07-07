@@ -46,16 +46,17 @@ namespace PingPongServer
         {
             ServerConfiguration = new ServerConfiguration();
 
-            Registration = new ClientRegistration(ServerConfiguration, Logger);
-            Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
-            Registration.OnObserverRequest += HandleObserveRequest;
-
             UDPConnection MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
             
             GamesManager = new GamesManager(MasterUDPSocket);
             MatchManager.OnMatchFound += GamesManager.OnMatchmadeGameFound;
+
+            Registration = new ClientRegistration(ServerConfiguration, Logger, GamesManager.RejoinClientToGame);
+            Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
+            Registration.OnObserverRequest += HandleObserveRequest;
+
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
