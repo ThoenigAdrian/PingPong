@@ -33,8 +33,10 @@ namespace PingPongServer.ServerGame
         public int GameID = 0;
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
         public event GameFinishedEventHandler GameFinished;
+        private int TeardownDelaySeconds = 60;
 
-        
+
+
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
             Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
@@ -112,8 +114,8 @@ namespace PingPongServer.ServerGame
             Logger.GameLog("Game finished");
             Logger.GameLog("Sending final Game finished to the Clients");
             Network.BroadcastGenericTCPPackage(gameFinishedPackage);
-            Logger.GameLog("Game Finished Package has been sent waiting 5 seconds before tearing down the network");
-            Thread.Sleep(5000);
+            Logger.GameLog("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
+            Thread.Sleep(TeardownDelaySeconds * 1000);
             Logger.NetworkLog("Tearing Down Network");
             Network.Close();
             GameState = GameStates.Finished;
