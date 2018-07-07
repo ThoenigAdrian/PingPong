@@ -119,19 +119,15 @@ namespace PingPongServer
             else
                 ConnectClientWithNewSession(connection);
 
-            ServerSessionResponse response = new ServerSessionResponse();
-            response.ClientSessionID = connection.ClientSession.SessionID;
-            response.GameReconnect = false;
-            connection.SendTCP(response);
-
             OnSessionAssigned?.Invoke(this, connection);
         }
 
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)
         {
             Logger.RegistrationLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
-            networkConnection.ClientSession = new Session(new Random().Next());
+            networkConnection.ClientSession = new Session();
             Logger.RegistrationLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
+            SendSessionResponse(networkConnection);
             ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             AcceptedConnections.Remove(networkConnection);
         }
@@ -151,11 +147,22 @@ namespace PingPongServer
                 Logger.RegistrationLog("According to callback client could NOT rejoin the game. ");
                 Logger.RegistrationLog("Removing it from Accepted Connections List and adding it to Conections Ready for Matchmaking.");
                 AcceptedConnections.Remove(networkConnection);
+                Logger.RegistrationLog("Sending Normal Session Response. And assigning him a new Session ID");
+                networkConnection.ClientSession = new Session();
+                SendSessionResponse(networkConnection);
                 ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             }                
             
         }
 
+
+        private void SendSessionResponse(NetworkConnection networkConnection)
+        {
+            ServerSessionResponse response = new ServerSessionResponse();
+            response.ClientSessionID = networkConnection.ClientSession.SessionID;
+            response.GameReconnect = false;
+            networkConnection.SendTCP(response);
+        }
 
         private void ReadGameRequests(NetworkConnection networkConnection)
         {
