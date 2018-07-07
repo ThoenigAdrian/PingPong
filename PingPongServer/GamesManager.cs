@@ -69,15 +69,18 @@ namespace PingPongServer
         public bool RejoinClientToGame(NetworkConnection conn)
         {
             bool couldRejoin = false;
+            Logger.GamesManagerLog("Trying to rejoin a client with the session: " + conn.ClientSession.SessionID + " to the game.");
 
             foreach (Game game in RunningGames.Entries)
             {
-                if (game.Network.DiedSessions.Contains(conn.ClientSession.SessionID))
+                couldRejoin = game.RejoinClient(conn);
+                if (couldRejoin)
                 {
-                    game.RejoinClient(conn);                    
-                    couldRejoin = true;
+                    Logger.GamesManagerLog("Could successfully rejoin the client to the Game with ID: " + game.GameID.ToString());
                     break;
                 }
+
+                    
             }
             return couldRejoin;
         }

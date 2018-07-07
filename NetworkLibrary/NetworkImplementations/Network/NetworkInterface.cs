@@ -78,8 +78,7 @@ namespace NetworkLibrary.NetworkImplementations
 
         public void RemoveClientConnection(int SessionID)
         {
-            if (!ClientConnections.TryRemove(SessionID, out _))
-                throw new ConnectionException("Couldn't remove Client with Session ID: " + SessionID.ToString());
+            ClientConnections.TryRemove(SessionID, out _);
 
             // CaptainOachkatzl how to do this properly ?? Event unsubscribe ? 
             //clientConnection.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;

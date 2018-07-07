@@ -244,7 +244,8 @@ namespace PingPongServer.ServerGame
         {
             bool couldRejoin = false;
             // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
-            bool rejoinJustified = Network.ClientStillConnected(client.ClientSession.SessionID);
+            bool rejoinJustified = !Network.ClientStillConnected(client.ClientSession.SessionID);
+            Logger.GameLog("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
             if (GameState != GameStates.Finished && rejoinJustified)
             {
                 ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
@@ -267,7 +268,12 @@ namespace PingPongServer.ServerGame
                         p.Controllable = (player.ID == p.ID);
                     }
                 }
-                    
+                Logger.GameLog("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
+                ServerSessionResponse response = new ServerSessionResponse();
+                response.ClientSessionID = client.ClientSession.SessionID;
+                response.GameReconnect = true;
+                client.SendTCP(response);
+                Logger.GameLog("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
                 client.SendTCP(packet);
                 couldRejoin = true;
 
