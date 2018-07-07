@@ -79,7 +79,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             Status = CreateStatusDrawString();
             Status.Visible = false;
             Strings.Add(Status);
-            Strings.Add(new DrawableString("Press <Delete> to remove a player.", new Vector2 (117, 50), Color.White));
+            Strings.Add(new DrawableString(new DrawingOptions() { Position = new Vector2(117, 50) }, "Press <Delete> to remove a player."));
 
             RegistrationSelection = new RegistrationOptions();
             RegisteredPlayers = new List<PlayerEntry>();
@@ -159,7 +159,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
             if (RegisteredPlayersCount >= MaxLocalPlayers)
                 return;
 
-            DrawableString playerString = new DrawableString("", new Vector2(0, 0), Color.White);
+            DrawableString playerString = new DrawableString(new DrawingOptions() { Position = new Vector2(0, 0) });
             PlayerEntry entry = new PlayerEntry(RegisteredPlayersCount, playerString);
             RegistrationSelection.ListEntries.Insert(RegisteredPlayersCount, new SelectionEntry(playerString, new Selector()));
             RegisteredPlayers.Add(entry);
@@ -198,12 +198,16 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         DrawableString CreateStatusDrawString()
         {
-            return new DrawableString("", new Vector2(100, 350), Color.White);
+            return new DrawableString(new DrawingOptions() { Position = new Vector2(100, 350) });
         }
 
         SelectionEntry CreateAddPlayerStringEntry()
         {
-            return new SelectionEntry(new DrawableString("<Enter> Add local Player", new Vector2(0, 30), Color.White), new Selector());
+            return new SelectionEntry(
+                new DrawableString(
+                    new DrawingOptions() { Position = new Vector2(0, 30) },
+                    "<Enter> Add local Player"),
+                new Selector());
         }
 
         bool SelectionIsPlayer()

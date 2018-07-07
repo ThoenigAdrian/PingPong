@@ -19,7 +19,8 @@ namespace PingPongClient
         Options,
         Registration,
         Status,
-        Game
+        Game,
+        Finish
     }
 
     public class Control : Game
@@ -45,6 +46,7 @@ namespace PingPongClient
         public PlayerRegistrationControl RegistrationControl { get; set; }
         public MatchmakingStatusControl StatusControl { get; set; }
         public GameControl GameControl { get; set; }
+        public FinishControl FinishControl { get; set; }
 
         private SubControlResponseRequest CurrentResponseRequest { get; set; }
 
@@ -69,12 +71,14 @@ namespace PingPongClient
             RegistrationControl = new PlayerRegistrationControl(this);
             StatusControl = new MatchmakingStatusControl(this);
             GameControl = new GameControl(this);
+            FinishControl = new FinishControl(this);
 
             SubControls.Add(GameMode.Connect, ConnectionControl);
             SubControls.Add(GameMode.Options, OptionControl);
             SubControls.Add(GameMode.Registration, RegistrationControl);
             SubControls.Add(GameMode.Status, StatusControl);
             SubControls.Add(GameMode.Game, GameControl);
+            SubControls.Add(GameMode.Finish, FinishControl);
             
             ActiveControl = GetSubControl(GameMode.Connect);
 
@@ -110,6 +114,7 @@ namespace PingPongClient
             {
                 ConnectionControl.SetStatus("Connection died.");
                 CleanUpNetwork();
+                SwitchMode(GameMode.Connect);
             }
 
             InputManager.Update();
@@ -140,6 +145,7 @@ namespace PingPongClient
                 else
                 {
                     Disconnect();
+                    SwitchMode(GameMode.Connect);
                 }
             }
         }
@@ -234,7 +240,6 @@ namespace PingPongClient
         {
             Network = null;
             CurrentResponseRequest = null;
-            Mode = GameMode.Connect;
             m_networkDied = false;
         }
 

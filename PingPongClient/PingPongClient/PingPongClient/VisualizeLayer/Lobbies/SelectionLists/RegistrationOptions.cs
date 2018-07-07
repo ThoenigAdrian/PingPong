@@ -8,7 +8,13 @@ namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
         protected override SelectionEntry[] CreateInitialListEntries()
         {
             SelectionEntry[] entries = new SelectionEntry[1];
-            entries[0] = new SelectionEntry(new DrawableString("Ready!", new Vector2(100, 250), Color.White), new Selector());
+
+            entries[0] = new SelectionEntry(
+                new DrawableString(
+                    new DrawingOptions() { Position = new Vector2(100, 250)},
+                    "Ready!"), 
+                new Selector());
+
             return entries;
         }
     }

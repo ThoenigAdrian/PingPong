@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using XSLibrary.ThreadSafety.Containers;
 
 namespace PingPongServer.Matchmaking
 {
@@ -6,7 +7,7 @@ namespace PingPongServer.Matchmaking
     {
         Dictionary<int, Filter> m_waitingForMatch = new Dictionary<int, Filter>();
 
-        public List<Request[]> Matches { get; private set; } = new List<Request[]>();
+        public SafeStack<Request[]> Matches { get; private set; } = new SafeStack<Request[]>();
 
         public bool AddRequestToQueue(int id, int maxPlayerCount, int[] teamWishes)
         {
@@ -18,13 +19,12 @@ namespace PingPongServer.Matchmaking
             if (!IsRequestValid(request))
                 return false;
 
-            AddSearchingClient(request);
+            AddRequest(request);
             return true;
         }
         
         public void RemoveSearchingClient(int requestID)
         {
-            List<Request> requestsToBeRemoved = new List<Request>();
             foreach (KeyValuePair<int, Filter> keyvalue in m_waitingForMatch)
             {
                 foreach (RequestGroup requestGroup in keyvalue.Value.RequestGroups)
@@ -33,19 +33,17 @@ namespace PingPongServer.Matchmaking
                     {
                         if(request.ID == requestID)
                         {
-                            requestsToBeRemoved.Add(request);
+                            requestGroup.m_requests.Remove(request);
+                            return;
                         }
                     }
-                    foreach (Request requestToBeRemoved in requestsToBeRemoved)
-                        requestGroup.m_requests.Remove(requestToBeRemoved);
                 }
             }
-
         }
         
-        private void AddSearchingClient(Request client)
+        private void AddRequest(Request request)
         {
-            int maxPlayerCount = client.MaxPlayerCount;
+            int maxPlayerCount = request.MaxPlayerCount;
 
             Filter sameSizedFilter = null;
 
@@ -60,7 +58,24 @@ namespace PingPongServer.Matchmaking
                 m_waitingForMatch.Add(maxPlayerCount, sameSizedFilter);
             }
 
-            sameSizedFilter.AddRequest(client);
+            sameSizedFilter.AddRequest(request);
+        }
+
+        private Request FindRequest(int requestID)
+        {
+            foreach (KeyValuePair<int, Filter> keyvalue in m_waitingForMatch)
+            {
+                foreach (RequestGroup requestGroup in keyvalue.Value.RequestGroups)
+                {
+                    foreach (Request request in requestGroup.m_requests)
+                    {
+                        if (request.ID == requestID)
+                            return request;
+                    }
+                }
+            }
+
+            return null;
         }
 
 
@@ -93,7 +108,7 @@ namespace PingPongServer.Matchmaking
 
         private void HandleFoundMatch(object sender, Request[] requests)
         {
-            Matches.Add(requests);
+            Matches.Write(requests);
         }
 
         public bool IsRequestValid(Request request)
@@ -108,6 +123,9 @@ namespace PingPongServer.Matchmaking
                 return false;
 
             if (request.Team1Count > request.TeamSize || request.Team2Count > request.TeamSize)
+                return false;
+
+            if (FindRequest(request.ID) != null)
                 return false;
 
             return true;

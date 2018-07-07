@@ -3,25 +3,31 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace PingPongClient.VisualizeLayer.Visualizers.DrawableElements
 {
+    public class DrawingOptions
+    {
+        public Color StringColor = Color.White;
+        public Vector2 Position = new Vector2();
+        public bool DrawCentered = false;
+    }
+
     public class DrawableString : DrawableElement
     {
-        public Color StringColor = Color.Red;
-        public string Value;
-        public Vector2 Postion;
+        public DrawingOptions Options;
+        public string Value = "";
 
-        public DrawableString(string value) : this(value, Vector2.Zero)
+        public DrawableString() : this (new DrawingOptions())
         {
         }
 
-        public DrawableString(string value, Vector2 position) : this(value, position, Color.Red)
+        public DrawableString(DrawingOptions options)
         {
+            Options = options;
         }
 
-        public DrawableString(string value, Vector2 position, Color color)
+        public DrawableString(DrawingOptions options, string value)
         {
+            Options = options;
             Value = value;
-            Postion = position;
-            StringColor = color;
         }
 
         public Vector2 GetMeasurements(SpriteFont font)

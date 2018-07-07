@@ -77,14 +77,14 @@ namespace PingPongServer
 
             while (!ServerStopping)
             {
-                MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
-                MatchManager.Update();
-
                 QueueRequest request;
                 while ((request = MatchmakingRequests.Read()) != null)
                 {
                     MatchManager.AddClientToQueue(request.Connection, request.InitData);
                 }
+
+                MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
+                MatchManager.Update();
 
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }

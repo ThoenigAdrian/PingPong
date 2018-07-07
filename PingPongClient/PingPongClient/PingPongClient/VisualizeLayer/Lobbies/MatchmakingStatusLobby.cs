@@ -12,9 +12,12 @@ namespace PingPongClient.VisualizeLayer.Lobbies
 
         public MatchmakingStatusLobby()
         {
-            Status = new DrawableString("", new Vector2(117, 100), Color.White);
+            Status = new DrawableString(new DrawingOptions() { Position = new Vector2(0, 50), DrawCentered = true });
             Strings.Add(Status);
-            Strings.Add(new DrawableString("Press ESC to cancel", new Vector2(290, 380), Color.White));
+
+            Strings.Add(new DrawableString(
+                new DrawingOptions() { Position = new Vector2(0, 380), DrawCentered = true }, 
+                "Press ESC to cancel"));
 
             Animation = new WaitingAnimation();
             Animations.Add(Animation);
@@ -43,7 +46,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         {
             Status.Value = "Waiting for match...";
             Status.Visible = true;
-            Animation.ResetState();
+            Animation.Reset();
         }
     }
 }

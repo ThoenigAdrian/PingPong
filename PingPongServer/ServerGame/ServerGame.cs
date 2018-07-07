@@ -46,7 +46,7 @@ namespace PingPongServer.ServerGame
             this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
             maxPlayers = NeededNumberOfPlayersForGameToStart;
             GameEngine.TeamScoredHandler += OnTeamScored;
-            GameEngine.GameFinishedHandler += OnGameFinished;
+            GameEngine.OnGameFinished += HandleFinishedGame;
 
         }
 
@@ -117,7 +117,7 @@ namespace PingPongServer.ServerGame
             GameFinished?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnGameFinished(object sender, EventArgs e)
+        private void HandleFinishedGame(object sender, EventArgs e)
         {
             GameFinishedCleanup();
         }

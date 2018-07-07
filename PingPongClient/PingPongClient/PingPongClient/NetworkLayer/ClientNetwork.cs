@@ -29,7 +29,7 @@ namespace PingPongClient.NetworkLayer
             if (response)
             {
                 ClientSession = ResponseHandler.SessionID;
-                AddClientConnection(ResponseHandler.ServerConnection);
+                AddClientConnection(ResponseHandler.Connection);
             }
             else
             {
@@ -95,7 +95,7 @@ namespace PingPongClient.NetworkLayer
             return In.GetDataUDP(ClientSession) as ServerDataPackage;
         }
 
-        public ServerGameControlPackage GetScore()
+        public ServerGameControlPackage GetGameStatus()
         {
             return In.GetDataTCP(ClientSession) as ServerGameControlPackage;
         }

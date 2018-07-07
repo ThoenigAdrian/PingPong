@@ -68,13 +68,25 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected void DrawString(DrawableString drawString)
         {
-            DrawString(drawString, drawString.Postion);
+            if (drawString.Visible)
+            {
+                float x;
+                if (drawString.Options.DrawCentered)
+                    x = GetCenteredXValue(drawString);
+                else
+                    x = drawString.Options.Position.X;
+
+                SpriteBatchMain.DrawString(
+                    Font,
+                    drawString.Value,
+                    new Vector2(x, drawString.Options.Position.Y),
+                    drawString.Options.StringColor);
+            }
         }
 
-        protected void DrawString(DrawableString drawString, Vector2 position)
+        private float GetCenteredXValue(DrawableString drawString)
         {
-            if(drawString.Visible)
-                SpriteBatchMain.DrawString(Font, drawString.Value, position, drawString.StringColor);
+            return GetCenter().X - (drawString.GetMeasurements(Font).X / 2);
         }
 
         protected void DrawSelectionList(SelectionListInterface selectionList)
@@ -90,14 +102,20 @@ namespace PingPongClient.VisualizeLayer.Visualizers
                 if (selection == selectionList.Selection)
                     DrawSelector(entry.Selector, selectionList.TopLeft + entry.Position + entry.SelectorPosition(Font));
 
-                DrawString(entry.DrawString, selectionList.TopLeft + entry.Position + entry.StringPosition(Font));
+                entry.DrawString.Options.Position = selectionList.TopLeft + entry.Position + entry.StringPosition(Font);
+                DrawString(entry.DrawString);
                 selection++;
             }
         }
 
-        protected void DrawRectangle(Vector2 position, Vector2 size, Color color)
+        public void DrawRectangle(Vector2 position, Vector2 size, Color color)
         {
-            SpriteBatchMain.Draw(TextureRectangle, new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), color);
+            DrawRectangle(new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), color);
+        }
+
+        public void DrawRectangle(Rectangle rectangle, Color color)
+        {
+            SpriteBatchMain.Draw(TextureRectangle, rectangle, color);
         }
 
         protected void DrawSelector(Selector selector, Vector2 position)
@@ -115,8 +133,8 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         {
             SpriteBatchMain.Draw(CircleSelector,
                 new Rectangle(
-                    (int)position.X,
-                    (int)position.Y,
+                    (int)position.X - radius,
+                    (int)position.Y - radius,
                     2 * radius,
                     2 * radius),
                 color);

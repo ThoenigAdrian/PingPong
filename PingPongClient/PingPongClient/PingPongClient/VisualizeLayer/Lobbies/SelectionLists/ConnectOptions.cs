@@ -8,8 +8,19 @@ namespace PingPongClient.VisualizeLayer.Lobbies.SelectionLists
         protected override SelectionEntry[] CreateInitialListEntries()
         {
             SelectionEntry[] entries = new SelectionEntry[2];
-            entries[0] = new SelectionEntry(new DrawableString("Connect with a new session", new Vector2(0, 0), Color.White), new Selector());
-            entries[1] = new SelectionEntry(new DrawableString("Reconnect with previous session", new Vector2(0, 30), Color.White), new Selector());
+
+            entries[0] = new SelectionEntry(
+                new DrawableString(
+                    new DrawingOptions() { Position = new Vector2(0, 0) },
+                    "Connect with a new session"),
+                new Selector());
+
+            entries[1] = new SelectionEntry(
+                new DrawableString(
+                    new DrawingOptions() { Position = new Vector2(0, 30) },
+                    "Reconnect with previous session"),
+                new Selector());
+
             return entries;
         }
     }

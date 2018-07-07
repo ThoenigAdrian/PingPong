@@ -12,9 +12,9 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         List<Player> Players { get { return Structure.Players; } }
         Ball Ball { get { return Structure.Ball; } }
 
-        Texture2D FieldTexture;
         Texture2D BallTexture;
         Texture2D PlayerTexture;
+        DrawableString ScoreString;
 
         public Vector2 FieldSize { get { return new Vector2(Structure.Field.Width, Structure.Field.Height); } }
 
@@ -25,6 +25,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         public GameStructureVisualizer()
         {
             DrawingTranslation = new DrawingOffsetTranslation();
+            ScoreString = new DrawableString(new DrawingOptions() { Position = new Vector2(0, 10), DrawCentered = true });
         }
 
         public void SetGameStructure(BasicStructure structure)
@@ -59,7 +60,6 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         private void CreateObjectTextures()
         {
-            FieldTexture = TextureFactory.CreateRectangeTexture(Graphics);
             BallTexture = TextureFactory.CreateCircleTexture(100, Graphics);
             PlayerTexture = TextureFactory.CreateRectangeTexture(Graphics);
         }
@@ -68,7 +68,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
         {
             DrawScore();
             DrawBorders();
-            DrawBall();
+            DrawBall(Ball);
             
             foreach(Player player in Players)
             {
@@ -83,31 +83,30 @@ namespace PingPongClient.VisualizeLayer.Visualizers
 
         protected void DrawScore()
         {
-            DrawableString scoreString = new DrawableString("Team 1   " + Structure._score.Score_Team1 + "-" + Structure._score.Score_Team2 + "   Team 2",
-                new Vector2(0, 0),
-                Color.White);
+            string score = "Team 1   " + Structure._score.Score_Team1 + "-" + Structure._score.Score_Team2 + "   Team 2";
+            ScoreString.Value = score;
+            
 
-            Vector2 measurements = scoreString.GetMeasurements(Font);
+            Vector2 measurements = ScoreString.GetMeasurements(Font);
             float x = DrawingTranslation.GetAbsoluteX(FieldSize.X / 2);
             x -= measurements.X / 2;
-            scoreString.Postion.X = x;
+            ScoreString.Options.Position.X = x;
 
-            DrawString(scoreString);
+            DrawString(ScoreString);
         }
 
-        protected void DrawBall()
+        protected void DrawBall(Ball ball)
         {
-            int BallPosX = (int)DrawingTranslation.GetAbsoluteX(Ball.PositionX - Ball.Radius);
-            int BallPosY = (int)DrawingTranslation.GetAbsoluteY(Ball.PositionY - Ball.Radius);
-            int BallRadius = (int)DrawingTranslation.GetAbsoluteSize(Ball.Radius);
+            int BallPosX = (int)DrawingTranslation.GetAbsoluteX(ball.PositionX - ball.Radius);
+            int BallPosY = (int)DrawingTranslation.GetAbsoluteY(ball.PositionY - ball.Radius);
+            int BallRadius = (int)DrawingTranslation.GetAbsoluteSize(ball.Radius);
 
             SpriteBatchMain.Draw(BallTexture, new Rectangle(BallPosX, BallPosY, BallRadius * 2, BallRadius * 2), Color.Black);
         }
 
         protected void DrawBorders()
         {
-            SpriteBatchMain.Draw(
-                FieldTexture,
+            DrawRectangle(
                 new Rectangle(
                     (int)DrawingTranslation.GetAbsoluteX(0),
                     (int)DrawingTranslation.GetAbsoluteY(0),
@@ -123,8 +122,7 @@ namespace PingPongClient.VisualizeLayer.Visualizers
             int playerWidth = (int)DrawingTranslation.GetAbsoluteSize(player.Width);
             int playerHeight = (int)DrawingTranslation.GetAbsoluteSize(player.Height);
 
-
-            SpriteBatchMain.Draw(PlayerTexture, new Rectangle(playerPosX, playerPosY, playerWidth, playerHeight), Color.Black);
+            DrawRectangle(new Rectangle(playerPosX, playerPosY, playerWidth, playerHeight), Color.Black);
         }
     }
 }

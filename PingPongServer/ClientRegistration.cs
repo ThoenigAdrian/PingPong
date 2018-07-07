@@ -118,6 +118,7 @@ namespace PingPongServer
 
             ServerSessionResponse response = new ServerSessionResponse();
             response.ClientSessionID = connection.ClientSession.SessionID;
+            response.GameReconnect = false;
             connection.SendTCP(response);
 
             OnSessionAssigned?.Invoke(this, connection);

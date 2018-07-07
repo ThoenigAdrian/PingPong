@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="ControlLayer\ConnectionControl.cs" />
     <Compile Include="ControlLayer\Control.cs" />
+    <Compile Include="ControlLayer\FinishControl.cs" />
     <Compile Include="ControlLayer\GameControl.cs" />
     <Compile Include="ControlLayer\GameOptionsControl.cs" />
     <Compile Include="ControlLayer\MatchmakingStatusControl.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizeLayer\DrawingOffsetTranslation.cs" />
     <Compile Include="VisualizeLayer\Lobbies\ConnectionLobby.cs" />
+    <Compile Include="VisualizeLayer\Lobbies\FinishLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\LobbyInterface.cs" />
     <Compile Include="VisualizeLayer\Lobbies\MatchmakingStatusLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\PlayerEntry.cs" />
@@ -110,12 +112,14 @@
     <Compile Include="VisualizeLayer\Lobbies\RequestLobby.cs" />
     <Compile Include="VisualizeLayer\Lobbies\SelectionLists\ConnectOptions.cs" />
     <Compile Include="VisualizeLayer\Lobbies\SelectionLists\RegistrationOptions.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\Animation.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\DrawableElement.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\DrawableString.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\FinishAnimation.cs" />
     <Compile Include="VisualizeLayer\Visualizers\DrawableElements\SelectionListInterface.cs" />
     <Compile Include="VisualizeLayer\Lobbies\SelectionLists\QueueSelection.cs" />
-    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animation\AnimationChange.cs" />
-    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animation\WaitingAnimation.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\AnimationChange.cs" />
+    <Compile Include="VisualizeLayer\Visualizers\DrawableElements\Animations\WaitingAnimation.cs" />
     <Compile Include="VisualizeLayer\Visualizers\LobbyVisualizer.cs" />
     <Compile Include="VisualizeLayer\Visualizers\VisualizerInterface.cs" />
     <Compile Include="VisualizeLayer\Visualizers\VisualizerInitializatonData.cs" />

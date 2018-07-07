@@ -34,7 +34,7 @@ namespace PingPongClient.VisualizeLayer.Lobbies
         public PlayerEntry(int index, DrawableString playerString)
         {
             PlayerString = playerString;
-            playerString.StringColor = Color.Yellow;
+            playerString.Options.StringColor = Color.Yellow;
 
             Index = index;
             m_team = 0;
