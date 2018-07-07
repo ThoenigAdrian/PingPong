@@ -43,6 +43,11 @@ namespace NetworkLibrary.NetworkImplementations
                     deadConnection.CloseConnection();
             }
 
+            public void HandleUDPSendError(object sender, IPEndPoint remote)
+            {
+                throw new System.Exception("y u du dis");
+            }
+
             private void RemoveConnection(NetworkConnection connection)
             {
                 NetworkConnection dummy;

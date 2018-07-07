@@ -46,6 +46,7 @@ namespace NetworkLibrary.NetworkImplementations
             UdpConnection = udpConnection;
             UdpConnection.Logger = logger;
             UdpConnection.OnReceiveError += ErrorHandling.HandleUDPReceiveError;
+            UdpConnection.OnSendError += ErrorHandling.HandleUDPSendError;
             UdpConnection.InitializeReceiving();
 
             KeepAliveInterval = 1000;
