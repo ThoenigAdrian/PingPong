@@ -52,8 +52,7 @@ namespace PingPongServer.ServerGame
 
         ~Game()
         {
-            // Not sure if i need this Destructor Thing
-            Logger.NetworkLog("Tearing Down Network");
+            Logger.GameLog("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
             Network.Close();
         }
 
@@ -85,11 +84,15 @@ namespace PingPongServer.ServerGame
         {
             Logger.GameLog("Team Scored");
             Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Network.BroadcastScore(GenerateScorePackage());
+        }
 
+        private ServerGameControlPackage GenerateScorePackage()
+        {
             ServerGameControlPackage scoreData = new ServerGameControlPackage();
             scoreData.Score.Team1 = GameStructure.GameTeams[0].score;
             scoreData.Score.Team2 = GameStructure.GameTeams[1].score;
-            Network.BroadcastScore(scoreData);
+            return scoreData;
         }
 
         private void GameFinishedCleanup()
@@ -245,22 +248,24 @@ namespace PingPongServer.ServerGame
             bool couldRejoin = false;
             // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
             bool rejoinJustified = !Network.ClientStillConnected(client.ClientSession.SessionID);
+            bool clientBelongedToThisGame = false;
+            Client correctClient = null;
+            foreach (Client c in Clients)
+            {
+                if (c.SessionID == client.ClientSession.SessionID)
+                {
+                    correctClient = c;
+                }
+            }
             Logger.GameLog("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
-            if (GameState != GameStates.Finished && rejoinJustified)
+            if (GameState != GameStates.Finished && rejoinJustified && correctClient != null)
             {
                 ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
                 packet.m_field = GameStructure.GameField;
                 packet.m_ball = GameStructure.Ball;
                 packet.m_players = new Player[GameStructure.PlayersCount];
                 Array.Copy(GameStructure.GetAllPlayers(), packet.m_players, GameStructure.PlayersCount);
-                Client correctClient = null;
-                foreach(Client c in Clients)
-                {
-                    if(c.SessionID == client.ClientSession.SessionID)
-                    {
-                        correctClient = c;
-                    }
-                }
+              
                 foreach(Player p in packet.m_players)
                 {
                     foreach (Player player in correctClient.Players)
@@ -276,9 +281,12 @@ namespace PingPongServer.ServerGame
                 Logger.GameLog("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
                 client.SendTCP(packet);
                 couldRejoin = true;
-
+                Logger.GameLog("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
+                Thread.Sleep(100);
+                client.SendTCP(GenerateScorePackage());
                 Network.RemoveClientConnection(client.ClientSession.SessionID);
                 Network.AddClientConnection(client);
+                
             }
             return couldRejoin;
 
