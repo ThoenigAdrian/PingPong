@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 
 using NetworkLibrary.Utility;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ClientSourcePackages;
-using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 
 using XSLibrary.Network.Connections;
-using XSLibrary.Network.Accepters;
 using XSLibrary.ThreadSafety.Containers;
 
 namespace PingPongServer
