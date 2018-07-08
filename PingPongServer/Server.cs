@@ -66,7 +66,6 @@ namespace PingPongServer
         {
             Logger.Log("\n\n");
             Logger.ServerLog("Entering Server Run Method");
-            Logger.ServerLog("Starting Connection Accepter");
             Registration.Run();
             Logger.ServerLog("Starting Games Manager");
             GamesManager.Run();

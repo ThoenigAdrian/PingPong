@@ -1,14 +1,15 @@
-﻿using NetworkLibrary.DataPackages;
-using NetworkLibrary.DataPackages.ClientSourcePackages;
-using NetworkLibrary.DataPackages.ServerSourcePackages;
-using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using NetworkLibrary.Utility;
-using System;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Threading;
 using XSLibrary.Network.Accepters;
 using XSLibrary.Network.Connections;
 using XSLibrary.ThreadSafety.Containers;
+using NetworkLibrary.DataPackages;
+using NetworkLibrary.DataPackages.ClientSourcePackages;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using NetworkLibrary.Utility;
+
+
 
 namespace PingPongServer
 {
@@ -62,6 +63,7 @@ namespace PingPongServer
             m_registrationThread = new Thread(RegistrationLoop);
             m_registrationThread.Name = "Registration";
             m_registrationThread.Start();
+            Logger.RegistrationLog("Starting Connection Accepter");
             ConnectionAccepter.Run();
         }
 
@@ -76,7 +78,6 @@ namespace PingPongServer
                     ReadGameRequests(connection);
 
                 RemoveDeadConnections();
-
                 Thread.Sleep(1000);
             }
         }
@@ -155,7 +156,6 @@ namespace PingPongServer
             
         }
 
-
         private void SendSessionResponse(NetworkConnection networkConnection)
         {
             ServerSessionResponse response = new ServerSessionResponse();
@@ -188,7 +188,6 @@ namespace PingPongServer
                     ConnectionsReadyForQueingUpToMatchmaking.Remove(connection);
                     OnObserverRequest?.Invoke(this, connection);
                     break;
-
             }
         }
 

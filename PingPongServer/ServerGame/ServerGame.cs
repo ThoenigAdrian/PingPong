@@ -51,7 +51,6 @@ namespace PingPongServer.ServerGame
 
         public void StartGame(object caller)
         {
-
             GameFinished += (caller as GamesManager).OnGameFinished;
             GameState = GameStates.Running;
 
@@ -60,14 +59,15 @@ namespace PingPongServer.ServerGame
 
             Log("Game started");
             GameEngine.PauseBall(3000);
-            MainLoop();
-            Log("has exited it's main loop. Therefore the Thread started this game should finish as well");
+            GameLoop();
+            Log("has exited it's game loop. Therefore the Thread started this game should finish as well");
 
         }
 
-        private void MainLoop()
+        private void GameLoop()
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
+
             Log("Entering the main loop");
 
             while (GameState == GameStates.Running)
@@ -77,6 +77,8 @@ namespace PingPongServer.ServerGame
                 Network.BroadcastFramesToClients(ServerPackage);
                 Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
             }
+
+            Log("Exiting the main loop");
         }
 
         public bool AddClient(NetworkConnection client, int[] playerTeamWish)
