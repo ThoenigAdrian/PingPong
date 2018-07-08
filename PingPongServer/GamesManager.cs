@@ -157,7 +157,6 @@ namespace PingPongServer
         {
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
             Game newGame = new Game(newGameNetwork, match.MaxPlayerCount);
-            newGame.GameID = new Random().Next();
 
             foreach (MatchmakingManager.ClientData client in match.Clients)
             {

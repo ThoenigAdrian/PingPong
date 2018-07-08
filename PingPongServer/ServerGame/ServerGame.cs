@@ -39,7 +39,8 @@ namespace PingPongServer.ServerGame
 
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
         {
-            Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
+            GameID = new Random().Next();
+            Log("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
             this.Network = Network;
             this.Network.ClientLost += OnClientLost;
             GameState = GameStates.Initializing;
@@ -53,7 +54,7 @@ namespace PingPongServer.ServerGame
 
         ~Game()
         {
-            Logger.GameLog("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
+            Log("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
             Network.Close();
         }
 
@@ -83,8 +84,8 @@ namespace PingPongServer.ServerGame
 
         private void OnTeamScored(object sender, EventArgs e)
         {
-            Logger.GameLog("Team Scored");
-            Logger.GameLog("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Log("Team Scored");
+            Log("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
             Network.BroadcastScore(GenerateScorePackage());
         }
 
@@ -98,8 +99,8 @@ namespace PingPongServer.ServerGame
 
         private void GameFinishedCleanup()
         {
-            Logger.GameLog("This was the final point");
-            Logger.GameLog("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Log("This was the final point");
+            Log("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
 
             ServerGameControlPackage gameFinishedPackage = new ServerGameControlPackage();
             gameFinishedPackage.Command = ServerControls.GameFinished;
@@ -110,10 +111,10 @@ namespace PingPongServer.ServerGame
             else
                 gameFinishedPackage.Winner = Teams.Team2;
 
-            Logger.GameLog("Game finished");
-            Logger.GameLog("Sending final Game finished to the Clients");
+            Log("Game finished");
+            Log("Sending final Game finished to the Clients");
             Network.BroadcastGenericTCPPackage(gameFinishedPackage);
-            Logger.GameLog("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
+            Log("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
             Thread.Sleep(TeardownDelaySeconds * 1000);
             Logger.NetworkLog("Tearing Down Network");
             Network.Close();
@@ -181,7 +182,7 @@ namespace PingPongServer.ServerGame
             foreach (Client client in Clients)
                 SendServerInitResponse(client);
 
-            Logger.GameLog("Game started");
+            Log("Game started");
             GameEngine.PauseBall(3000);
 
             while (GameState == GameStates.Running)
@@ -191,7 +192,9 @@ namespace PingPongServer.ServerGame
                 Network.BroadcastFramesToClients(ServerPackage);
                 Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
             }
-            
+
+            Log("has exited it's main loop. Therefore the Thread started this game should finish as well");
+
         }
 
         public bool AddClient(NetworkConnection client, int[] playerTeamWish)
@@ -257,7 +260,7 @@ namespace PingPongServer.ServerGame
                     correctClient = c;
                 }
             }
-            Logger.GameLog("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
+            Log("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
             if (GameState != GameStates.Finished && rejoinJustified && correctClient != null)
             {
                 ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
@@ -273,15 +276,15 @@ namespace PingPongServer.ServerGame
                         p.Controllable = (player.ID == p.ID);
                     }
                 }
-                Logger.GameLog("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
+                Log("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
                 ServerSessionResponse response = new ServerSessionResponse();
                 response.ClientSessionID = client.ClientSession.SessionID;
                 response.GameReconnect = true;
                 client.SendTCP(response);
-                Logger.GameLog("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
+                Log("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
                 client.SendTCP(packet);
                 couldRejoin = true;
-                Logger.GameLog("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
+                Log("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
                 Thread.Sleep(100);  // Client can't handle instant score package right away after joining therefore waiting 100 milli seconds.
                 client.SendTCP(GenerateScorePackage());
                 Network.RemoveClientConnection(client.ClientSession.SessionID);
@@ -350,6 +353,12 @@ namespace PingPongServer.ServerGame
             }
             return cc[cc.Count - 1].ControlInput;
         }
+
+        private void Log(string text)
+        {
+            Logger.GameLog("ID: " + GameID.ToString() + "  " + text);
+        }
+
 
         public ClientMovement GetLastPlayerMovement(int playerID)
         {
