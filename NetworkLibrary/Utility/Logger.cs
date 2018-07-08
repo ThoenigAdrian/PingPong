@@ -32,7 +32,7 @@ namespace NetworkLibrary.Utility
 
         public override void GamesManagerLog(string text)
         {
-            Log("[GAMES_MANAGER_LOG]  " + text);
+            Log("[GAMES_MANAGER]  " + text);
         }
 
         public override void NetworkLog(string text)
