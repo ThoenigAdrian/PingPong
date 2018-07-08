@@ -76,14 +76,6 @@ namespace PingPongClient.ControlLayer
 
         }
 
-        protected override void ServerResponseActions(PackageInterface responsePackage)
-        {
-        }
-
-        protected override void ResponseTimeoutActions(PackageType requestedPackageType)
-        {
-        }
-
         private void HandlePlayerCountInput()
         {
             SelectionInputs selection = Input.GetSelectionInput();

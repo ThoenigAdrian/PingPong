@@ -154,7 +154,6 @@ namespace PingPongServer.ServerGame
                 client.SendTCP(packet);
                 couldRejoin = true;
                 Log("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
-                Thread.Sleep(100);  // Client can't handle instant score package right away after joining therefore waiting 100 milli seconds.
                 client.SendTCP(GenerateScorePackage());
                 Network.RemoveClientConnection(client.ClientSession.SessionID);
                 Network.AddClientConnection(client);

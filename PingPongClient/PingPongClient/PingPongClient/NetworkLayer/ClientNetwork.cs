@@ -38,11 +38,6 @@ namespace PingPongClient.NetworkLayer
             return response;
         }
 
-        public void IssueServerResponse(ResponseRequest responseRequest)
-        {
-            IssueResponse(responseRequest, ClientSession);
-        }
-
         public void SendClientQueueMatchmaking(int playerCount, int[] playerTeamWish)
         {
             SendClientInitializePackage(ClientInitializeGamePackage.RequestType.Matchmaking, playerCount, playerTeamWish);
@@ -90,14 +85,9 @@ namespace PingPongClient.NetworkLayer
             Out.SendDataUDP(package, ClientSession);
         }
 
-        public ServerDataPackage GetServerData()
+        public PackageInterface GetUDPPackage()
         {
-            return In.GetDataUDP(ClientSession) as ServerDataPackage;
-        }
-
-        public ServerGameControlPackage GetGameStatus()
-        {
-            return In.GetDataTCP(ClientSession) as ServerGameControlPackage;
+            return In.GetDataUDP(ClientSession);
         }
 
         public PackageInterface[] GetTCPPackages()

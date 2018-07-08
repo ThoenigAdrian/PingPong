@@ -48,8 +48,6 @@ namespace PingPongClient
         public GameControl GameControl { get; set; }
         public FinishControl FinishControl { get; set; }
 
-        private SubControlResponseRequest CurrentResponseRequest { get; set; }
-
         public ClientNetwork Network { get; set; }
         public InputManager InputManager { get; set; }
 
@@ -119,77 +117,44 @@ namespace PingPongClient
 
             InputManager.Update();
 
-            CheckResponse();
-
-            ActiveControl.Update(gameTime);
-
             if (IsActive)
             {
-                DetectExitInput();
+                if (IsExitInput())
+                    HandleExitInput();
 
-                if(CurrentResponseRequest == null)
-                    ActiveControl.HandleInput();
+                ActiveControl.HandleInput();
             }
+
+            if(Network != null)
+            {
+                foreach (PackageInterface package in Network.GetTCPPackages())
+                    ActiveControl.ProcessServerData(package);
+
+                PackageInterface udpPackage = Network.GetUDPPackage();
+                if(udpPackage != null)
+                    ActiveControl.ProcessServerData(udpPackage);
+            }
+
+            ActiveControl.Update(gameTime);
 
             base.Update(gameTime);
         }
 
-        protected void DetectExitInput()
+        private bool IsExitInput()
         {
-            if (InputManager.GetControlInput() == ControlInputs.Quit)
+            return InputManager.GetControlInput() == ControlInputs.Quit;
+        }
+
+        protected void HandleExitInput()
+        {
+            if (Mode == GameMode.Connect)
             {
-                if (Mode == GameMode.Connect)
-                {
-                    Exit();
-                }
-                else
-                {
-                    Disconnect();
-                    SwitchMode(GameMode.Connect);
-                }
+                Exit();
             }
-        }
-
-        public bool IssueServerResponse(SubControlResponseRequest responseRequest)
-        {
-            if (Network == null || CurrentResponseRequest != null)
-                return false;
-
-            CurrentResponseRequest = responseRequest;
-            Network.IssueServerResponse(responseRequest);
-            return true;
-        }
-
-        public void CancelResponseRequest()
-        {
-            CurrentResponseRequest.Cancel();
-            CurrentResponseRequest = null;
-        }
-
-        private void CheckResponse()
-        {
-            if (CurrentResponseRequest != null && CurrentResponseRequest.State != ResponseRequest.ResponseState.Pending)
+            else
             {
-                GameMode issuer = CurrentResponseRequest.Issuer;
-
-                switch (CurrentResponseRequest.State)
-                {
-                    case ResponseRequest.ResponseState.Received:
-                        PackageInterface package = CurrentResponseRequest.ResponsePackage;
-                        CurrentResponseRequest = null;  // set this null before processing because there might be a new response request
-                        GetSubControl(issuer).ProcessServerResponse(package);   
-                        break;
-
-                    case ResponseRequest.ResponseState.Timeout:
-                        PackageType type = CurrentResponseRequest.ResponsePackageType;
-                        CurrentResponseRequest = null;
-                        GetSubControl(issuer).HandleResponseTimeout(type);
-                        break;
-
-                    case ResponseRequest.ResponseState.Canceled:
-                        CurrentResponseRequest = null;
-                        break;
-                }
+                Disconnect();
+                SwitchMode(GameMode.Connect);
             }
         }
 
@@ -204,9 +169,6 @@ namespace PingPongClient
 
         public void SwitchMode(GameMode mode)
         {
-            if (CurrentResponseRequest != null)
-                throw new Exception("Mode switch while waiting for a response!");
-
             Mode = mode;
         }
 
@@ -239,7 +201,6 @@ namespace PingPongClient
         void CleanUpNetwork()
         {
             Network = null;
-            CurrentResponseRequest = null;
             m_networkDied = false;
         }
 

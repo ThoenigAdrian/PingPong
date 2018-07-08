@@ -52,22 +52,17 @@ namespace PingPongClient.ControlLayer
             }
             else if (Timeout == true)
                 TimeoutActions();
-            else
-                ProcessAllTCPPackages();
+        }
+
+        public override void ProcessServerData(PackageInterface data)
+        {
+            if (!Canceled && (Timeout == false))
+                ProcessTCPPackage(data);
         }
 
         public void SetReconnecting()
         {
             //StatusLobby.SetSuccess();
-        }
-
-        private void ProcessAllTCPPackages()
-        {
-            if (Network == null)
-                return;
-
-            foreach (PackageInterface package in Network.GetTCPPackages())
-                ProcessTCPPackage(package);
         }
 
         private void ProcessTCPPackage(PackageInterface package)

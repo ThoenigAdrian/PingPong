@@ -31,18 +31,12 @@ namespace PingPongClient.ControlLayer
         {
             if (Network != null)
             {
-                SendClientCommandos();
                 SendMovementInputs();
             }
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (Network != null)
-            {
-                ApplyServerPositions();
-                UpdateScore();
-            }
         }
 
         public void InitializeGame(Player[] players, GameField field, Ball ball)
@@ -108,17 +102,25 @@ namespace PingPongClient.ControlLayer
             }
         }
 
-        private void ApplyServerPositions()
+        public override void ProcessServerData(PackageInterface data)
         {
-            ServerDataPackage data = Network.GetServerData();
+            switch (data.PackageType)
+            {
+                case PackageType.ServerData:
+                    ApplyServerPositions(data as ServerDataPackage);
+                    break;
+                case PackageType.ServerGameControl:
+                    UpdateScore(data as ServerGameControlPackage);
+                    break;
+            }
+        }
 
-            if (data == null)
-                return;
-
-            for (int i = 0; i < data.Players.Count; i++)
+        private void ApplyServerPositions(ServerDataPackage gameState)
+        {
+            for (int i = 0; i < gameState.Players.Count; i++)
             {
                 Player localPlayer;
-                RawPlayer serverPlayer = data.Players[i];
+                RawPlayer serverPlayer = gameState.Players[i];
 
                 if ((localPlayer = GetPlayerWithID(serverPlayer.ID)) == null)
                     continue;
@@ -127,21 +129,17 @@ namespace PingPongClient.ControlLayer
                 localPlayer.PositionY = serverPlayer.PositionY;
             }
 
-            Structure.Ball.PositionX = data.Ball.PositionX;
-            Structure.Ball.PositionY = data.Ball.PositionY;
+            Structure.Ball.PositionX = gameState.Ball.PositionX;
+            Structure.Ball.PositionY = gameState.Ball.PositionY;
         }
 
-        private void UpdateScore()
+        private void UpdateScore(ServerGameControlPackage gameScore)
         {
-            ServerGameControlPackage gameStatus = Network.GetGameStatus();
-            if (gameStatus == null)
-                return;
+            Structure._score.Score_Team1 = gameScore.Score.Team1;
+            Structure._score.Score_Team2 = gameScore.Score.Team2;
 
-            Structure._score.Score_Team1 = gameStatus.Score.Team1;
-            Structure._score.Score_Team2 = gameStatus.Score.Team2;
-
-            if (gameStatus.Command == ServerControls.GameFinished)
-                SetGameFinished(gameStatus);
+            if (gameScore.Command == ServerControls.GameFinished)
+                SetGameFinished(gameScore);
         }
 
         private void SetGameFinished(ServerGameControlPackage package)
@@ -159,14 +157,6 @@ namespace PingPongClient.ControlLayer
             }
 
             return null;
-        }
-
-        protected void SendClientCommandos()
-        {
-            //if (ControlInput.GetControlInput() == ClientControls.Restart)
-            //{
-            //    Network.SendUDPTestData(new PlayerMovementPackage());
-            //}
         }
     }
 }

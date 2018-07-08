@@ -56,7 +56,7 @@ namespace PingPongServer
 
         }
 
-        private void MasterUDPSocket_OnDisconnect(object sender, EventArgs e)
+        private void MasterUDPSocket_OnDisconnect(object sender, IPEndPoint remote)
         {
             if (!ServerStopping)
                 throw new Exception("UDP Socket got disconnected");
