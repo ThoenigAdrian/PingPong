@@ -13,6 +13,7 @@ namespace GameLogicLibrary.GameObjects
     public class Ball : RawBall
     {
         public int Radius { get; set; }
+        public float SpeedGain = 1F/180;
         public int LastTouchedTeam;
         private float internal_speed = GameInitializers.BALL_SPEED;
         public Player LastTouchedPlayer { get; set; }
@@ -57,7 +58,7 @@ namespace GameLogicLibrary.GameObjects
 
         public void IncreaseSpeed(TimeSpan timePassed)
         {
-            Speed = GameInitializers.BALL_SPEED + ((float)timePassed.TotalSeconds / 180);
+            Speed = GameInitializers.BALL_SPEED + (SpeedGain*(float)timePassed.TotalSeconds);
         }
 
         public void ChangeAngleOfBall(float Angle)

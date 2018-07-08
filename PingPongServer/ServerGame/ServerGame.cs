@@ -33,6 +33,8 @@ namespace PingPongServer.ServerGame
         public int GameID = 0;
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
         public event GameFinishedEventHandler GameFinished;
+        private int Tickrate = 100;
+        private int SleepTimeMillisecondsBetweenTicks { get { return 1000 / Tickrate; } set { } }
         private int TeardownDelaySeconds = 60;
 
 
@@ -188,9 +190,9 @@ namespace PingPongServer.ServerGame
             while (GameState == GameStates.Running)
             {
                 GetNetworkDataForNextFrame();
-                ServerPackage = CalculateFrame();
+                ServerPackage = NextFramePackage();
                 Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(5);
+                Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
             }
             
         }
@@ -315,7 +317,7 @@ namespace PingPongServer.ServerGame
         
         
 
-        public ServerDataPackage CalculateFrame()
+        public ServerDataPackage NextFramePackage()
         {
             NextFrame = new ServerDataPackage();
 
@@ -323,6 +325,7 @@ namespace PingPongServer.ServerGame
             {
                 foreach (Player player in Team.Value.PlayerList)
                 {
+                    //GameEngine.SetPlayerMovement();
                     if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.Down)
                         player.DirectionY = player.Speed;
                     else if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.Up)
@@ -334,7 +337,7 @@ namespace PingPongServer.ServerGame
                 }
             }
 
-            GameEngine.CalculateFrame(10);
+            GameEngine.CalculateFrame(SleepTimeMillisecondsBetweenTicks);
             NextFrame.Ball.PositionX = GameStructure.Ball.PositionX;
             NextFrame.Ball.PositionY = GameStructure.Ball.PositionY;
 

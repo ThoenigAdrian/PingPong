@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Collections.Generic;
 using GameLogicLibrary.GameObjects;
 using XSLibrary.Utility;
@@ -130,65 +129,5 @@ namespace GameLogicLibrary
             return Math.Min(floatTuple.Item1, floatTuple.Item2);
         }
 
-
-        /* THOUGHTS ABOUT A BETTER COLLISION DETECTION SYSTEM BUT MAYBE NOT NECESSARY
-        private bool CircleInRectangle(Player p)
-        {
-            float minimumDistanceForCollision = (float)Math.Sqrt((Math.Pow(p.Height / 2, 2) + Math.Pow(p.Width / 2, 2))) + GameStructure.Ball.Radius;
-
-            Tuple<float, float> PlayerBallYPositionTuple = Tuple.Create(GameStructure.Ball.PositionY, p.PositionY);
-            float yDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
-
-            Tuple<float, float> PlayerBallXPositionTuple = Tuple.Create(GameStructure.Ball.PositionX, p.PositionX);
-            float xDistance = Max(PlayerBallYPositionTuple) - Min(PlayerBallYPositionTuple);
-
-            float actualDistance = (float)Math.Sqrt(Math.Pow(yDistance,2) + Math.Pow(xDistance,2 ));
-
-            if (actualDistance > minimumDistanceForCollision)
-                return false;                 
-            
-            if (actualDistance <= GameStructure.Ball.Radius)
-                return true; // this is a special case the return true has to be substituted by a deeper looking algorithm which checks if those two are colliding
-                             // XXX
-                             //XX  XX
-                             // XXX+ --+
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     |  |
-                             //     +--+    //will be implemented later
-
-            if (actualDistance < minimumDistanceForCollision)
-            {
-                if (p.PositionX >= GameInitializers.BORDER_WIDTH / 2)
-                {
-                    if (GameStructure.Ball.PositionX >= p.PositionX)
-                    {
-                        GameStructure.Ball.DirectionX = GameStructure.Ball.DirectionX * -1;
-                        return true;
-                    }
-                        
-                }
-                if (p.PositionX <= GameInitializers.BORDER_WIDTH / 2)
-                {
-                    if (GameStructure.Ball.PositionX <= p.PositionX)
-                    {
-                        GameStructure.Ball.DirectionX = GameStructure.Ball.DirectionX * -1;
-                        return true;
-                    }
-
-                }
-            }
-                
-            
-            return false;
-        }
-        */
     }
 }
