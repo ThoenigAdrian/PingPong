@@ -68,6 +68,16 @@ namespace GameLogicLibrary
             GameOngoingTimer = new OneShotTimer(millisecs * 1000, true);
         }
 
+        public void SetPlayerMovement(Player player, ClientMovement LastPlayerMovement)
+        {
+            if (LastPlayerMovement == ClientMovement.Down)
+                player.DirectionY = player.Speed;
+            else if (LastPlayerMovement == ClientMovement.Up)
+                player.DirectionY = -player.Speed;
+            else if (LastPlayerMovement == ClientMovement.StopMoving)
+                player.DirectionY = 0;
+        }
+
         private void ResetBall()
         {
             GameStructure.Ball.PositionX = GameInitializers.BALL_POSX;

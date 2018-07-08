@@ -51,7 +51,6 @@ namespace PingPongServer.ServerGame
             maxPlayers = NeededNumberOfPlayersForGameToStart;
             GameEngine.TeamScoredHandler += OnTeamScored;
             GameEngine.OnGameFinished += HandleFinishedGame;
-
         }
 
         ~Game()
@@ -325,14 +324,7 @@ namespace PingPongServer.ServerGame
             {
                 foreach (Player player in Team.Value.PlayerList)
                 {
-                    //GameEngine.SetPlayerMovement();
-                    if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.Down)
-                        player.DirectionY = player.Speed;
-                    else if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.Up)
-                        player.DirectionY = -player.Speed;
-                    else if ((ClientMovement)GetLastPlayerMovement(player.ID) == ClientMovement.StopMoving)
-                        player.DirectionY = 0;
-
+                    GameEngine.SetPlayerMovement(player, GetLastPlayerMovement(player.ID));
                     NextFrame.Players.Add(player);
                 }
             }
