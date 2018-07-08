@@ -17,21 +17,19 @@ namespace PingPongServer.ServerGame
     public class Game
     {
         public GameStates GameState { get; private set; }
-        List<Client> Clients = new List<Client>();
-
-        public int maxPlayers;
-        private int NeededNumberOfPlayersForGameToStart;
-
-        public GameNetwork Network;
-        public ServerDataPackage NextFrame;
-        public Dictionary<int, PackageInterface[]> packagesForNextFrame = new Dictionary<int, PackageInterface[]>();
-        public GameStructure GameStructure;
-        public GameEngine GameEngine;
-        private LogWriterConsole Logger = new LogWriterConsole();
+        public int Tickrate = 100;
         public int GameID = 0;
         public delegate void GameFinishedEventHandler(object sender, EventArgs e);
         public event GameFinishedEventHandler GameFinished;
-        private int Tickrate = 100;
+        public int NumberOfPlayers;
+
+        private GameNetwork Network;
+        private List<Client> Clients = new List<Client>();
+        private ServerDataPackage NextFrame;
+        private Dictionary<int, PackageInterface[]> packagesForNextFrame = new Dictionary<int, PackageInterface[]>();
+        private GameStructure GameStructure;
+        private GameEngine GameEngine;
+        private LogWriterConsole Logger = new LogWriterConsole();
         private int SleepTimeMillisecondsBetweenTicks { get { return 1000 / Tickrate; } set { } }
         private int TeardownDelaySeconds = 60;
 
@@ -46,27 +44,128 @@ namespace PingPongServer.ServerGame
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
             GameEngine = new GameEngine(GameStructure);
-            this.NeededNumberOfPlayersForGameToStart = NeededNumberOfPlayersForGameToStart;
-            maxPlayers = NeededNumberOfPlayersForGameToStart;
+            this.NumberOfPlayers = NeededNumberOfPlayersForGameToStart;
             GameEngine.TeamScoredHandler += OnTeamScored;
             GameEngine.OnGameFinished += HandleFinishedGame;
         }
 
-        ~Game()
+        public void StartGame(object caller)
         {
-            Log("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
-            Network.Close();
+
+            GameFinished += (caller as GamesManager).OnGameFinished;
+            GameState = GameStates.Running;
+
+            foreach (Client client in Clients)
+                SendServerInitResponse(client);
+
+            Log("Game started");
+            GameEngine.PauseBall(3000);
+            MainLoop();
+            Log("has exited it's main loop. Therefore the Thread started this game should finish as well");
+
         }
 
-        public void BroadcastStartGamePackage(ServerMatchmakingStatusResponse GameFoundPackage)
+        private void MainLoop()
         {
-            Network.BroadcastStartGamePackage(GameFoundPackage);
+            ServerDataPackage ServerPackage = new ServerDataPackage();
+            Log("Entering the main loop");
+
+            while (GameState == GameStates.Running)
+            {
+                GetNetworkDataForNextFrame();
+                ServerPackage = NextFramePackage();
+                Network.BroadcastFramesToClients(ServerPackage);
+                Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
+            }
+        }
+
+        public bool AddClient(NetworkConnection client, int[] playerTeamWish)
+        {
+            if (GameStructure.MissingPlayersCount < playerTeamWish.Length)
+                return false;
+
+            Network.AddClientConnection(client);
+            Client newClient = new Client(GameStructure, client.ClientSession.SessionID);
+
+            int maxTeamSize = GameStructure.maxPlayers / 2;
+
+            foreach (int team in playerTeamWish)
+            {
+                int index = GameStructure.PlayersCount;
+                int teamIndex = GameStructure.GameTeams[team].PlayerList.Count;
+                int teamOpenSpots = maxTeamSize - teamIndex;
+
+                if (teamOpenSpots < 1)
+                    continue;
+
+                Player newPlayer = new Player(index, team, GameInitializers.GetPlayerX(team, teamIndex));
+                newPlayer.Height = GameInitializers.GetPlayerHeight(maxTeamSize);
+                newPlayer.PositionY = GameInitializers.GetPlayerY(maxTeamSize);
+
+                newClient.AddPlayer(newPlayer);
+                GameStructure.AddPlayer(newPlayer);
+            }
+
+            Clients.Add(newClient);
+
+            if (GameStructure.PlayersCount == NumberOfPlayers)
+                GameState = GameStates.Ready;
+
+            return true;
+        }
+
+        public bool RejoinClient(NetworkConnection client)
+        {
+            bool couldRejoin = false;
+            // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
+            bool rejoinJustified = !Network.ClientStillConnected(client.ClientSession.SessionID);
+            Client correctClient = null;
+            foreach (Client c in Clients)
+            {
+                if (c.SessionID == client.ClientSession.SessionID)
+                {
+                    correctClient = c;
+                }
+            }
+            Log("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
+            if (GameState != GameStates.Finished && rejoinJustified && correctClient != null)
+            {
+                ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
+                packet.m_field = GameStructure.GameField;
+                packet.m_ball = GameStructure.Ball;
+                packet.m_players = new Player[GameStructure.PlayersCount];
+                Array.Copy(GameStructure.GetAllPlayers(), packet.m_players, GameStructure.PlayersCount);
+
+                foreach (Player p in packet.m_players)
+                {
+                    foreach (Player player in correctClient.Players)
+                    {
+                        p.Controllable = (player.ID == p.ID);
+                    }
+                }
+                Log("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
+                ServerSessionResponse response = new ServerSessionResponse();
+                response.ClientSessionID = client.ClientSession.SessionID;
+                response.GameReconnect = true;
+                client.SendTCP(response);
+                Log("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
+                client.SendTCP(packet);
+                couldRejoin = true;
+                Log("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
+                Thread.Sleep(100);  // Client can't handle instant score package right away after joining therefore waiting 100 milli seconds.
+                client.SendTCP(GenerateScorePackage());
+                Network.RemoveClientConnection(client.ClientSession.SessionID);
+                Network.AddClientConnection(client);
+
+            }
+            return couldRejoin;
+
         }
 
         public bool AddObserver(NetworkConnection connection)
         {
             bool added = false;
-            if(GameState != GameStates.Finished)
+            if (GameState != GameStates.Finished)
             {
                 ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
                 packet.m_field = GameStructure.GameField;
@@ -82,10 +181,21 @@ namespace PingPongServer.ServerGame
             return added;
         }
 
+        ~Game()
+        {
+            // IDisposable ? Dispose 
+            Log("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
+            Network.Close();
+        }
+
+        public void BroadcastStartGamePackage(ServerMatchmakingStatusResponse GameFoundPackage)
+        {
+            Network.BroadcastStartGamePackage(GameFoundPackage);
+        }
+
         private void OnTeamScored(object sender, EventArgs e)
         {
-            Log("Team Scored");
-            Log("Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Log("Team scored\t Team 1: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam 2: " + GameStructure.GameTeams[1].score.ToString());
             Network.BroadcastScore(GenerateScorePackage());
         }
 
@@ -101,8 +211,27 @@ namespace PingPongServer.ServerGame
         {
             Log("This was the final point");
             Log("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Log("Game finished");
+            Log("Sending final Game finished to the Clients");
+            BroadcastGameFinishedPackage();
+            Log("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
+            Thread.Sleep(TeardownDelaySeconds * 1000);
+            Logger.NetworkLog("Tearing Down Network");
+            Network.Close();
+            GameState = GameStates.Finished;
+            GameFinished?.Invoke(this, EventArgs.Empty);
+        }
 
+        private void BroadcastGameFinishedPackage()
+        {
+            ServerGameControlPackage gameFinishedPackage = GameFinishedPackage();
+            Network.BroadcastGenericTCPPackage(gameFinishedPackage);
+        }
+
+        private ServerGameControlPackage GameFinishedPackage()
+        {
             ServerGameControlPackage gameFinishedPackage = new ServerGameControlPackage();
+
             gameFinishedPackage.Command = ServerControls.GameFinished;
             gameFinishedPackage.Score.Team1 = GameStructure.GameTeams[0].score;
             gameFinishedPackage.Score.Team2 = GameStructure.GameTeams[1].score;
@@ -111,15 +240,7 @@ namespace PingPongServer.ServerGame
             else
                 gameFinishedPackage.Winner = Teams.Team2;
 
-            Log("Game finished");
-            Log("Sending final Game finished to the Clients");
-            Network.BroadcastGenericTCPPackage(gameFinishedPackage);
-            Log("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
-            Thread.Sleep(TeardownDelaySeconds * 1000);
-            Logger.NetworkLog("Tearing Down Network");
-            Network.Close();
-            GameState = GameStates.Finished;
-            GameFinished?.Invoke(this, EventArgs.Empty);
+            return gameFinishedPackage;
         }
 
         private void HandleFinishedGame(object sender, EventArgs e)
@@ -158,7 +279,6 @@ namespace PingPongServer.ServerGame
 
         public override string ToString()
         {
-            // Build a nice custom string in the future
             string str = "Game [" + GameID + "] \n\t" + "Players : " + GameStructure.PlayersCount.ToString();
             foreach (KeyValuePair<int, GameStructure.GameTeam> team in GameStructure.GameTeams)
             {
@@ -170,66 +290,6 @@ namespace PingPongServer.ServerGame
                 str += c.ToString();
             }
             return str;
-        }
-
-        // Caller will be notified via Event when Game is finished
-        public void StartGame(object caller)
-        {
-            ServerDataPackage ServerPackage = new ServerDataPackage();            
-            GameFinished += (caller as GamesManager).OnGameFinished;
-            GameState = GameStates.Running;
-
-            foreach (Client client in Clients)
-                SendServerInitResponse(client);
-
-            Log("Game started");
-            GameEngine.PauseBall(3000);
-
-            while (GameState == GameStates.Running)
-            {
-                GetNetworkDataForNextFrame();
-                ServerPackage = NextFramePackage();
-                Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
-            }
-
-            Log("has exited it's main loop. Therefore the Thread started this game should finish as well");
-
-        }
-
-        public bool AddClient(NetworkConnection client, int[] playerTeamWish)
-        {
-            if (GameStructure.MissingPlayersCount < playerTeamWish.Length)
-                return false; 
-
-            Network.AddClientConnection(client);            
-            Client newClient = new Client(GameStructure, client.ClientSession.SessionID);
-
-            int maxTeamSize = GameStructure.maxPlayers / 2;
-
-            foreach (int team in playerTeamWish)
-            {
-                int index = GameStructure.PlayersCount;
-                int teamIndex = GameStructure.GameTeams[team].PlayerList.Count;
-                int teamOpenSpots = maxTeamSize - teamIndex;
-
-                if (teamOpenSpots < 1)
-                    continue;
-  
-                Player newPlayer = new Player(index, team, GameInitializers.GetPlayerX(team, teamIndex));
-                newPlayer.Height = GameInitializers.GetPlayerHeight(maxTeamSize);
-                newPlayer.PositionY = GameInitializers.GetPlayerY(maxTeamSize);
-
-                newClient.AddPlayer(newPlayer);
-                GameStructure.AddPlayer(newPlayer);
-            }
-
-            Clients.Add(newClient);                       
-            
-            if (GameStructure.PlayersCount == maxPlayers)
-                GameState = GameStates.Ready;
-
-            return true;
         }
 
         private void SendServerInitResponse(Client client)
@@ -247,54 +307,6 @@ namespace PingPongServer.ServerGame
             Network.SendTCPPackageToClient(packet, client.SessionID);
         }
         
-        public bool RejoinClient(NetworkConnection client)
-        {
-            bool couldRejoin = false;
-            // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
-            bool rejoinJustified = !Network.ClientStillConnected(client.ClientSession.SessionID);
-            Client correctClient = null;
-            foreach (Client c in Clients)
-            {
-                if (c.SessionID == client.ClientSession.SessionID)
-                {
-                    correctClient = c;
-                }
-            }
-            Log("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
-            if (GameState != GameStates.Finished && rejoinJustified && correctClient != null)
-            {
-                ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
-                packet.m_field = GameStructure.GameField;
-                packet.m_ball = GameStructure.Ball;
-                packet.m_players = new Player[GameStructure.PlayersCount];
-                Array.Copy(GameStructure.GetAllPlayers(), packet.m_players, GameStructure.PlayersCount);
-              
-                foreach(Player p in packet.m_players)
-                {
-                    foreach (Player player in correctClient.Players)
-                    {
-                        p.Controllable = (player.ID == p.ID);
-                    }
-                }
-                Log("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
-                ServerSessionResponse response = new ServerSessionResponse();
-                response.ClientSessionID = client.ClientSession.SessionID;
-                response.GameReconnect = true;
-                client.SendTCP(response);
-                Log("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
-                client.SendTCP(packet);
-                couldRejoin = true;
-                Log("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
-                Thread.Sleep(100);  // Client can't handle instant score package right away after joining therefore waiting 100 milli seconds.
-                client.SendTCP(GenerateScorePackage());
-                Network.RemoveClientConnection(client.ClientSession.SessionID);
-                Network.AddClientConnection(client);
-                
-            }
-            return couldRejoin;
-
-        }
-        
         private void GetNetworkDataForNextFrame()
         {
             packagesForNextFrame = Network.GrabAllNetworkDataForNextFrame();
@@ -302,22 +314,18 @@ namespace PingPongServer.ServerGame
         
         private PackageInterface[] GetClientData(int sessionID)
         {
-            List<PackageInterface> ps = new List<PackageInterface>();
+            List<PackageInterface> clientRelatedPackets = new List<PackageInterface>();
 
             if (!packagesForNextFrame.ContainsKey(sessionID))
                 return new PackageInterface[0];
 
-            foreach (PackageInterface p in packagesForNextFrame[sessionID])
-                ps.Add(p);
+            foreach (PackageInterface packet in packagesForNextFrame[sessionID])
+                clientRelatedPackets.Add(packet);
             
-            
-            
-            return ps.ToArray();
+            return clientRelatedPackets.ToArray();
         }
         
-        
-
-        public ServerDataPackage NextFramePackage()
+        private ServerDataPackage NextFramePackage()
         {
             NextFrame = new ServerDataPackage();
 
@@ -336,9 +344,8 @@ namespace PingPongServer.ServerGame
 
             return NextFrame;
         }
-
-             
-        public ClientControls GetLastPlayerControl(int playerID)
+        
+        private ClientControls GetLastPlayerControl(int playerID)
         {
             List<ClientControlPackage> cc = new List<ClientControlPackage>();
             foreach (Client c in Clients)
@@ -359,10 +366,8 @@ namespace PingPongServer.ServerGame
             Logger.GameLog("ID: " + GameID.ToString() + "  " + text);
         }
 
-
-        public ClientMovement GetLastPlayerMovement(int playerID)
+        private ClientMovement GetLastPlayerMovement(int playerID)
         {
-
             List<PlayerMovementPackage> cc = new List<PlayerMovementPackage>();
             foreach (Client c in Clients)
             {

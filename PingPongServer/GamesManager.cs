@@ -101,7 +101,7 @@ namespace PingPongServer
             int playersCurrentlyInGame = 0;
             foreach (Game game in RunningGames.Entries)
             {
-                playersCurrentlyInGame += game.maxPlayers; // Change this to active players in Game max_players - disconnected ? Or is this already accurate enough ? 
+                playersCurrentlyInGame += game.NumberOfPlayers; // Change this to active players in Game max_players - disconnected ? Or is this already accurate enough ? 
             }
             return playersCurrentlyInGame;
         }
