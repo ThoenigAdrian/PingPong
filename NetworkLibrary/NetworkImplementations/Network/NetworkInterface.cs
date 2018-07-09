@@ -79,12 +79,11 @@ namespace NetworkLibrary.NetworkImplementations
 
         public void RemoveClientConnection(int SessionID)
         {
-            ClientConnections.TryRemove(SessionID, out _);
+            NetworkConnection removed;
+            if (!ClientConnections.TryRemove(SessionID, out removed))
+                throw new ConnectionException("Removing the connection failed!"); ;
 
-            // CaptainOachkatzl how to do this properly ?? Event unsubscribe ? 
-            //clientConnection.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
-            //clientConnection.SetUDPConnection(UdpConnection);
-            //clientConnection.ClientSession.SessionID = sessionID;
+            removed.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
         }
 
         public bool ClientStillConnected(int sessionID)

@@ -155,7 +155,6 @@ namespace PingPongServer.ServerGame
                 couldRejoin = true;
                 Log("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
                 client.SendTCP(GenerateScorePackage());
-                Network.RemoveClientConnection(client.ClientSession.SessionID);
                 Network.AddClientConnection(client);
 
             }

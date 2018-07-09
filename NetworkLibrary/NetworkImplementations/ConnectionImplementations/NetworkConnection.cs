@@ -2,9 +2,7 @@
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System;
-using System.IO;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using XSLibrary.Network.Connections;
 using XSLibrary.ThreadSafety.Containers;
@@ -50,7 +48,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
-            TcpConnection.OnReceiveError += HandleTCPReceiveError;
+            TcpConnection.OnDisconnect += HandleDisconnect;
             TcpConnection.InitializeReceiving();
 
             RemoteEndPoint = tcpConnection.Remote;
@@ -88,12 +86,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 {
                     m_connected = false;
 
-                    TcpConnection.OnReceiveError -= HandleTCPReceiveError;
+                    TcpConnection.OnReceiveError -= HandleDisconnect;
                     TcpConnection.DataReceivedEvent -= ReceiveTCP;
                     if(UdpConnection != null)
                         UdpConnection.DataReceivedEvent -= ReceiveUDP;
-
-                    TcpConnection.Disconnect();
                 }
             }
             finally
@@ -157,7 +153,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
                 UdpData.Write(new DataWrapper<byte[]>(data));
         }
 
-        private void ReceiveTCP(object sender, byte[] data)
+        private void ReceiveTCP(object sender, byte[] data, IPEndPoint source)
         {
             PackageInterface package = Adapter.CreatePackageFromNetworkData(data);
             if (package == null)
@@ -183,7 +179,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             return false;
         }
 
-        private void HandleTCPReceiveError(object sender, IPEndPoint source)
+        private void HandleDisconnect(object sender, IPEndPoint source)
         {
             CloseConnection();
         }
