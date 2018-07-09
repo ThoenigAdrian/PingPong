@@ -46,6 +46,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             ClientSession = null;
 
+            m_disconnectLock = new Semaphore(1, 1);
             TcpConnection = tcpConnection;
             TcpConnection.DataReceivedEvent += ReceiveTCP;
             TcpConnection.OnDisconnect += HandleDisconnect;
@@ -54,7 +55,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             RemoteEndPoint = tcpConnection.Remote;
 
             m_connected = true;
-            m_disconnectLock = new Semaphore(1, 1);
+            
         }
 
         public void IssueResponse(ResponseRequest responseHandler)

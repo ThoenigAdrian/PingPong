@@ -13,7 +13,6 @@ namespace NetworkLibrary.PackageAdapters
         {
             string PackageType = Newtonsoft.Json.Linq.JObject.Parse(json)["PackageType"].ToString();
             return (PackageType)Enum.Parse(typeof(PackageType), PackageType);
-
         }
 
         public override PackageInterface[] CreatePackagesFromStream(byte[] stream)
@@ -58,34 +57,44 @@ namespace NetworkLibrary.PackageAdapters
         {
             PackageType type = GetPackageType(jsonString);
 
-            switch (type)
+
+            try
             {
-                case PackageType.ServerData:
-                    return JsonConvert.DeserializeObject<ServerDataPackage>(jsonString);
-                case PackageType.ClientControl:
-                    return JsonConvert.DeserializeObject<ClientControlPackage>(jsonString);
-                case PackageType.OpenPort:
-                    return JsonConvert.DeserializeObject<ClientOpenPortPackage>(jsonString);
-                case PackageType.ClientInitalizeGamePackage:
-                    return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(jsonString);
-                case PackageType.ServerAddPlayerResponsePackage:
-                    return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(jsonString);
-                case PackageType.ServerGameControl:
-                    return JsonConvert.DeserializeObject<ServerGameControlPackage>(jsonString);
-                case PackageType.ServerJoinGameResponsePackage:
-                    return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(jsonString);
-                case PackageType.ServerSessionResponse:
-                    return JsonConvert.DeserializeObject<ServerSessionResponse>(jsonString);
-                case PackageType.ClientPlayerMovement:
-                    return JsonConvert.DeserializeObject<PlayerMovementPackage>(jsonString);
-                case PackageType.ClientSessionRequest:
-                    return JsonConvert.DeserializeObject<ClientSessionRequest>(jsonString);
-                case PackageType.ClientRejoinGamePackage:
-                    return JsonConvert.DeserializeObject<ClientRejoinGamePackage>(jsonString);
-                case PackageType.ServerPlayerIDResponse:
-                    return JsonConvert.DeserializeObject<ServerInitializeGameResponse>(jsonString);
-                case PackageType.ServerMatchmakingStatusResponse:
-                    return JsonConvert.DeserializeObject<ServerMatchmakingStatusResponse>(jsonString);
+                switch (type)
+                {
+                    case PackageType.ServerData:
+                        return JsonConvert.DeserializeObject<ServerDataPackage>(jsonString);
+                    case PackageType.ClientControl:
+                        return JsonConvert.DeserializeObject<ClientControlPackage>(jsonString);
+                    case PackageType.OpenPort:
+                        return JsonConvert.DeserializeObject<ClientOpenPortPackage>(jsonString);
+                    case PackageType.ClientInitalizeGamePackage:
+                        return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(jsonString);
+                    case PackageType.ServerAddPlayerResponsePackage:
+                        return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(jsonString);
+                    case PackageType.ServerGameControl:
+                        return JsonConvert.DeserializeObject<ServerGameControlPackage>(jsonString);
+                    case PackageType.ServerJoinGameResponsePackage:
+                        return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(jsonString);
+                    case PackageType.ServerSessionResponse:
+                        return JsonConvert.DeserializeObject<ServerSessionResponse>(jsonString);
+                    case PackageType.ClientPlayerMovement:
+                        return JsonConvert.DeserializeObject<PlayerMovementPackage>(jsonString);
+                    case PackageType.ClientSessionRequest:
+                        return JsonConvert.DeserializeObject<ClientSessionRequest>(jsonString);
+                    case PackageType.ClientRejoinGamePackage:
+                        return JsonConvert.DeserializeObject<ClientRejoinGamePackage>(jsonString);
+                    case PackageType.ServerPlayerIDResponse:
+                        return JsonConvert.DeserializeObject<ServerInitializeGameResponse>(jsonString);
+                    case PackageType.ServerMatchmakingStatusResponse:
+                        return JsonConvert.DeserializeObject<ServerMatchmakingStatusResponse>(jsonString);
+                }
+            }
+
+            catch(JsonReaderException)
+            {
+                // Package Type was valid and could be extracted from json string but the rest of the content didn't match and caused a JSONReader Exception
+                return null;
             }
 #if DEBUG
             throw new NotImplementedException();
