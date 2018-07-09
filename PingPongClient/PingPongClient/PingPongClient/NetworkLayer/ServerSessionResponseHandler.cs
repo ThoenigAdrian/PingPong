@@ -3,6 +3,7 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using XSLibrary.Network.Connections;
@@ -76,7 +77,7 @@ namespace PingPongClient.NetworkLayer
             ErrorMessage = "Server timeout while receiving session ID!";
         }
 
-        private void ReadIDResponse(object sender, byte[] data)
+        private void ReadIDResponse(object sender, byte[] data, IPEndPoint source)
         {
             try
             {
