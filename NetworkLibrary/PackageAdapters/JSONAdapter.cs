@@ -70,20 +70,14 @@ namespace NetworkLibrary.PackageAdapters
                         return JsonConvert.DeserializeObject<ClientOpenPortPackage>(jsonString);
                     case PackageType.ClientInitalizeGamePackage:
                         return JsonConvert.DeserializeObject<ClientInitializeGamePackage>(jsonString);
-                    case PackageType.ServerAddPlayerResponsePackage:
-                        return JsonConvert.DeserializeObject<ServerAddPlayerResponsePackage>(jsonString);
                     case PackageType.ServerGameControl:
                         return JsonConvert.DeserializeObject<ServerGameControlPackage>(jsonString);
-                    case PackageType.ServerJoinGameResponsePackage:
-                        return JsonConvert.DeserializeObject<ServerJoinGameResponsePackage>(jsonString);
                     case PackageType.ServerSessionResponse:
                         return JsonConvert.DeserializeObject<ServerSessionResponse>(jsonString);
                     case PackageType.ClientPlayerMovement:
                         return JsonConvert.DeserializeObject<PlayerMovementPackage>(jsonString);
                     case PackageType.ClientSessionRequest:
                         return JsonConvert.DeserializeObject<ClientSessionRequest>(jsonString);
-                    case PackageType.ClientRejoinGamePackage:
-                        return JsonConvert.DeserializeObject<ClientRejoinGamePackage>(jsonString);
                     case PackageType.ServerPlayerIDResponse:
                         return JsonConvert.DeserializeObject<ServerInitializeGameResponse>(jsonString);
                     case PackageType.ServerMatchmakingStatusResponse:
@@ -96,11 +90,7 @@ namespace NetworkLibrary.PackageAdapters
                 // Package Type was valid and could be extracted from json string but the rest of the content didn't match and caused a JSONReader Exception
                 return null;
             }
-#if DEBUG
-            throw new NotImplementedException();
-#else
             return null;
-#endif
         }
 
         private string[] ConvertStreamToValidJsonStrings(string json)
