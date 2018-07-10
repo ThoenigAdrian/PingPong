@@ -11,14 +11,10 @@
         ClientPlayerMovement,
         OpenPort,
         ClientInitalizeGamePackage,
-        ClientJoinGameRequest,
         ClientSessionRequest,
-        ClientRejoinGamePackage,
 
         ServerData,
         ServerGameControl,
-        ServerAddPlayerResponsePackage,
-        ServerJoinGameResponsePackage,
         ServerSessionResponse,
         ServerPlayerIDResponse,
         ServerMatchmakingStatusResponse
