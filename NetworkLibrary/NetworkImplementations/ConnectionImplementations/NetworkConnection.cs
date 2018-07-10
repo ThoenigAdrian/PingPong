@@ -26,9 +26,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public IPEndPoint RemoteEndPoint { get; set; }
 
-        volatile bool m_connected;
-        public bool Connected { get { return m_connected && TcpConnection.Connected; } }
-        Semaphore m_disconnectLock;
+        public bool Connected { get { return TcpConnection.Connected; } }
 
         SafeList<ResponseRequest> m_openResponses;
 
@@ -46,16 +44,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             ClientSession = null;
 
-            m_disconnectLock = new Semaphore(1, 1);
             TcpConnection = tcpConnection;
+            RemoteEndPoint = tcpConnection.Remote;
+
             TcpConnection.DataReceivedEvent += ReceiveTCP;
             TcpConnection.OnDisconnect += HandleDisconnect;
             TcpConnection.InitializeReceiving();
-
-            RemoteEndPoint = tcpConnection.Remote;
-
-            m_connected = true;
-            
         }
 
         public void IssueResponse(ResponseRequest responseHandler)
@@ -78,28 +72,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void CloseConnection()
         {
-            m_disconnectLock.WaitOne();
+            TcpConnection.OnReceiveError -= HandleDisconnect;
+            TcpConnection.DataReceivedEvent -= ReceiveTCP;
+            if (UdpConnection != null)
+                UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
-            bool raiseEvent = m_connected;
-            try
-            {
-                if (m_connected)
-                {
-                    m_connected = false;
-
-                    TcpConnection.OnReceiveError -= HandleDisconnect;
-                    TcpConnection.DataReceivedEvent -= ReceiveTCP;
-                    if(UdpConnection != null)
-                        UdpConnection.DataReceivedEvent -= ReceiveUDP;
-                }
-            }
-            finally
-            {
-                m_disconnectLock.Release();
-            }
-
-            if(raiseEvent)
-                RaiseConnectionDiedEvent();
+            RaiseConnectionDiedEvent();
         }
 
         private void RaiseConnectionDiedEvent()
