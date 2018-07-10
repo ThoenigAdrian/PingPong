@@ -125,11 +125,15 @@ namespace PingPongClient
                 ActiveControl.HandleInput();
             }
 
-            if(Network != null)
+            if (Network != null)
             {
                 foreach (PackageInterface package in Network.GetTCPPackages())
                     ActiveControl.ProcessServerData(package);
+            }
 
+            // a switch to finish can happen in between those lines which disconnects -> check again if its dead
+            if (Network != null)
+            { 
                 PackageInterface udpPackage = Network.GetUDPPackage();
                 if(udpPackage != null)
                     ActiveControl.ProcessServerData(udpPackage);
