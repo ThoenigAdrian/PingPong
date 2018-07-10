@@ -72,7 +72,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void CloseConnection()
         {
-            TcpConnection.OnReceiveError -= HandleDisconnect;
+            TcpConnection.OnDisconnect -= HandleDisconnect;
             TcpConnection.DataReceivedEvent -= ReceiveTCP;
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;

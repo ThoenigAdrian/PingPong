@@ -57,9 +57,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             private void RaiseDeadSessionEvent(NetworkConnection connection)
             {
-                SessionDeathHandler SessionDiedCopy = ParentNetwork.SessionDied;
-                if(SessionDiedCopy != null)
-                    SessionDiedCopy.Invoke(ParentNetwork, connection.ClientSession.SessionID);
+                ParentNetwork.SessionDied?.Invoke(ParentNetwork, connection.ClientSession.SessionID);
             }
         }
     }

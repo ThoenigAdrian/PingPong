@@ -83,7 +83,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!ClientConnections.TryRemove(SessionID, out removed))
                 throw new ConnectionException("Removing the connection failed!"); ;
 
-            removed.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
+            removed.ConnectionDiedEvent -= ErrorHandling.ConnectionDiedHandler;
         }
 
         public bool ClientStillConnected(int sessionID)
