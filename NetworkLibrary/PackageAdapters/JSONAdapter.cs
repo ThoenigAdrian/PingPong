@@ -55,11 +55,10 @@ namespace NetworkLibrary.PackageAdapters
 
         private PackageInterface CreatePackageFromJSONString(string jsonString)
         {
-            PackageType type = GetPackageType(jsonString);
-
-
             try
             {
+                PackageType type = GetPackageType(jsonString);
+
                 switch (type)
                 {
                     case PackageType.ServerData:
@@ -84,7 +83,6 @@ namespace NetworkLibrary.PackageAdapters
                         return JsonConvert.DeserializeObject<ServerMatchmakingStatusResponse>(jsonString);
                 }
             }
-
             catch(JsonReaderException)
             {
                 // Package Type was valid and could be extracted from json string but the rest of the content didn't match and caused a JSONReader Exception
