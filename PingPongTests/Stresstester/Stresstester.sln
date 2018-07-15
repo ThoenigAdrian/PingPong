@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stresstester", "Stresstester\Stresstester.csproj", "{0D081106-AAAC-4721-B02D-B67D0430D0B3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357} = {AA01E32B-AB68-49A5-AD9E-07E955D3B357}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\..\NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D081106-AAAC-4721-B02D-B67D0430D0B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D081106-AAAC-4721-B02D-B67D0430D0B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D081106-AAAC-4721-B02D-B67D0430D0B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D081106-AAAC-4721-B02D-B67D0430D0B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA01E32B-AB68-49A5-AD9E-07E955D3B357}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A37C8BF1-08E7-46BB-8F9E-536A82365FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA0DE8E8-463C-482D-83D4-95A08C8A8100}
+	EndGlobalSection
+EndGlobal
