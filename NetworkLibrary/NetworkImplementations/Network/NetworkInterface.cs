@@ -70,6 +70,7 @@ namespace NetworkLibrary.NetworkImplementations
                 throw new ConnectionException("Connection with this session ID is already in the network!");
 
             clientConnection.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
+            // Can we raise a On Client Lost Event when a dead Connection get's added here ? Important after adding to the event other toctu race condition.
             clientConnection.SetUDPConnection(UdpConnection);
             clientConnection.ClientSession.SessionID = sessionID;
 

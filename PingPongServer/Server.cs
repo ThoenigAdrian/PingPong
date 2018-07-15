@@ -54,9 +54,6 @@ namespace PingPongServer
             Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
             Registration.OnObserverRequest += HandleObserveRequest;
 
-            byte[] bla = BitConverter.GetBytes(1024);
-            byte[] bla2 = bla;
-
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, IPEndPoint remote)
