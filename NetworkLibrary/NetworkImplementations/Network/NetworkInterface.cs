@@ -69,7 +69,6 @@ namespace NetworkLibrary.NetworkImplementations
             if (ClientConnections[sessionID] != null)
                 throw new ConnectionException("Connection with this session ID is already in the network!");
 
-            clientConnection.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
             // Can we raise a On Client Lost Event when a dead Connection get's added here ? Important after adding to the event other toctu race condition.
             clientConnection.SetUDPConnection(UdpConnection);
             clientConnection.ClientSession.SessionID = sessionID;
@@ -77,6 +76,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!ClientConnections.TryAdd(sessionID, clientConnection))
                 throw new ConnectionException("Adding the connection failed!");
 
+            clientConnection.SubscribeOnDisconnect(ErrorHandling.ConnectionDiedHandler);
         }
 
         public bool ClientStillConnected(int sessionID)
@@ -115,7 +115,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             foreach (NetworkConnection clientCon in ClientConnections.Values)
             {
-                clientCon.ConnectionDiedEvent -= ErrorHandling.ConnectionDiedHandler;
+                clientCon.UnsubscribeOnDisconnect(ErrorHandling.ConnectionDiedHandler);
                 clientCon.CloseConnection();
             }
 

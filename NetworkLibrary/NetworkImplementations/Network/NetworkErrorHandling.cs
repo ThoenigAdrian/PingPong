@@ -20,9 +20,9 @@ namespace NetworkLibrary.NetworkImplementations
 
             public void ConnectionDiedHandler(NetworkConnection sender)
             {
-                sender.ConnectionDiedEvent -= ConnectionDiedHandler;
-
+                sender.UnsubscribeOnDisconnect(ConnectionDiedHandler);
                 RemoveConnection(sender);
+
                 RaiseDeadSessionEvent(sender);
             }
 

@@ -3,16 +3,16 @@ using NetworkLibrary.PackageAdapters;
 using NetworkLibrary.Utility;
 using System;
 using System.Net;
-using System.Threading;
 using XSLibrary.Network.Connections;
 using XSLibrary.ThreadSafety.Containers;
+using XSLibrary.ThreadSafety.Executors;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class NetworkConnection : IDisposable
     {
         public delegate void ConnectionDiedHandler(NetworkConnection sender);
-        public event ConnectionDiedHandler ConnectionDiedEvent;
+        private event ConnectionDiedHandler ConnectionDiedEvent;
 
         public Session ClientSession { get; set; }
 
@@ -28,7 +28,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public bool Connected { get { return TcpConnection.Connected; } }
 
+        private volatile bool m_disconnectRaised = false;
+
         SafeList<ResponseRequest> m_openResponses;
+        SafeExecutor m_disconnectLock = new SingleThreadExecutor();
 
         public NetworkConnection(TCPPacketConnection tcpConnection) : this(tcpConnection, null) { }
         public NetworkConnection(TCPPacketConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
@@ -50,6 +53,19 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             TcpConnection.DataReceivedEvent += ReceiveTCP;
             TcpConnection.OnDisconnect += HandleDisconnect;
             TcpConnection.InitializeReceiving();
+        }
+
+        public void SubscribeOnDisconnect(ConnectionDiedHandler handler)
+        {
+            ConnectionDiedEvent += handler;
+
+            if (MustRaiseDisconnectEvent())
+                RaiseConnectionDiedEvent();
+        }
+
+        public void UnsubscribeOnDisconnect(ConnectionDiedHandler handler)
+        {
+            ConnectionDiedEvent -= handler;
         }
 
         public void IssueResponse(ResponseRequest responseHandler)
@@ -77,12 +93,28 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
-            RaiseConnectionDiedEvent();
+            if (MustRaiseDisconnectEvent())
+                RaiseConnectionDiedEvent();
         }
 
         private void RaiseConnectionDiedEvent()
         {
             ConnectionDiedEvent?.Invoke(this);
+        }
+
+        // can only return true once
+        private bool MustRaiseDisconnectEvent()
+        {
+            return m_disconnectLock.Execute(() =>
+            {
+                if (Connected || m_disconnectRaised)
+                    return false;
+                else
+                {
+                    m_disconnectRaised = true;
+                    return true;
+                }
+            });
         }
 
         public void SendTCP(PackageInterface package)
