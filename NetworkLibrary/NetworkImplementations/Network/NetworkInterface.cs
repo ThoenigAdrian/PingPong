@@ -76,7 +76,7 @@ namespace NetworkLibrary.NetworkImplementations
             if (!ClientConnections.TryAdd(sessionID, clientConnection))
                 throw new ConnectionException("Adding the connection failed!");
 
-            clientConnection.SubscribeOnDisconnect(ErrorHandling.ConnectionDiedHandler);
+            clientConnection.ConnectionDiedEvent += ErrorHandling.ConnectionDiedHandler;
         }
 
         public bool ClientStillConnected(int sessionID)
@@ -115,7 +115,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             foreach (NetworkConnection clientCon in ClientConnections.Values)
             {
-                clientCon.UnsubscribeOnDisconnect(ErrorHandling.ConnectionDiedHandler);
+                clientCon.ConnectionDiedEvent -= ErrorHandling.ConnectionDiedHandler;
                 clientCon.CloseConnection();
             }
 

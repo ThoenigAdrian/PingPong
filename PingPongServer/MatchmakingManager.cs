@@ -46,7 +46,7 @@ namespace PingPongServer
             {
                 m_waitingClientConnections.Add(clientConnection);
                 SendMatchmakingStatus(clientConnection, string.Format(WAITING_IN_QUEUE, TotalPlayersOnline, TotalPlayersSearching()));
-                clientConnection.SubscribeOnDisconnect(RemoveConnection);
+                clientConnection.ConnectionDiedEvent += RemoveConnection;
             }
             else
                 SendMatchmakingError(clientConnection, INVALID_REQUEST);
@@ -168,7 +168,7 @@ namespace PingPongServer
 
         private void RemoveConnection(NetworkConnection client)
         {
-            client.UnsubscribeOnDisconnect(RemoveConnection);
+            client.ConnectionDiedEvent -= RemoveConnection;
             m_waitingClientConnections.Remove(client);
         }
 
