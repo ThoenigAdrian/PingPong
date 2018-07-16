@@ -32,7 +32,7 @@ namespace NetworkLibrary.NetworkImplementations
 
                 foreach (NetworkConnection clientCon in ClientConnections.Values)
                 {
-                    if (clientCon.ISConnectedTo(receiveEndPoint.Port))
+                    if (clientCon.IsConnectedTo(receiveEndPoint.Port))
                     {
                         deadConnection = clientCon;
                         break;
@@ -50,8 +50,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             private void RemoveConnection(NetworkConnection connection)
             {
-                NetworkConnection dummy;
-                if (!ClientConnections.TryRemove(connection.ClientSession.SessionID, out dummy))
+                if (!ClientConnections.TryRemove(connection.ClientSession.SessionID, out NetworkConnection dummy))
                     throw new ConnectionException("Could not remove network connection!");
             }
 

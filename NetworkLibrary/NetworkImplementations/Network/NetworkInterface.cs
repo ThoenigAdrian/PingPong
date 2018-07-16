@@ -76,15 +76,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             if (!ClientConnections.TryAdd(sessionID, clientConnection))
                 throw new ConnectionException("Adding the connection failed!");
-        }
 
-        public void RemoveClientConnection(int SessionID)
-        {
-            NetworkConnection removed;
-            if (!ClientConnections.TryRemove(SessionID, out removed))
-                throw new ConnectionException("Removing the connection failed!"); ;
-
-            removed.ConnectionDiedEvent -= ErrorHandling.ConnectionDiedHandler;
         }
 
         public bool ClientStillConnected(int sessionID)

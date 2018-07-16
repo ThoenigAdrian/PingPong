@@ -57,7 +57,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             m_openResponses.Add(responseHandler);
         }
 
-        public bool ISConnectedTo(int port)
+        public bool IsConnectedTo(int port)
         {
             return RemoteEndPoint.Port == port;
         }
