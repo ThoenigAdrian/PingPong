@@ -14,19 +14,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public delegate void ConnectionDiedHandler(NetworkConnection sender);
         public event ConnectionDiedHandler ConnectionDiedEvent
         {
-            add
-            {
-                OnDisconnect += value;
-
-                m_raiseDisconnect.Fire(() =>
-                {
-                    return !Connected && RaiseConnectionDiedEvent();
-                });
-            }
-            remove { OnDisconnect -= value; }
+            add { DisconnectEvent.OnFire += () => value(this); }
+            remove { DisconnectEvent.OnFire -= () => value(this); }
         }
-
-        private event ConnectionDiedHandler OnDisconnect;
 
         public Session ClientSession { get; set; }
 
@@ -43,7 +33,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public bool Connected { get { return TcpConnection.Connected; } }
 
         SafeList<ResponseRequest> m_openResponses;
-        OneShotCondition m_raiseDisconnect = new OneShotCondition();
+        OneShotEvent DisconnectEvent { get; set; }
 
         public NetworkConnection(TCPPacketConnection tcpConnection) : this(tcpConnection, null) { }
         public NetworkConnection(TCPPacketConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
@@ -51,6 +41,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Adapter = adapter;
 
+            DisconnectEvent = new OneShotEvent();
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();
 
@@ -92,19 +83,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
-            if (m_raiseDisconnect.Fire(() => {  return OnDisconnect != null; }))
-                RaiseConnectionDiedEvent();
-        }
-
-        private bool RaiseConnectionDiedEvent()
-        {
-            ConnectionDiedHandler handler = OnDisconnect;
-            if (handler != null)
-            {
-                handler(this);
-                return true;
-            }
-            return false;
+            DisconnectEvent.Invoke();
         }
 
         public void SendTCP(PackageInterface package)
