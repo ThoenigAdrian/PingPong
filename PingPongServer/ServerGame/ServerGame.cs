@@ -86,8 +86,9 @@ namespace PingPongServer.ServerGame
             if (GameStructure.MissingPlayersCount < playerTeamWish.Length)
                 return false;
 
-            Network.AddClientConnection(client);
             Client newClient = new Client(GameStructure, client.ClientSession.SessionID);
+            Clients.Add(newClient);
+           
 
             int maxTeamSize = GameStructure.maxPlayers / 2;
 
@@ -108,11 +109,10 @@ namespace PingPongServer.ServerGame
                 GameStructure.AddPlayer(newPlayer);
             }
 
-            Clients.Add(newClient);
-
             if (GameStructure.PlayersCount == NumberOfPlayers)
                 GameState = GameStates.Ready;
 
+            Network.AddClientConnection(client);
             return true;
         }
 
@@ -250,19 +250,30 @@ namespace PingPongServer.ServerGame
 
         private void OnClientLost(object sender, EventArgs e)
         {
+            Log("Client Lost Event called");
             bool gameOver = true;
             List<Player> DisconnectedPlayers = new List<Player>();
 
             foreach (Client c in Clients)
+            {
+                Log("Iterating over clients");
                 if (Network.DiedSessions.Contains(c.SessionID))
+                {
+                    Log("Adding Client to disconnected Clients, Session ID:" + c.SessionID);
                     DisconnectedPlayers.AddRange(c.Players);
+                }
+                    
+            }
+                
 
             foreach(GameStructure.GameTeam team in GameStructure.GameTeams.Values)
             {
-                foreach(Player p in team.PlayerList)
+                Log("Iterating over players");
+                foreach (Player p in team.PlayerList)
                 {
                     if (!DisconnectedPlayers.Contains(p))
                     {
+                        Log("Player not in disconnected Players");
                         gameOver = false;
                         break;
                     }
@@ -272,6 +283,7 @@ namespace PingPongServer.ServerGame
 
             if (gameOver)
             {
+                Log("Calling Game finished cleanup because Client Lost was the last client of the game");
                 GameFinishedCleanup();
             }
                 

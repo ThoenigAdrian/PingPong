@@ -23,7 +23,7 @@ namespace Stresstester
         {
             
             Logger.Log("Test");
-            openMultipleGames(480);
+            openMultipleGames(1);
         }
 
         static void openMultipleGames(int numberOfGames)
