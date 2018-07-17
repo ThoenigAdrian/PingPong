@@ -83,6 +83,8 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
+            TcpConnection.Disconnect();
+
             DisconnectEvent.Invoke();
         }
 
