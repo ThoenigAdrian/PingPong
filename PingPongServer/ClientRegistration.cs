@@ -8,16 +8,14 @@ using NetworkLibrary.DataPackages.ClientSourcePackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
-
-
+using System.Collections.Generic;
+using System;
 
 namespace PingPongServer
 {
     class ClientRegistration
     {
         public delegate void ConnectionStateChangedHandler(object sender, NetworkConnection connection);
-        public event ConnectionStateChangedHandler OnConnectionAccept;
-        public event ConnectionStateChangedHandler OnSessionAssigned;
 
         public delegate void ClientRequestHandler(object sender, NetworkConnection connection, PackageInterface request);
         public event ClientRequestHandler OnSessionRequest;
@@ -33,7 +31,9 @@ namespace PingPongServer
         private TCPAccepter ConnectionAccepter;
         private SafeList<NetworkConnection> ConnectionsReadyForQueingUpToMatchmaking = new SafeList<NetworkConnection>();
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
-
+        
+        
+        UniqueIDGenerator SessionIDGen = new UniqueIDGenerator();
         GameLogger Logger;
 
         Thread m_registrationThread;
@@ -98,7 +98,6 @@ namespace PingPongServer
             Logger.ServerLog("Adding Client to Accepted Connections");
             AcceptedConnections.Add(newNetworkConnection);
 
-            OnConnectionAccept?.Invoke(this, newNetworkConnection);
         }
 
         private void ReadSessionRequests(NetworkConnection networkConnection)
@@ -109,6 +108,7 @@ namespace PingPongServer
 
             if (newPacket.PackageType == PackageType.ClientSessionRequest)
                 OnSessionRequest?.Invoke(this, networkConnection, newPacket);
+
         }
 
         private void HandleSessionRequest(object sender, NetworkConnection connection, PackageInterface request)
@@ -120,13 +120,12 @@ namespace PingPongServer
             else
                 ConnectClientWithNewSession(connection);
 
-            OnSessionAssigned?.Invoke(this, connection);
         }
 
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)
         {
             Logger.RegistrationLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
-            networkConnection.ClientSession = new Session();
+            networkConnection.ClientSession = new Session(SessionIDGen.GetSessionID());
             Logger.RegistrationLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
             SendSessionResponse(networkConnection);
             ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
@@ -149,7 +148,7 @@ namespace PingPongServer
                 Logger.RegistrationLog("Removing it from Accepted Connections List and adding it to Conections Ready for Matchmaking.");
                 AcceptedConnections.Remove(networkConnection);
                 Logger.RegistrationLog("Sending Normal Session Response. And assigning him a new Session ID");
-                networkConnection.ClientSession = new Session();
+                networkConnection.ClientSession = new Session(SessionIDGen.GetSessionID());
                 SendSessionResponse(networkConnection);
                 ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             }                

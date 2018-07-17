@@ -18,8 +18,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             {
                 OnDisconnect += value;
 
-                if (m_raiseDisconnect.Fire(() => { return !Connected; }))
-                    RaiseConnectionDiedEvent();
+                m_raiseDisconnect.Fire(() =>
+                {
+                    return !Connected && RaiseConnectionDiedEvent();
+                });
             }
             remove { OnDisconnect -= value; }
         }
@@ -90,13 +92,19 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
-            if (m_raiseDisconnect.Fire())
+            if (m_raiseDisconnect.Fire(() => {  return OnDisconnect != null; }))
                 RaiseConnectionDiedEvent();
         }
 
-        private void RaiseConnectionDiedEvent()
+        private bool RaiseConnectionDiedEvent()
         {
-            OnDisconnect?.Invoke(this);
+            ConnectionDiedHandler handler = OnDisconnect;
+            if (handler != null)
+            {
+                handler(this);
+                return true;
+            }
+            return false;
         }
 
         public void SendTCP(PackageInterface package)

@@ -6,6 +6,7 @@ using PingPongServer.ServerGame.ServerGameObjects;
 
 using GameLogicLibrary;
 using GameLogicLibrary.GameObjects;
+using XSLibrary.ThreadSafety.Containers;
 
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
@@ -32,27 +33,29 @@ namespace PingPongServer.ServerGame
         private LogWriterConsole Logger = new LogWriterConsole();
         private int SleepTimeMillisecondsBetweenTicks { get { return 1000 / Tickrate; } set { } }
         private int TeardownDelaySeconds = 60;
+        private object GameStateLock = new object();
 
-
-
-        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart)
+        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart, int gameID)
         {
-            GameID = new Random().Next();
+            GameID = gameID;
             Log("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
             this.Network = Network;
             this.Network.ClientLost += OnClientLost;
             GameState = GameStates.Initializing;
             GameStructure = new GameStructure(NeededNumberOfPlayersForGameToStart);
             GameEngine = new GameEngine(GameStructure);
-            this.NumberOfPlayers = NeededNumberOfPlayersForGameToStart;
+            NumberOfPlayers = NeededNumberOfPlayersForGameToStart;
             GameEngine.TeamScoredHandler += OnTeamScored;
             GameEngine.OnGameFinished += HandleFinishedGame;
         }
 
         public void StartGame(object caller)
         {
-            GameFinished += (caller as GamesManager).OnGameFinished;
-            GameState = GameStates.Running;
+            lock(GameStateLock)
+            {
+                if (GameState == GameStates.Ready)
+                    GameState = GameStates.Running;
+            }
 
             foreach (Client client in Clients)
                 SendServerInitResponse(client);
@@ -110,7 +113,10 @@ namespace PingPongServer.ServerGame
             }
 
             if (GameStructure.PlayersCount == NumberOfPlayers)
+            {
                 GameState = GameStates.Ready;
+            }
+                
 
             Network.AddClientConnection(client);
             return true;
@@ -209,6 +215,10 @@ namespace PingPongServer.ServerGame
 
         private void GameFinishedCleanup()
         {
+            lock (GameStateLock)
+            {
+                GameState = GameStates.Aborted;
+            }
             Log("This was the final point");
             Log("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
             Log("Game finished");
@@ -219,7 +229,6 @@ namespace PingPongServer.ServerGame
             Logger.NetworkLog("Tearing Down Network");
             Network.Close();
             GameState = GameStates.Finished;
-            GameFinished?.Invoke(this, EventArgs.Empty);
         }
 
         private void BroadcastGameFinishedPackage()

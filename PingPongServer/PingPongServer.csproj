@@ -67,6 +67,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="UniqueIDGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

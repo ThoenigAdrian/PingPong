@@ -17,6 +17,7 @@ namespace PingPongServer
         private SafeList<Game> RunningGames = new SafeList<Game>();
         private SafeList<NetworkConnection> WaitingObservers = new SafeList<NetworkConnection>();
         private UDPConnection MasterUDPSocket;
+        private UniqueIDGenerator GamesIDGenerator = new UniqueIDGenerator();
         private bool shutdownGameManager = false;
 
         public GamesManager(UDPConnection MasterUDPSocket)
@@ -156,7 +157,7 @@ namespace PingPongServer
         public void OnMatchmadeGameFound(object sender, MatchmakingManager.MatchData match)
         {
             GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            Game newGame = new Game(newGameNetwork, match.MaxPlayerCount);
+            Game newGame = new Game(newGameNetwork, match.MaxPlayerCount, GamesIDGenerator.GetSessionID());
 
             foreach (MatchmakingManager.ClientData client in match.Clients)
             {
