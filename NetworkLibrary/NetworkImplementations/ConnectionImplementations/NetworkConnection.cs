@@ -33,7 +33,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public bool Connected { get { return TcpConnection.Connected; } }
 
         SafeList<ResponseRequest> m_openResponses;
-        OneShotEvent DisconnectEvent { get; set; }
+        OneTimeEvent DisconnectEvent { get; set; }
 
         public NetworkConnection(TCPPacketConnection tcpConnection) : this(tcpConnection, null) { }
         public NetworkConnection(TCPPacketConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
@@ -41,7 +41,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Adapter = adapter;
 
-            DisconnectEvent = new OneShotEvent();
+            DisconnectEvent = new OneTimeEvent();
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();
 
