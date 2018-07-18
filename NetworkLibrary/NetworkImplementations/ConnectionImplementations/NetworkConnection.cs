@@ -12,10 +12,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
     public class NetworkConnection : IDisposable
     {
         public delegate void ConnectionDiedHandler(NetworkConnection sender);
-        public event ConnectionDiedHandler ConnectionDiedEvent
+        public event OneTimeEvent.EventHandle ConnectionDiedEvent
         {
-            add { DisconnectEvent.OnFire += () => value(this); }
-            remove { DisconnectEvent.OnFire -= () => value(this); }
+            add { DisconnectEvent.OnEventRaise += value; }
+            remove { DisconnectEvent.OnEventRaise -= value; }
         }
 
         public Session ClientSession { get; set; }
@@ -85,7 +85,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection.Disconnect();
 
-            DisconnectEvent.Invoke();
+            DisconnectEvent.Invoke(this, new EventArgs());
         }
 
         public void SendTCP(PackageInterface package)
