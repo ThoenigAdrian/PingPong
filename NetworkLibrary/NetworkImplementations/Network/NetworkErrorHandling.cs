@@ -19,10 +19,8 @@ namespace NetworkLibrary.NetworkImplementations
                 ClientConnections = connections;
             }
 
-            public void ConnectionDiedHandler(object sender, EventArgs e)
+            public void ConnectionDiedHandler(NetworkConnection connection, EndPoint remote)
             {
-                NetworkConnection connection = sender as NetworkConnection;
-
                 connection.ConnectionDiedEvent -= ConnectionDiedHandler;
                 RemoveConnection(connection);
 

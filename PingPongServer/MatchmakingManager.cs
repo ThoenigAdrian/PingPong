@@ -4,6 +4,7 @@ using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using PingPongServer.Matchmaking;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using XSLibrary.ThreadSafety.Containers;
 using XSLibrary.Utility;
 
@@ -173,9 +174,9 @@ namespace PingPongServer
             m_waitingClientConnections.Remove(client);
         }
 
-        private void RemoveConnection(object sender, EventArgs e)
+        private void RemoveConnection(NetworkConnection connection, EndPoint remote)
         {
-            RemoveConnection(sender as NetworkConnection);
+            RemoveConnection(connection);
         }
 
         private NetworkConnection FindClientConnection(int clientID)
