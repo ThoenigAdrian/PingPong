@@ -1,5 +1,6 @@
 ﻿using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.NetworkImplementations.Network;
+using System;
 using System.Net;
 using XSLibrary.Network.Connections;
 
@@ -18,12 +19,12 @@ namespace NetworkLibrary.NetworkImplementations
                 ClientConnections = connections;
             }
 
-            public void ConnectionDiedHandler(NetworkConnection sender)
+            public void ConnectionDiedHandler(NetworkConnection connection, EndPoint remote)
             {
-                sender.ConnectionDiedEvent -= ConnectionDiedHandler;
-                RemoveConnection(sender);
+                connection.ConnectionDiedEvent -= ConnectionDiedHandler;
+                RemoveConnection(connection);
 
-                RaiseDeadSessionEvent(sender);
+                RaiseDeadSessionEvent(connection);
             }
 
             public void HandleUDPReceiveError(object sender, IPEndPoint receiveEndPoint)
@@ -45,7 +46,7 @@ namespace NetworkLibrary.NetworkImplementations
 
             public void HandleUDPSendError(object sender, IPEndPoint remote)
             {
-                throw new System.Exception("y u du dis");
+                throw new Exception("y u du dis");
             }
 
             private void RemoveConnection(NetworkConnection connection)

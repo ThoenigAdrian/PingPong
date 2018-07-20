@@ -11,11 +11,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
     public class NetworkConnection : IDisposable
     {
-        public delegate void ConnectionDiedHandler(NetworkConnection sender);
-        public event ConnectionDiedHandler ConnectionDiedEvent
+        class DisconnectEvent : AutoInvokeEvent<NetworkConnection, EndPoint> { }
+        
+        public event DisconnectEvent.EventHandle ConnectionDiedEvent
         {
-            add { DisconnectEvent.OnFire += () => value(this); }
-            remove { DisconnectEvent.OnFire -= () => value(this); }
+            add { OnDisconnect.Event += value; }
+            remove { OnDisconnect.Event -= value; }
         }
 
         public Session ClientSession { get; set; }
@@ -33,7 +34,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         public bool Connected { get { return TcpConnection.Connected; } }
 
         SafeList<ResponseRequest> m_openResponses;
-        OneShotEvent DisconnectEvent { get; set; }
+        DisconnectEvent OnDisconnect { get; set; }
 
         public NetworkConnection(TCPPacketConnection tcpConnection) : this(tcpConnection, null) { }
         public NetworkConnection(TCPPacketConnection tcpConnection, ResponseRequest responseRequest) : this(tcpConnection, responseRequest, new JSONAdapter()) { }
@@ -41,7 +42,7 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Adapter = adapter;
 
-            DisconnectEvent = new OneShotEvent();
+            OnDisconnect = new DisconnectEvent();
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();
 
@@ -83,7 +84,9 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
-            DisconnectEvent.Invoke();
+            TcpConnection.Disconnect();
+
+            OnDisconnect.Invoke(this, TcpConnection.Remote);
         }
 
         public void SendTCP(PackageInterface package)
