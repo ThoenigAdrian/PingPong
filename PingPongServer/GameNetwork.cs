@@ -38,12 +38,7 @@ namespace PingPongServer
         {
             AddClientConnection(connection); // from Inherited Class
         }
-
-        /*public void RemoveClient(int sessionID)
-        {
-            RemoveClientConnection(sessionID);
-        }*/
-
+        
         public void AddObserver(NetworkConnection connection)
         {
             AddClientConnection(connection);
@@ -76,6 +71,8 @@ namespace PingPongServer
 
         public void Close()
         {
+            SessionDied -= SessionDiedHandler;
+            ClientLost = null;
             Disconnect();
         }
 

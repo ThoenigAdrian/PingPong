@@ -120,6 +120,7 @@ namespace NetworkLibrary.NetworkImplementations
             }
 
             UdpConnection.OnReceiveError -= ErrorHandling.HandleUDPReceiveError;
+            UdpConnection.OnSendError -= ErrorHandling.HandleUDPSendError;
             PostDisconnectActions();
         }
 
@@ -143,6 +144,7 @@ namespace NetworkLibrary.NetworkImplementations
         protected void TerminateUDPConnection()
         {
             UdpConnection.OnReceiveError -= ErrorHandling.HandleUDPReceiveError;
+            UdpConnection.OnSendError -= ErrorHandling.HandleUDPSendError;
             UdpConnection.Disconnect();
         }
 

@@ -114,6 +114,7 @@ namespace PingPongServer
                 if (game.GameState == GameStates.Finished)
                 {
                     Logger.GamesManagerLog("Found a finished Game removing it now\n " + game.ToString());
+                    GamesIDGenerator.FreeSessionID(game.GameID);
                     RunningGames.Remove(game);
                 }
             }
