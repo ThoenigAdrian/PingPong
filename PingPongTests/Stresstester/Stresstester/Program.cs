@@ -21,11 +21,42 @@ namespace Stresstester
         static JSONAdapter PacketAdapter = new JSONAdapter();
         static LogWriterConsole Logger = new LogWriterConsole();
         static List<TCPPacketConnection> connections = new List<TCPPacketConnection>();
+        static Random RandomGenerator = new Random();
+
         static void Main(string[] args)
         {
             
             Logger.Log("Test");
-            openMultipleGames(10);
+            HighResolutionTest();
+            MidResoultionTest();
+        }
+
+        static void HighResolutionTest()
+        {
+            int start = 0;
+            int step = 2;
+            int max = 2000;
+            int numberOfConnectionsPerBatch = 10;
+            delayTest(start, step, max, numberOfConnectionsPerBatch);
+        }
+
+        static void MidResoultionTest()
+        {
+            int start = 2000;
+            int step = 100;
+            int max = 8000;
+            int numberOfConnectionsPerBatch = 10;
+            delayTest(start, step, max, numberOfConnectionsPerBatch);
+        }
+        
+        static void delayTest(int start, int step, int max, int numberOfConnections)
+        {
+            for(int waitTime=0; waitTime <= max; waitTime+=step)
+            {
+                openMultipleGames(numberOfConnections);
+                Thread.Sleep(waitTime);
+                Disconnect();
+            }
         }
 
         static void openAndTheCloseGameWithRandomDelayMultiple(int numberOfGames)
@@ -43,7 +74,9 @@ namespace Stresstester
         }
         static void openAndThenCloseGameWithRandomDelay(TCPPacketConnection conn)
         {
-            openAndThenCloseGameWithDelay(conn, new Random().Next());
+            int waitTimeMillisecs = RandomGenerator.Next(30 * 1000);
+            Logger.Log("Waiting " + waitTimeMillisecs.ToString() + "Milliseconds");
+            openAndThenCloseGameWithDelay(conn, waitTimeMillisecs);
         }
         static void openAndThenCloseGameWithDelay(TCPPacketConnection conn, int delay)
         {
@@ -67,7 +100,7 @@ namespace Stresstester
                     openGame(conn);
 
             }
-            Logger.Log("Started " + numberOfGames.ToString() + "  Games now waiting to see what will happen");
+            Logger.Log("Started " + numberOfGames.ToString() + "  Games");
         }
 
         static void openMultipleGamesInteractive(int numberOfGames)
