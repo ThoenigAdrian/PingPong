@@ -23,7 +23,31 @@ namespace Stresstester
         {
             
             Logger.Log("Test");
-            openMultipleGames(1);
+            openMultipleGames(10);
+        }
+        static void openAndTheCloseGameWithRandomDelayMultiple(int numberOfGames)
+        {
+            for (int i = 0; i < numberOfGames; i++)
+            {
+                List<TCPPacketConnection> connections = new List<TCPPacketConnection>();
+                IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
+                Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                connectionSocket.Connect(server);
+                TCPPacketConnection conn = new TCPPacketConnection(connectionSocket);
+                connections.Add(conn);
+                openAndThenCloseGameWithRandomDelay(conn);
+                Thread.Sleep(1000); // If this line get's removed the server isn't able to start multiple Games !! Bug Found
+            }
+        }
+        static void openAndThenCloseGameWithRandomDelay(TCPPacketConnection conn)
+        {
+            openAndThenCloseGameWithDelay(conn, new Random().Next());
+        }
+        static void openAndThenCloseGameWithDelay(TCPPacketConnection conn, int delay)
+        {
+            openGame(conn);
+            Thread.Sleep(delay);
+            closeGame(conn);
         }
 
         static void openMultipleGames(int numberOfGames)
@@ -38,7 +62,7 @@ namespace Stresstester
                 TCPPacketConnection conn = new TCPPacketConnection(connectionSocket);
                 connections.Add(conn);
                 openGame(conn);
-                Thread.Sleep(1000); // If this line get's removed the server isn't able to start multiple Games !! Bug Found
+                //Thread.Sleep(1000); // If this line get's removed the server isn't able to start multiple Games !! Bug Found
                 
             }
             Logger.Log("Started " + numberOfGames.ToString() + "  Games now waiting to see what will happen");
@@ -60,6 +84,11 @@ namespace Stresstester
             initGame.PlayerTeamwish[1] = 1;
             sendWithAdapter(conn, initGame);
            
+        }
+
+        static void closeGame(TCPPacketConnection conn)
+        {
+            conn.Disconnect();
         }
 
         static void sendWithAdapter(TCPPacketConnection conn, PackageInterface packet)
