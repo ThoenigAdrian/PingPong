@@ -2,6 +2,7 @@
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
+using PingPongServer.GameExecution;
 using PingPongServer.ServerGame;
 using System;
 using System.Threading;
@@ -18,11 +19,15 @@ namespace PingPongServer
         private SafeList<NetworkConnection> WaitingObservers = new SafeList<NetworkConnection>();
         private UDPConnection MasterUDPSocket;
         private UniqueIDGenerator GamesIDGenerator = new UniqueIDGenerator();
+        private UniqueIDGenerator SessionManager;
+        private GamesExecutorLoadBalancer LoadBalancer = new GamesExecutorLoadBalancer();
         private bool shutdownGameManager = false;
+        
 
-        public GamesManager(UDPConnection MasterUDPSocket)
+        public GamesManager(UDPConnection MasterUDPSocket, UniqueIDGenerator sessionManager)
         {
             this.MasterUDPSocket = MasterUDPSocket;
+            SessionManager = sessionManager;
         }
 
         public void Run()
@@ -114,7 +119,7 @@ namespace PingPongServer
                 if (game.GameState == GameStates.Finished)
                 {
                     Logger.GamesManagerLog("Found a finished Game removing it now\n " + game.ToString());
-                    GamesIDGenerator.FreeSessionID(game.GameID);
+                    GamesIDGenerator.FreeID(game.GameID);
                     RunningGames.Remove(game);
                 }
             }
@@ -157,8 +162,8 @@ namespace PingPongServer
 
         public void OnMatchmadeGameFound(object sender, MatchmakingManager.MatchData match)
         {
-            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket);
-            Game newGame = new Game(newGameNetwork, match.MaxPlayerCount, GamesIDGenerator.GetSessionID());
+            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, SessionManager);
+            Game newGame = new Game(newGameNetwork, match.MaxPlayerCount, GamesIDGenerator.GetID());
 
             foreach (MatchmakingManager.ClientData client in match.Clients)
             {

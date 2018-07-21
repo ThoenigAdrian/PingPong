@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientRegistration.cs" />
+    <Compile Include="GameExecution\GamesExecutor.cs" />
+    <Compile Include="GameExecution\GamesExecutorLoadBalancer.cs" />
     <Compile Include="GamesManager.cs" />
     <Compile Include="MatchmakingManager.cs" />
     <Compile Include="Matchmaking\Game.cs" />

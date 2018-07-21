@@ -16,6 +16,7 @@ namespace PingPongServer
     {
 
         private ClientRegistration Registration { get; set; }
+        private UniqueIDGenerator SessionIDGenerator = new UniqueIDGenerator();
         private MatchmakingManager MatchManager = new MatchmakingManager();
         private GamesManager GamesManager;
 
@@ -46,11 +47,13 @@ namespace PingPongServer
             UDPConnection MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
             MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
-            
-            GamesManager = new GamesManager(MasterUDPSocket);
+
+            SessionIDGenerator = new UniqueIDGenerator();
+
+            GamesManager = new GamesManager(MasterUDPSocket, SessionIDGenerator);
             MatchManager.OnMatchFound += GamesManager.OnMatchmadeGameFound;
 
-            Registration = new ClientRegistration(ServerConfiguration, Logger, GamesManager.RejoinClientToGame);
+            Registration = new ClientRegistration(ServerConfiguration, Logger, GamesManager.RejoinClientToGame, SessionIDGenerator);
             Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
             Registration.OnObserverRequest += HandleObserveRequest;
 

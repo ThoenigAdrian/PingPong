@@ -13,14 +13,16 @@ namespace PingPongServer
 
     public class GameNetwork : NetworkInterface
     {
-        public GameNetwork(UDPConnection UDPGameData) : this(UDPGameData, new NoLog()) { }
+        public GameNetwork(UDPConnection UDPGameData, UniqueIDGenerator sessionIDManager) : this(UDPGameData, new NoLog(), sessionIDManager) { }
         public List<int> DiedSessions = new List<int>();
         public delegate void ClientLostEventHandler(object sender, EventArgs e);
         public event ClientLostEventHandler ClientLost;
+        private UniqueIDGenerator SessionIDManager;
 
-        public GameNetwork(UDPConnection UDPGameData, Logger Logger) : base (UDPGameData, Logger)
+        public GameNetwork(UDPConnection UDPGameData, Logger Logger, UniqueIDGenerator sessionIDManager) : base (UDPGameData, Logger)
         {
             SessionDied += SessionDiedHandler;
+            SessionIDManager = sessionIDManager;
         }
 
         private void SessionDiedHandler(NetworkInterface sender, int sessionID)
@@ -73,7 +75,11 @@ namespace PingPongServer
         {
             SessionDied -= SessionDiedHandler;
             ClientLost = null;
+            int[] SessionIDs = GetSessionIDs;
             Disconnect();
+            foreach (int sessionID in SessionIDs)
+                SessionIDManager.FreeID(sessionID);
+
         }
 
         public void BroadcastGenericTCPPackage(PackageInterface package)

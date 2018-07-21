@@ -33,7 +33,7 @@ namespace PingPongServer
         private SafeList<NetworkConnection> AcceptedConnections = new SafeList<NetworkConnection>();
         
         
-        UniqueIDGenerator SessionIDGen = new UniqueIDGenerator();
+        UniqueIDGenerator SessionIDGenerator;
         GameLogger Logger;
 
         Thread m_registrationThread;
@@ -41,11 +41,12 @@ namespace PingPongServer
 
         public int RegisteredPlayersCount { get { return ConnectionsReadyForQueingUpToMatchmaking.Count; } }
 
-        public ClientRegistration(ServerConfiguration config, GameLogger log, RejoinClientToGame rejoinCallback)
+        public ClientRegistration(ServerConfiguration config, GameLogger log, RejoinClientToGame rejoinCallback, UniqueIDGenerator sessionIDGenerator)
         {
             Logger = log;
             InitRegistration(config);
             RejoinCallback = rejoinCallback;
+            SessionIDGenerator = sessionIDGenerator;
         }
 
         private void InitRegistration(ServerConfiguration config)
@@ -125,7 +126,7 @@ namespace PingPongServer
         private void ConnectClientWithNewSession(NetworkConnection networkConnection)
         {
             Logger.RegistrationLog("Client  (" + networkConnection.RemoteEndPoint.ToString() + ") wants to connect ");
-            networkConnection.ClientSession = new Session(SessionIDGen.GetSessionID());
+            networkConnection.ClientSession = new Session(SessionIDGenerator.GetID());
             Logger.RegistrationLog("Assigned Session " + networkConnection.ClientSession.SessionID + " to Client " + networkConnection.RemoteEndPoint.ToString());
             SendSessionResponse(networkConnection);
             ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
@@ -148,7 +149,7 @@ namespace PingPongServer
                 Logger.RegistrationLog("Removing it from Accepted Connections List and adding it to Conections Ready for Matchmaking.");
                 AcceptedConnections.Remove(networkConnection);
                 Logger.RegistrationLog("Sending Normal Session Response. And assigning him a new Session ID");
-                networkConnection.ClientSession = new Session(SessionIDGen.GetSessionID());
+                networkConnection.ClientSession = new Session(SessionIDGenerator.GetID());
                 SendSessionResponse(networkConnection);
                 ConnectionsReadyForQueingUpToMatchmaking.Add(networkConnection);
             }                
@@ -207,6 +208,7 @@ namespace PingPongServer
                 {
                     Logger.RegistrationLog("Removing disconnected connection from ConnectionsReadyForJoiningAndStarting Games Connection ( Client :  " + networkConnection.RemoteEndPoint.ToString() + ")");
                     ConnectionsReadyForQueingUpToMatchmaking.Remove(networkConnection);
+                    SessionIDGenerator.FreeID(networkConnection.ClientSession.SessionID);
                 }
             }
         }

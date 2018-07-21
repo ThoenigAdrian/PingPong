@@ -20,10 +20,7 @@ namespace PingPongServer.ServerGame
         public GameStates GameState { get; private set; }
         public int Tickrate = 100;
         public int GameID = 0;
-        public delegate void GameFinishedEventHandler(object sender, EventArgs e);
-        public event GameFinishedEventHandler GameFinished;
         public int NumberOfPlayers;
-
         private GameNetwork Network;
         private List<Client> Clients = new List<Client>();
         private ServerDataPackage NextFrame;
@@ -38,7 +35,8 @@ namespace PingPongServer.ServerGame
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart, int gameID)
         {
             GameID = gameID;
-            Log("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
+            Logger.GameID = GameID;
+            Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
             this.Network = Network;
             this.Network.ClientLost += OnClientLost;
             GameState = GameStates.Initializing;
@@ -60,10 +58,10 @@ namespace PingPongServer.ServerGame
             foreach (Client client in Clients)
                 SendServerInitResponse(client);
 
-            Log("Game started");
+            Logger.GameLog("Game started");
             GameEngine.PauseBall(3000);
             GameLoop();
-            Log("has exited it's game loop. Therefore the Thread started this game should finish as well");
+            Logger.GameLog("has exited it's game loop. Therefore the Thread started this game should finish as well");
 
         }
 
@@ -71,7 +69,7 @@ namespace PingPongServer.ServerGame
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
 
-            Log("Entering the main loop");
+            Logger.GameLog("Entering the main loop");
 
             while (GameState == GameStates.Running)
             {
@@ -81,7 +79,7 @@ namespace PingPongServer.ServerGame
                 Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
             }
 
-            Log("Exiting the main loop");
+            Logger.GameLog("Exiting the main loop");
         }
 
         public bool AddClient(NetworkConnection client, int[] playerTeamWish)
@@ -135,7 +133,7 @@ namespace PingPongServer.ServerGame
                     correctClient = c;
                 }
             }
-            Log("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
+            Logger.GameLog("Client rejoin was requested: " + client.ClientSession.SessionID.ToString());
             if (GameState != GameStates.Finished && rejoinJustified && correctClient != null)
             {
                 ServerInitializeGameResponse packet = new ServerInitializeGameResponse();
@@ -151,15 +149,15 @@ namespace PingPongServer.ServerGame
                         p.Controllable = (player.ID == p.ID);
                     }
                 }
-                Log("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
+                Logger.GameLog("Rejoin succeeded sending the ServerSessionResponse with GameReconnect Flag set to true to the Client");
                 ServerSessionResponse response = new ServerSessionResponse();
                 response.ClientSessionID = client.ClientSession.SessionID;
                 response.GameReconnect = true;
                 client.SendTCP(response);
-                Log("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
+                Logger.GameLog("Rejoin succeeded sending the ServerInitializeGameResponse to the Client");
                 client.SendTCP(packet);
                 couldRejoin = true;
-                Log("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
+                Logger.GameLog("Since Client just rejoined he isn't aware of the current score, therefore sending a score package");
                 client.SendTCP(GenerateScorePackage());
                 Network.AddClientConnection(client);
 
@@ -190,7 +188,7 @@ namespace PingPongServer.ServerGame
         ~Game()
         {
             // IDisposable ? Dispose 
-            Log("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
+            Logger.GameLog("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
             Network.Close();
         }
 
@@ -201,7 +199,7 @@ namespace PingPongServer.ServerGame
 
         private void OnTeamScored(object sender, EventArgs e)
         {
-            Log("Team scored\t Team 1: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam 2: " + GameStructure.GameTeams[1].score.ToString());
+            Logger.GameLog("Team scored\t Team 1: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam 2: " + GameStructure.GameTeams[1].score.ToString());
             Network.BroadcastScore(GenerateScorePackage());
         }
 
@@ -219,12 +217,12 @@ namespace PingPongServer.ServerGame
             {
                 GameState = GameStates.Aborted;
             }
-            Log("This was the final point");
-            Log("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
-            Log("Game finished");
-            Log("Sending final Game finished to the Clients");
+            Logger.GameLog("This was the final point");
+            Logger.GameLog("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
+            Logger.GameLog("Game finished");
+            Logger.GameLog("Sending final Game finished to the Clients");
             BroadcastGameFinishedPackage();
-            Log("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
+            Logger.GameLog("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
             Thread.Sleep(TeardownDelaySeconds * 1000);
             Logger.NetworkLog("Tearing Down Network");
             Network.Close();
@@ -259,16 +257,16 @@ namespace PingPongServer.ServerGame
 
         private void OnClientLost(object sender, EventArgs e)
         {
-            Log("Client Lost Event called");
+            Logger.GameLog("Client Lost Event called");
             bool gameOver = true;
             List<Player> DisconnectedPlayers = new List<Player>();
 
             foreach (Client c in Clients)
             {
-                Log("Iterating over clients");
+                Logger.GameLog("Iterating over clients");
                 if (Network.DiedSessions.Contains(c.SessionID))
                 {
-                    Log("Adding Client to disconnected Clients, Session ID:" + c.SessionID);
+                    Logger.GameLog("Adding Client to disconnected Clients, Session ID:" + c.SessionID);
                     DisconnectedPlayers.AddRange(c.Players);
                 }
                     
@@ -277,12 +275,12 @@ namespace PingPongServer.ServerGame
 
             foreach(GameStructure.GameTeam team in GameStructure.GameTeams.Values)
             {
-                Log("Iterating over players");
+                Logger.GameLog("Iterating over players");
                 foreach (Player p in team.PlayerList)
                 {
                     if (!DisconnectedPlayers.Contains(p))
                     {
-                        Log("Player not in disconnected Players");
+                        Logger.GameLog("Player not in disconnected Players");
                         gameOver = false;
                         break;
                     }
@@ -292,7 +290,7 @@ namespace PingPongServer.ServerGame
 
             if (gameOver)
             {
-                Log("Calling Game finished cleanup because Client Lost was the last client of the game");
+                Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
                 GameFinishedCleanup();
             }
                 
@@ -380,11 +378,6 @@ namespace PingPongServer.ServerGame
                 }
             }
             return cc[cc.Count - 1].ControlInput;
-        }
-
-        private void Log(string text)
-        {
-            Logger.GameLog("ID: " + GameID.ToString() + "  " + text);
         }
 
         private ClientMovement GetLastPlayerMovement(int playerID)

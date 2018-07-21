@@ -11,10 +11,18 @@ namespace NetworkLibrary.Utility
         public abstract void ServerLog(string text);
         public abstract void RegistrationLog(string text);
         public abstract void ConfigurationLog(string text);
+        public abstract void ExecutorLoadBalancerLog(string text);
+        public abstract void GamesExecutorLog(string text);
     }
 
     public class LogWriterConsole : GameLogger
     {
+        public int? GameID;
+        public int? GamesExecutorID;
+        public LogWriterConsole()
+        {
+
+        }
         public override void Log(string text)
         {
             Console.Out.WriteLine(text);
@@ -47,7 +55,23 @@ namespace NetworkLibrary.Utility
 
         public override void GameLog(string text)
         {
-            Log("[GAME]  " + text);
+            if(GameID.HasValue)
+                Log("[GAME]  " + text);
+            else
+                Log("[GAME]  " + text);
+        }
+
+        public override void GamesExecutorLog(string text)
+        {
+            if(GamesExecutorID.HasValue)
+                Log("[GAMES_EXECUTOR]  ID: " + GamesExecutorID.ToString() + "\t" + text);
+            else
+                Log("[GAMES_EXECUTOR]  " + text);
+        }
+
+        public override void ExecutorLoadBalancerLog(string text)
+        {
+            Log("[GAMES_EXECUTOR_LOAD_BALANCER]  " + text);
         }
     }
 }
