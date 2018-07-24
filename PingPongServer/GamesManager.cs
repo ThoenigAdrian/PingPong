@@ -62,8 +62,7 @@ namespace PingPongServer
                 gameToBeStarted.BroadcastStartGamePackage(GameFoundPackage);
                 Thread.Sleep(1000);                
             }
-            ThreadPool.QueueUserWorkItem(gameToBeStarted.StartGame, this);
-            RunningGames.Add(gameToBeStarted);
+            LoadBalancer.AddGame(gameToBeStarted);
         }
 
         public void OnGameFinished(object sender, EventArgs e)

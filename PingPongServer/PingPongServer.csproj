@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientRegistration.cs" />
+    <Compile Include="GameExecution\FrameTimer.cs" />
     <Compile Include="GameExecution\GamesExecutor.cs" />
     <Compile Include="GameExecution\GamesExecutorLoadBalancer.cs" />
     <Compile Include="GamesManager.cs" />

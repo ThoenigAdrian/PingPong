@@ -60,26 +60,16 @@ namespace PingPongServer.ServerGame
 
             Logger.GameLog("Game started");
             GameEngine.PauseBall(3000);
-            GameLoop();
             Logger.GameLog("has exited it's game loop. Therefore the Thread started this game should finish as well");
 
         }
 
-        private void GameLoop()
+        public void CalculateNextFrame(int timePassed)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
-
-            Logger.GameLog("Entering the main loop");
-
-            while (GameState == GameStates.Running)
-            {
-                GetNetworkDataForNextFrame();
-                ServerPackage = NextFramePackage();
-                Network.BroadcastFramesToClients(ServerPackage);
-                Thread.Sleep(SleepTimeMillisecondsBetweenTicks);
-            }
-
-            Logger.GameLog("Exiting the main loop");
+            GetNetworkDataForNextFrame();
+            ServerPackage = NextFramePackage(timePassed);
+            Network.BroadcastFramesToClients(ServerPackage);
         }
 
         public bool AddClient(NetworkConnection client, int[] playerTeamWish)
@@ -344,7 +334,7 @@ namespace PingPongServer.ServerGame
             return clientRelatedPackets.ToArray();
         }
         
-        private ServerDataPackage NextFramePackage()
+        private ServerDataPackage NextFramePackage(int TimePassedInMilliseconds)
         {
             NextFrame = new ServerDataPackage();
 
@@ -357,7 +347,7 @@ namespace PingPongServer.ServerGame
                 }
             }
 
-            GameEngine.CalculateFrame(SleepTimeMillisecondsBetweenTicks);
+            GameEngine.CalculateFrame(TimePassedInMilliseconds);
             NextFrame.Ball.PositionX = GameStructure.Ball.PositionX;
             NextFrame.Ball.PositionY = GameStructure.Ball.PositionY;
 

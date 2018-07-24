@@ -11,7 +11,7 @@ namespace NetworkLibrary.Utility
         public abstract void ServerLog(string text);
         public abstract void RegistrationLog(string text);
         public abstract void ConfigurationLog(string text);
-        public abstract void ExecutorLoadBalancerLog(string text);
+        public abstract void LoadBalancerLog(string text);
         public abstract void GamesExecutorLog(string text);
     }
 
@@ -56,7 +56,7 @@ namespace NetworkLibrary.Utility
         public override void GameLog(string text)
         {
             if(GameID.HasValue)
-                Log("[GAME]  " + text);
+                Log("[GAME]  ID: " + GameID.ToString() + "\t" + text);
             else
                 Log("[GAME]  " + text);
         }
@@ -69,7 +69,7 @@ namespace NetworkLibrary.Utility
                 Log("[GAMES_EXECUTOR]  " + text);
         }
 
-        public override void ExecutorLoadBalancerLog(string text)
+        public override void LoadBalancerLog(string text)
         {
             Log("[GAMES_EXECUTOR_LOAD_BALANCER]  " + text);
         }
