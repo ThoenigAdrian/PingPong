@@ -34,7 +34,6 @@ namespace PingPongServer.GameExecution
                 FrameTimer.WaitOne();
                 watch.Stop();
                 int elapsedTime = (int)watch.ElapsedMilliseconds;
-                Logger.GamesExecutorLog("Time passed since last frame: " + elapsedTime.ToString());
                 watch.Reset();
                 watch.Start();
                 foreach(Game game in Games.Entries)
