@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using XSLibrary.ThreadSafety.Containers;
+using System.Threading;
 
 namespace PingPongServer.GameExecution
 {
@@ -15,13 +16,13 @@ namespace PingPongServer.GameExecution
         SafeList<Game> Games = new SafeList<Game>();
         DateTime TimeOfPreviousFrame;
         DateTime TimeOfCurrentFrame;
-        SingleFireWaitCondition FrameTimer;
+        AutoResetEvent FrameTimer;
         Stopwatch watch = new Stopwatch();
         public int ID;
         public int GamesCount { get { return Games.Count; } set { } }
         bool StopExecutor = false;
 
-        public GamesExecutor(int ID, SingleFireWaitCondition frameTimer)
+        public GamesExecutor(int ID, AutoResetEvent frameTimer)
         {
             Logger.GamesExecutorID = ID;
             Logger.GamesExecutorLog("Initilaising Games Executor");
@@ -33,9 +34,10 @@ namespace PingPongServer.GameExecution
             watch.Start();
             while(!StopExecutor)
             {
-                FrameTimer.Wait();
+                FrameTimer.WaitOne();
                 watch.Stop();
                 int elapsedTime = (int)watch.ElapsedMilliseconds;
+                Logger.GamesExecutorLog("Time passed since last frame: " + elapsedTime.ToString());
                 watch.Reset();
                 watch.Start();
                 foreach(Game game in Games.Entries)

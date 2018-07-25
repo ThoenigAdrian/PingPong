@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -14,13 +15,14 @@ namespace PingPongServer.GameExecution
     class GamesExecutorLoadBalancer
     {
         List<GamesExecutor> GamesExecutors = new List<GamesExecutor>();
-        List<SingleFireWaitCondition> WaitConditions = new List<SingleFireWaitCondition>();
+        List<AutoResetEvent> WaitConditions = new List<AutoResetEvent>();
         private LogWriterConsole Logger = new LogWriterConsole();
         private int PhyiscalCoreCount = 1;
         private int PhysicalThreadCount = 1;
         private int FrameRate = 240;
         private int index = 0;
         System.Timers.Timer FrameTimer;
+        Stopwatch watch = new Stopwatch();
 
         public GamesExecutorLoadBalancer()
         {
@@ -28,14 +30,15 @@ namespace PingPongServer.GameExecution
             GetLogicalCoreCount();
             for (int id = 0; id < PhyiscalCoreCount; id++)
             {
-                SingleFireWaitCondition FrameWaitCondition = new SingleFireWaitCondition(id);
+                AutoResetEvent FrameWaitCondition = new AutoResetEvent(true);
                 WaitConditions.Add(FrameWaitCondition);
                 GamesExecutors.Add(new GamesExecutor(id, FrameWaitCondition));
                 Thread ExecutorThread = new Thread(GamesExecutors[id].Run);
                 ExecutorThread.Name = "Executor Thread " + id.ToString();
                 ExecutorThread.Start();
             }
-            float timerIntervall = 1000f / (FrameRate * PhyiscalCoreCount);
+            double timerIntervall = 1000;
+            timerIntervall = timerIntervall / (FrameRate * PhyiscalCoreCount);
             FrameTimer = new System.Timers.Timer(timerIntervall);
             FrameTimer.Elapsed += OnNextFrameTimed;
             FrameTimer.AutoReset = true;
@@ -60,11 +63,18 @@ namespace PingPongServer.GameExecution
         private void OnNextFrameTimed(object source, ElapsedEventArgs e)
         {
             FrameTimer.Stop();
+            Logger.LoadBalancerLog("");
+            
+            watch.Stop();
+            int elapsedTime = (int)watch.ElapsedMilliseconds;
+            Logger.GamesExecutorLog("Time passed since last frame: " + elapsedTime.ToString());
+            watch.Reset();
+            watch.Start();
             if (index >= WaitConditions.Count)
             {
                 index = 0;
             }
-            WaitConditions[index].Fire();
+            WaitConditions[index].Set();
             index++;
             FrameTimer.Start();
         }
