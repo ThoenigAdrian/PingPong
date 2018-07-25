@@ -20,9 +20,7 @@ namespace PingPongServer.GameExecution
         private int PhyiscalCoreCount = 1;
         private int PhysicalThreadCount = 1;
         private int FrameRate = 240;
-        private int index = 0;
         System.Timers.Timer FrameTimer;
-        Stopwatch watch = new Stopwatch();
 
         public GamesExecutorLoadBalancer()
         {
@@ -63,19 +61,10 @@ namespace PingPongServer.GameExecution
         private void OnNextFrameTimed(object source, ElapsedEventArgs e)
         {
             FrameTimer.Stop();
-            Logger.LoadBalancerLog("");
-            
-            watch.Stop();
-            int elapsedTime = (int)watch.ElapsedMilliseconds;
-            Logger.GamesExecutorLog("Time passed since last frame: " + elapsedTime.ToString());
-            watch.Reset();
-            watch.Start();
-            if (index >= WaitConditions.Count)
+            foreach(AutoResetEvent frameSignal in WaitConditions)
             {
-                index = 0;
+                frameSignal.Set();
             }
-            WaitConditions[index].Set();
-            index++;
             FrameTimer.Start();
         }
                

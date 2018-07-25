@@ -14,11 +14,8 @@ namespace PingPongServer.GameExecution
     {
         LogWriterConsole Logger = new LogWriterConsole();
         SafeList<Game> Games = new SafeList<Game>();
-        DateTime TimeOfPreviousFrame;
-        DateTime TimeOfCurrentFrame;
         AutoResetEvent FrameTimer;
         Stopwatch watch = new Stopwatch();
-        public int ID;
         public int GamesCount { get { return Games.Count; } set { } }
         bool StopExecutor = false;
 
