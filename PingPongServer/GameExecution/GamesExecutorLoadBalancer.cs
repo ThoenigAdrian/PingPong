@@ -1,26 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Management;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Threading;
-using System.Timers;
 using NetworkLibrary.Utility;
-using PingPongServer.GameExecution;
 using PingPongServer.ServerGame;
 
 namespace PingPongServer.GameExecution
 {
-    class GamesExecutorLoadBalancer
+    class GamesExecutorLoadBalancer : IDisposable
     {
+        public delegate void TimerCallbackMethod(uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2);
+
+        [DllImport("winmm.dll")]
+        public static extern uint timeSetEvent(uint delay, uint resolution, TimerCallbackMethod callback, ref uint userCtx, uint fuEvent);
+        [DllImport("winmm.dll")]
+        public static extern uint timeKillEvent(uint timerID);
+
         List<GamesExecutor> GamesExecutors = new List<GamesExecutor>();
         List<AutoResetEvent> WaitConditions = new List<AutoResetEvent>();
         private LogWriterConsole Logger = new LogWriterConsole();
-        private int PhyiscalCoreCount = 1;
+        private uint PhyiscalCoreCount = 1;
         private int PhysicalThreadCount = 1;
-        private int FrameRate = 240;
-        System.Timers.Timer FrameTimer;
+        private uint FrameRate = 240;
+        GCHandle CallbackHandle;
+        uint TimerID;
 
         public GamesExecutorLoadBalancer()
         {
@@ -35,13 +39,14 @@ namespace PingPongServer.GameExecution
                 ExecutorThread.Name = "Executor Thread " + id.ToString();
                 ExecutorThread.Start();
             }
-            double timerIntervall = 1000;
+            uint timerIntervall = 1000;
             timerIntervall = timerIntervall / (FrameRate * PhyiscalCoreCount);
-            FrameTimer = new System.Timers.Timer(timerIntervall);
-            FrameTimer.Elapsed += OnNextFrameTimed;
-            FrameTimer.AutoReset = true;
-            FrameTimer.Enabled = true;
 
+            TimerCallbackMethod callback = new TimerCallbackMethod(OnNextFrameTimed);
+            CallbackHandle = GCHandle.Alloc(callback);
+
+            uint userCtx = 0;
+            TimerID = timeSetEvent(timerIntervall, 0, callback, ref userCtx, 1);
         }
 
         public void AddGame(Game game)
@@ -58,14 +63,12 @@ namespace PingPongServer.GameExecution
             LeastStressedExecutor.AddGame(game);
         }
 
-        private void OnNextFrameTimed(object source, ElapsedEventArgs e)
+        private void OnNextFrameTimed(uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2)
         {
-            FrameTimer.Stop();
             foreach(AutoResetEvent frameSignal in WaitConditions)
             {
                 frameSignal.Set();
             }
-            FrameTimer.Start();
         }
                
 
@@ -76,14 +79,17 @@ namespace PingPongServer.GameExecution
 
         private void GetPhysicalCoreCount()
         {
-            int coreCount = 0;
+            PhyiscalCoreCount = 0;
             foreach (ManagementBaseObject item in new ManagementObjectSearcher("Select NumberOfCores from Win32_Processor").Get())
             {
-                coreCount += int.Parse(item["NumberOfCores"].ToString());
+                PhyiscalCoreCount += uint.Parse(item["NumberOfCores"].ToString());
             }
-            PhyiscalCoreCount = coreCount;
+        }
+
+        public void Dispose()
+        {
+            timeKillEvent(TimerID);
+            CallbackHandle.Free();
         }
     }
-
-    
 }
