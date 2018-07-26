@@ -56,7 +56,6 @@ namespace PingPongServer
             Registration = new ClientRegistration(ServerConfiguration, Logger, GamesManager.RejoinClientToGame, SessionIDGenerator);
             Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
             Registration.OnObserverRequest += HandleObserveRequest;
-
         }
 
         private void MasterUDPSocket_OnDisconnect(object sender, IPEndPoint remote)
@@ -96,6 +95,7 @@ namespace PingPongServer
             ServerStopping = true;
             Logger.ServerLog("Stopping Games Manager");
             GamesManager.Stop();
+            Registration.Stop();
         }
 
         private void HandleObserveRequest(object sender, NetworkConnection connection)

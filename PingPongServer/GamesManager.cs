@@ -47,6 +47,8 @@ namespace PingPongServer
         {
             Logger.GamesManagerLog("GamesManager Stop has been requested");
             shutdownGameManager = true;
+            LoadBalancer.Dispose();
+            Logger.GamesManagerLog("GamesManager stopped");
         }
 
         private void StartGame(object game)
