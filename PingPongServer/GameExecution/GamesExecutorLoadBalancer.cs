@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using NetworkLibrary.Utility;
 using PingPongServer.ServerGame;
+using XSLibrary.ThreadSafety.Locks;
+using XSLibrary.Utility;
 
 namespace PingPongServer.GameExecution
 {
@@ -21,11 +23,17 @@ namespace PingPongServer.GameExecution
         public static extern uint timeKillEvent(uint timerID);
 
         List<GamesExecutor> GamesExecutors = new List<GamesExecutor>();
-        List<AutoResetEvent> WaitConditions = new List<AutoResetEvent>();
         private LogWriterConsole Logger = new LogWriterConsole();
         private uint PhyiscalCoreCount = 1;
-        private int PhysicalThreadCount = 1;
-        private uint FrameRate = 240;
+        private int LogicalCoreCount = 1;
+        private const uint FrameTime = 4;
+        private const uint TimeInterval = 1;
+
+        UnleashSignal[] WaitConditions = new UnleashSignal[TimeSlices];
+
+        // need time slices because the minimum is still 1ms and we cant go lower than that
+        // this means if we have more cores than slices two or more of the cores will start at the same time
+        private const uint TimeSlices = FrameTime / TimeInterval;   
         GCHandle CallbackHandle;
         uint TimerID;
         int FireID = 0;
@@ -34,25 +42,23 @@ namespace PingPongServer.GameExecution
         {
             GetPhysicalCoreCount();
             GetLogicalCoreCount();
+
+            PhyiscalCoreCount = 16;
+
+            for (int i = 0; i < TimeSlices; i++)
+                WaitConditions[i] = new UnleashSignal();
+
             for (int id = 0; id < PhyiscalCoreCount; id++)
             {
-                AutoResetEvent FrameWaitCondition = new AutoResetEvent(true);
-                WaitConditions.Add(FrameWaitCondition);
-                GamesExecutors.Add(new GamesExecutor(id, FrameWaitCondition));
-                Thread ExecutorThread = new Thread(GamesExecutors[id].Run);
-                ExecutorThread.Name = "Executor Thread " + id.ToString();
-                ExecutorThread.Start();
+                GamesExecutors.Add(new GamesExecutor(id, WaitConditions[id % (int)TimeSlices]));
+                ThreadStarter.ThreadpoolDebug("Executor Thread " + id.ToString(), GamesExecutors[id].Run);
             }
-            uint timerIntervall = 1000;
-            timerIntervall = timerIntervall / (FrameRate * PhyiscalCoreCount);
-            if (timerIntervall == 0)
-                timerIntervall = 1;
 
             TimerCallbackMethod callback = new TimerCallbackMethod(OnNextFrameTimed);
-            CallbackHandle = GCHandle.Alloc(callback);
+            CallbackHandle = GCHandle.Alloc(callback, GCHandleType.Normal);
 
             uint userCtx = 0;
-            TimerID = timeSetEvent(timerIntervall, 0, callback, ref userCtx, TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+            TimerID = timeSetEvent(TimeInterval, 0, callback, ref userCtx, TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
         }
 
         public void AddGame(Game game)
@@ -72,16 +78,16 @@ namespace PingPongServer.GameExecution
         private void OnNextFrameTimed(uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2)
         {
             FireID++;
-            if (FireID >= PhyiscalCoreCount)
+            if (FireID >= TimeSlices)
                 FireID = 0;
 
-            WaitConditions[FireID].Set();
+            WaitConditions[FireID].Release();
         }
                
 
         private void GetLogicalCoreCount()
         {
-            PhysicalThreadCount = Environment.ProcessorCount;
+            LogicalCoreCount = Environment.ProcessorCount;
         }
 
         private void GetPhysicalCoreCount()
@@ -96,7 +102,12 @@ namespace PingPongServer.GameExecution
         public void Dispose()
         {
             timeKillEvent(TimerID);
-            CallbackHandle.Free();
+
+            foreach (GamesExecutor game in GamesExecutors)
+                game.Stop();
+
+            foreach (UnleashSignal signal in WaitConditions)
+                signal.Destroy();
         }
     }
 }

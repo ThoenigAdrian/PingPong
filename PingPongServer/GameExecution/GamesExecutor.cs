@@ -1,12 +1,8 @@
 ﻿using NetworkLibrary.Utility;
-using System;
 using PingPongServer.ServerGame;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using XSLibrary.ThreadSafety.Containers;
-using System.Threading;
+using XSLibrary.ThreadSafety.Locks;
 
 namespace PingPongServer.GameExecution
 {
@@ -14,12 +10,12 @@ namespace PingPongServer.GameExecution
     {
         LogWriterConsole Logger = new LogWriterConsole();
         SafeList<Game> Games = new SafeList<Game>();
-        AutoResetEvent FrameTimer;
+        UnleashSignal FrameTimer;
         Stopwatch watch = new Stopwatch();
         public int GamesCount { get { return Games.Count; } set { } }
         bool StopExecutor = false;
 
-        public GamesExecutor(int ID, AutoResetEvent frameTimer)
+        public GamesExecutor(int ID, UnleashSignal frameTimer)
         {
             Logger.GamesExecutorID = ID;
             Logger.GamesExecutorLog("Initilaising Games Executor");
@@ -31,7 +27,7 @@ namespace PingPongServer.GameExecution
             watch.Start();
             while(!StopExecutor)
             {
-                FrameTimer.WaitOne();
+                FrameTimer.Lock();
                 watch.Stop();
                 int elapsedTime = (int)watch.ElapsedMilliseconds;
                 watch.Reset();
