@@ -10,6 +10,9 @@ namespace PingPongServer.GameExecution
 {
     class GamesExecutorLoadBalancer : IDisposable
     {
+        const uint TIME_CALLBACK_FUNCTION = 0x001;
+        const uint TIME_KILL_SYNCHRONOUS = 0x100;
+
         public delegate void TimerCallbackMethod(uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2);
 
         [DllImport("winmm.dll")]
@@ -49,7 +52,7 @@ namespace PingPongServer.GameExecution
             CallbackHandle = GCHandle.Alloc(callback);
 
             uint userCtx = 0;
-            TimerID = timeSetEvent(timerIntervall, 0, callback, ref userCtx, 1);
+            TimerID = timeSetEvent(timerIntervall, 0, callback, ref userCtx, TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
         }
 
         public void AddGame(Game game)
