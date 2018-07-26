@@ -43,8 +43,6 @@ namespace PingPongServer.GameExecution
             GetPhysicalCoreCount();
             GetLogicalCoreCount();
 
-            PhyiscalCoreCount = 16;
-
             for (int i = 0; i < TimeSlices; i++)
                 WaitConditions[i] = new UnleashSignal();
 
