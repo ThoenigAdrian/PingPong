@@ -25,6 +25,7 @@ namespace PingPongServer.GameExecution
         private uint FrameRate = 240;
         GCHandle CallbackHandle;
         uint TimerID;
+        int FireID = 0;
 
         public GamesExecutorLoadBalancer()
         {
@@ -41,6 +42,8 @@ namespace PingPongServer.GameExecution
             }
             uint timerIntervall = 1000;
             timerIntervall = timerIntervall / (FrameRate * PhyiscalCoreCount);
+            if (timerIntervall == 0)
+                timerIntervall = 1;
 
             TimerCallbackMethod callback = new TimerCallbackMethod(OnNextFrameTimed);
             CallbackHandle = GCHandle.Alloc(callback);
@@ -65,10 +68,11 @@ namespace PingPongServer.GameExecution
 
         private void OnNextFrameTimed(uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2)
         {
-            foreach(AutoResetEvent frameSignal in WaitConditions)
-            {
-                frameSignal.Set();
-            }
+            FireID++;
+            if (FireID >= PhyiscalCoreCount)
+                FireID = 0;
+
+            WaitConditions[FireID].Set();
         }
                
 
