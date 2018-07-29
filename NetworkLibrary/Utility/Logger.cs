@@ -56,7 +56,7 @@ namespace NetworkLibrary.Utility
         public override void GameLog(string text)
         {
             if(GameID.HasValue)
-                Log("[GAME]  ID: " + GameID.ToString() + "\t" + text);
+                Log("[GAME]  ID: " + GameID.ToString() + " " + text);
             else
                 Log("[GAME]  " + text);
         }
@@ -64,7 +64,7 @@ namespace NetworkLibrary.Utility
         public override void GamesExecutorLog(string text)
         {
             if(GamesExecutorID.HasValue)
-                Log("[GAMES_EXECUTOR]  ID: " + GamesExecutorID.ToString() + "\t" + text);
+                Log("[GAMES_EXECUTOR]  ID: " + GamesExecutorID.ToString() + " " + text);
             else
                 Log("[GAMES_EXECUTOR]  " + text);
         }
