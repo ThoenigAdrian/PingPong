@@ -20,7 +20,7 @@ namespace GameLogicLibrary
         public const int PLAYER_WIDTH = 5;
         public const int PLAYER_SPACING = 30;
         public const int PLAYER_XOFFSET = 30;
-        public const float PLAYER_SPEED = 0.04F;
+        public const float PLAYER_SPEED = 0.03F;
         
         public const float MAXIMUM_ANGLE_DEGREE = 70;
         public static readonly float MAXIMUM_ANGLE_RAD = GameMath.DegreeToRadian(MAXIMUM_ANGLE_DEGREE);
