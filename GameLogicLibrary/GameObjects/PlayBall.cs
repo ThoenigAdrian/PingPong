@@ -13,7 +13,7 @@ namespace GameLogicLibrary.GameObjects
     public class Ball : RawBall
     {
         public int Radius { get; set; }
-        public float SpeedGain = 1F/180;
+        public float SpeedGain = 1F/1800;
         public int LastTouchedTeam;
         private float internal_speed = GameInitializers.BALL_SPEED;
         public Player LastTouchedPlayer { get; set; }
