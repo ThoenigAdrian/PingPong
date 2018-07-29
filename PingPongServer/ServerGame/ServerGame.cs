@@ -31,10 +31,12 @@ namespace PingPongServer.ServerGame
         private int SleepTimeMillisecondsBetweenTicks { get { return 1000 / Tickrate; } set { } }
         private int TeardownDelaySeconds = 60;
         private object GameStateLock = new object();
+        UniqueIDGenerator GamesIDGenerator;
 
-        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart, int gameID)
+        public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart, UniqueIDGenerator gamesIDGenerator)
         {
-            GameID = gameID;
+            GamesIDGenerator = gamesIDGenerator;
+            GameID = GamesIDGenerator.GetID();
             Logger.GameID = GameID;
             Logger.GameLog("Initialising a new Game with " + Convert.ToString(NeededNumberOfPlayersForGameToStart) + " Players");
             this.Network = Network;
@@ -60,15 +62,14 @@ namespace PingPongServer.ServerGame
 
             Logger.GameLog("Game started");
             GameEngine.PauseBall(3000);
-            Logger.GameLog("has exited it's game loop. Therefore the Thread started this game should finish as well");
 
         }
 
-        public void CalculateNextFrame(int timePassed)
+        public void CalculateNextFrame(long timePassedInTenthOfAMilliseconds)
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
             GetNetworkDataForNextFrame();
-            ServerPackage = NextFramePackage(timePassed);
+            ServerPackage = NextFramePackage(timePassedInTenthOfAMilliseconds);
             Network.BroadcastFramesToClients(ServerPackage);
         }
 
@@ -180,6 +181,7 @@ namespace PingPongServer.ServerGame
             // IDisposable ? Dispose 
             Logger.GameLog("Destructor for Game with Game ID: " + GameID.ToString() + " has been called. Game is being cleaned up nicely");
             Network.Close();
+            GamesIDGenerator.FreeID(GameID);
         }
 
         public void BroadcastStartGamePackage(ServerMatchmakingStatusResponse GameFoundPackage)
@@ -201,7 +203,7 @@ namespace PingPongServer.ServerGame
             return scoreData;
         }
 
-        private void GameFinishedCleanup()
+        public void StopGame()
         {
             lock (GameStateLock)
             {
@@ -242,7 +244,7 @@ namespace PingPongServer.ServerGame
 
         private void HandleFinishedGame(object sender, EventArgs e)
         {
-            GameFinishedCleanup();
+            StopGame();
         }
 
         private void OnClientLost(object sender, EventArgs e)
@@ -281,7 +283,7 @@ namespace PingPongServer.ServerGame
             if (gameOver)
             {
                 Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
-                GameFinishedCleanup();
+                StopGame();
             }
                 
         }
@@ -334,7 +336,7 @@ namespace PingPongServer.ServerGame
             return clientRelatedPackets.ToArray();
         }
         
-        private ServerDataPackage NextFramePackage(int TimePassedInMilliseconds)
+        private ServerDataPackage NextFramePackage(long timePassedInTenthOfAMilliseconds)
         {
             NextFrame = new ServerDataPackage();
 
@@ -347,7 +349,7 @@ namespace PingPongServer.ServerGame
                 }
             }
 
-            GameEngine.CalculateFrame(TimePassedInMilliseconds);
+            GameEngine.CalculateFrame(timePassedInTenthOfAMilliseconds);
             NextFrame.Ball.PositionX = GameStructure.Ball.PositionX;
             NextFrame.Ball.PositionY = GameStructure.Ball.PositionY;
 
