@@ -33,19 +33,19 @@ namespace GameLogicLibrary
             ResetBall();
         }
 
-        public void CalculateFrame(long timePassedInMilliseconds)
+        public void CalculateFrame(long timePassedInTenthOfAMilliseconds)
         {
             if (GameOngoingTimer == true)
             {
-                GameStructure.Ball.PositionX += GameStructure.Ball.DirectionX * timePassedInMilliseconds;
-                GameStructure.Ball.PositionY += GameStructure.Ball.DirectionY * timePassedInMilliseconds;
+                GameStructure.Ball.PositionX += GameStructure.Ball.DirectionX * timePassedInTenthOfAMilliseconds;
+                GameStructure.Ball.PositionY += GameStructure.Ball.DirectionY * timePassedInTenthOfAMilliseconds;
             }
 
             foreach (KeyValuePair<int, GameStructure.GameTeam> Team in GameStructure.GameTeams)
             {
                 foreach (Player player in Team.Value.PlayerList)
                 {
-                    CalculatePlayerPosition(player);
+                    CalculatePlayerPosition(player, timePassedInTenthOfAMilliseconds);
                 }
             }
 
@@ -53,9 +53,9 @@ namespace GameLogicLibrary
             IncreaseBallSpeed();
         }
 
-        private void CalculatePlayerPosition(Player player)
+        private void CalculatePlayerPosition(Player player, long timePassedInTenthOfAMilliseconds)
         {
-            player.PositionY += player.DirectionY;
+            player.PositionY += player.DirectionY * timePassedInTenthOfAMilliseconds;
 
             if (player.PositionY >= GameInitializers.BORDER_HEIGHT - player.Height)
                 player.PositionY = GameInitializers.BORDER_HEIGHT - player.Height;
