@@ -1,15 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Management;
 using System.Runtime.InteropServices;
-using System.Threading;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using PingPongServer.ServerGame;
+using XSLibrary.ThreadSafety.Containers;
 using XSLibrary.ThreadSafety.Locks;
 using XSLibrary.Utility;
 
 namespace PingPongServer.GameExecution
 {
+    /// <summary>
+    /// 
+    /// General:
+    /// The purpose of this Class is to create multiple Threads which execute the Games. 
+    /// The responsibility of this class is to Load Balance each GamesExecutor to have around the same number of games and therefore around the same load (see AddGame Method)
+    /// 
+    /// Threading:
+    /// The number of Threads which will be started is equal to the number of LogicalCores (also called Threads/Hyperthreads).
+    /// Creating more threads would decrease performance, one previous approach was to have a Thread for each game which resulted in bad performance due to a lot of context switching.
+    /// 
+    /// CPU Load Balancing:
+    /// Also the threads won't be started all at once but instead will be evened out over time
+    /// 
+    /// ^ Thread Nr.
+    /// | |Thread 1|----------------------------remaining time
+    /// | |Thread 2|----------------------------remaining time
+    /// | |Thread 3|----------------------------remaining time
+    /// | |Thread 4|----------------------------remaining time
+    /// -------------------------------------------------> t/s
+    /// 
+    /// VS.
+    /// 
+    /// ^ Thread Nr.
+    /// | |Thread 1|-----------------------------remaining time
+    /// | ----------|Thread 2|-------------------remaining time
+    /// | --------------------|Thread 3|---------remaining time
+    /// | ------------------------------|Thread 4|emaining time
+    /// -------------------------------------------------> t/s
+    /// 
+    /// The period between awakening a sepcific GameExecutor is dependent on the frame rate.
+    /// So for a frame rate of 250 FPS => a 4 millisecond period is needed. 
+    /// The minimum time period on windows is 1 milli second.
+    /// This means if we have more logical cores than FramePeriod/MinimumTimerPeriod we need to start mutliple threads at once.
+    /// We'll call this CPULoadBalanceFactor . The CPU Balance Factor can be increased by decreasing the frame rate.
+    /// </summary>
     class GamesExecutorLoadBalancer : IDisposable
     {
         const uint TIME_CALLBACK_FUNCTION = 0x001;
@@ -22,47 +57,46 @@ namespace PingPongServer.GameExecution
         [DllImport("winmm.dll")]
         public static extern uint timeKillEvent(uint timerID);
 
-        List<GamesExecutor> GamesExecutors = new List<GamesExecutor>();
+        SafeList<GamesExecutor> GamesExecutors = new SafeList<GamesExecutor>();
         private LogWriterConsole Logger = new LogWriterConsole();
         private uint PhyiscalCoreCount = 1;
         private int LogicalCoreCount = 1;
-        private const uint FrameTime = 4;
-        private const uint TimeInterval = 1;
+        private const uint FrameTimeMilliseconds = 4; // Every 4 milliseconds => Framerate = 250 FPS
+        private const uint TimerIntervalMilliseconds = 1;
 
-        UnleashSignal[] WaitConditions = new UnleashSignal[TimeSlices];
+        // If we have more logical cores than FramePeriod/MinimumTimerPeriod we need to start mutliple threads at once.
+        private const uint CPULoadBalanceFactor = FrameTimeMilliseconds / TimerIntervalMilliseconds;
 
-        // need time slices because the minimum is still 1ms and we cant go lower than that
-        // this means if we have more cores than slices two or more of the cores will start at the same time
-        private const uint TimeSlices = FrameTime / TimeInterval;   
+        public int PlayersCurrentlyInGames()
+        {
+            int playersCurrentlyInGame = 0;
+            foreach(GamesExecutor executor in GamesExecutors.Entries)
+            {
+                playersCurrentlyInGame += executor.PlayersCurrentlyInGames();
+            }
+            return playersCurrentlyInGame;
+        }
+
+        UnleashSignal[] FrameWaitConditions = new UnleashSignal[CPULoadBalanceFactor];
+        
         GCHandle CallbackHandle;
         uint TimerID;
         int FireID = 0;
 
         public GamesExecutorLoadBalancer()
         {
+            Logger.LoadBalancerLog("Initialising...");
             GetPhysicalCoreCount();
             GetLogicalCoreCount();
-
-            for (int i = 0; i < TimeSlices; i++)
-                WaitConditions[i] = new UnleashSignal();
-
-            for (int id = 0; id < PhyiscalCoreCount; id++)
-            {
-                GamesExecutors.Add(new GamesExecutor(id, WaitConditions[id % (int)TimeSlices]));
-                ThreadStarter.ThreadpoolDebug("Executor Thread " + id.ToString(), GamesExecutors[id].Run);
-            }
-
-            TimerCallbackMethod callback = new TimerCallbackMethod(OnNextFrameTimed);
-            CallbackHandle = GCHandle.Alloc(callback, GCHandleType.Normal);
-
-            uint userCtx = 0;
-            TimerID = timeSetEvent(TimeInterval, 0, callback, ref userCtx, TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+            CreateFrameWaitConditions();
+            StartGamesExecutionThreads();
+            InitializeFrameTimer();
         }
 
         public void AddGame(Game game)
         {
             GamesExecutor LeastStressedExecutor = GamesExecutors[0];
-            foreach (GamesExecutor executor in GamesExecutors)
+            foreach (GamesExecutor executor in GamesExecutors.Entries)
             {
                 if (executor.GamesCount < LeastStressedExecutor.GamesCount)
                 {
@@ -75,17 +109,57 @@ namespace PingPongServer.GameExecution
 
         private void OnNextFrameTimed(uint id, uint msg, ref uint userCtx, uint rsv1, uint rsv2)
         {
-            FireID++;
-            if (FireID >= TimeSlices)
+            if (FireID >= CPULoadBalanceFactor)
                 FireID = 0;
+            FrameWaitConditions[FireID].Release();
+            FireID++;
+        }
 
-            WaitConditions[FireID].Release();
+        private void InitializeFrameTimer()
+        {
+            TimerCallbackMethod callback = new TimerCallbackMethod(OnNextFrameTimed);
+            CallbackHandle = GCHandle.Alloc(callback, GCHandleType.Normal);
+            uint userCtx = 0;
+            TimerID = timeSetEvent(TimerIntervalMilliseconds, 0, callback, ref userCtx, TIME_CALLBACK_FUNCTION | TIME_KILL_SYNCHRONOUS);
+        }
+
+        public bool RejoinClientToGame(NetworkConnection clientWantsRejoin)
+        {
+            foreach(GamesExecutor executor in GamesExecutors.Entries)
+            {
+                if(executor.RejoinClientToGame(clientWantsRejoin))
+                    return true;
+            }
+            return false;
+        }
+
+        private void StartGamesExecutionThreads()
+        {
+            Logger.LoadBalancerLog("Starting Games Executors according to Threadcount of CPU");
+            for (int id = 0; id < LogicalCoreCount; id++)
+            {
+                GamesExecutors.Add(new GamesExecutor(id, FrameWaitConditions[id % (int)CPULoadBalanceFactor]));
+                ThreadStarter.ThreadpoolDebug("Games Executor Thread " + id.ToString(), GamesExecutors[id].Run);
+            }
+            
+        }
+
+        private void CreateFrameWaitConditions()
+        {
+            for (int i = 0; i < CPULoadBalanceFactor; i++)
+                FrameWaitConditions[i] = new UnleashSignal();
         }
                
-
         private void GetLogicalCoreCount()
         {
             LogicalCoreCount = Environment.ProcessorCount;
+
+            // There must be at least one thread otherwise this program shouldn't be able to run. This is just a safe guard in case something is wrong with the lines above.
+            if (LogicalCoreCount == 0)
+            {
+                LogicalCoreCount = 1;
+            }
+            Logger.LoadBalancerLog("System has " + LogicalCoreCount.ToString() + " Threads");
         }
 
         private void GetPhysicalCoreCount()
@@ -95,17 +169,46 @@ namespace PingPongServer.GameExecution
             {
                 PhyiscalCoreCount += uint.Parse(item["NumberOfCores"].ToString());
             }
+
+            // There must be at least one core otherwise this program shouldn't be able to run. This is just a safe guard in case something is wrong with the lines above.
+            if (PhyiscalCoreCount == 0)
+            {
+                PhyiscalCoreCount = 1;
+            }
+
+            Logger.LoadBalancerLog("System has " + PhyiscalCoreCount.ToString() + " Physical Cores");
+                
+        }
+
+        public bool AddObserver(NetworkConnection observerConnection)
+        {
+            bool success = false;
+            foreach (GamesExecutor executor in GamesExecutors.Entries)
+            {
+                if (executor.AddObserversToGame(observerConnection))
+                {
+                    success = true;
+                    break;
+                }
+            }
+            return success;
         }
 
         public void Dispose()
         {
+            Logger.LoadBalancerLog("Dispose is being called and therefore being cleaned up nicely");
             timeKillEvent(TimerID);
 
-            foreach (GamesExecutor game in GamesExecutors)
-                game.Stop();
+            foreach (GamesExecutor gamesExecutor in GamesExecutors.Entries)
+            {
+                gamesExecutor.Stop();
+                GamesExecutors.Remove(gamesExecutor);
+            }
+                
 
-            foreach (UnleashSignal signal in WaitConditions)
+            foreach (UnleashSignal signal in FrameWaitConditions)
                 signal.Destroy();
+
         }
     }
 }
