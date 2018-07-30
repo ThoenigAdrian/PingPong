@@ -2,7 +2,6 @@
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using PingPongServer.ServerGame;
-using System;
 using System.Diagnostics;
 using XSLibrary.ThreadSafety.Containers;
 using XSLibrary.ThreadSafety.Locks;
@@ -40,8 +39,9 @@ namespace PingPongServer.GameExecution
                 {
                     if (game.GameState == GameStates.Finished)
                         Games.Remove(game);
-                    else
+                    else if(game.GameState == GameStates.Running)
                         game.CalculateNextFrame(((FrameDistanceWatch.ElapsedTicks*10000)/Stopwatch.Frequency));
+                        
                 }
                 FramesExecuted++;
                 FrameDistanceWatch.Restart();
@@ -65,16 +65,12 @@ namespace PingPongServer.GameExecution
 
         public bool AddObserversToGame(NetworkConnection observerConnection)
         {
-            bool success = false;
             foreach (Game game in Games.Entries)
             {
                 if (game.AddObserver(observerConnection))
-                {
-                    success = true;
-                    break;
-                }
+                    return true;
             }
-            return success;
+            return false;
         }
 
         private void ReportFrameRate()
@@ -125,7 +121,6 @@ namespace PingPongServer.GameExecution
                         + " with Session ID: " + clientWantsRejoin.ClientSession.SessionID + "to the Game with ID: " + game.GameID.ToString());
                     return true;
                 }
-                    
             }
             return false;
         }
