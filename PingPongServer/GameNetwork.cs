@@ -4,9 +4,10 @@ using NetworkLibrary.NetworkImplementations;
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
-using System.Net.Sockets;
+using NetworkLibrary.Utility;
 using XSLibrary.Network.Connections;
 using XSLibrary.Utility;
+
 
 namespace PingPongServer
 {
@@ -17,10 +18,12 @@ namespace PingPongServer
         public List<int> DiedSessions = new List<int>();
         public delegate void ClientLostEventHandler(object sender, EventArgs e);
         public event ClientLostEventHandler ClientLost;
+        private LogWriterConsole LogWriter = new LogWriterConsole();
         private UniqueIDGenerator SessionIDManager;
 
         public GameNetwork(UDPConnection UDPGameData, Logger Logger, UniqueIDGenerator sessionIDManager) : base (UDPGameData, Logger)
         {
+            LogWriter = (LogWriterConsole)Logger;
             SessionDied += SessionDiedHandler;
             SessionIDManager = sessionIDManager;
         }
@@ -79,6 +82,7 @@ namespace PingPongServer
             Disconnect();
             foreach (int sessionID in SessionIDs)
                 SessionIDManager.FreeID(sessionID);
+            LogWriter.NetworkLog("Tearing Down Network");
 
         }
 
