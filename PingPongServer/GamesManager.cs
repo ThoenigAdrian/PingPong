@@ -19,8 +19,7 @@ namespace PingPongServer
         private UniqueIDGenerator GamesIDGenerator = new UniqueIDGenerator();
         private UniqueIDGenerator SessionManager;
         private GamesExecutorLoadBalancer LoadBalancer = new GamesExecutorLoadBalancer();
-        private bool shutdownGameManager = false;
-        
+        private bool shutdownGameManager = false;   
 
         public GamesManager(UDPConnection MasterUDPSocket, UniqueIDGenerator sessionManager)
         {
@@ -49,6 +48,7 @@ namespace PingPongServer
             Logger.GamesManagerLog("GamesManager stopped");
         }
 
+        // Needs to have object as argument due to Thread Start Requirement from Library
         private void StartGame(object game)
         {
             Game gameToBeStarted = (Game)game;
@@ -65,14 +65,11 @@ namespace PingPongServer
             LoadBalancer.AddGame(gameToBeStarted);
         }
 
-        // Return true if client could rejoin the game
         public bool RejoinClientToGame(NetworkConnection conn)
         {
-            Logger.GamesManagerLog("Trying to rejoin a client with the session: " + conn.ClientSession.SessionID + " to the game.");
+            Logger.GamesManagerLog("Trying to rejoin a client with the session: " + conn.ClientSession.SessionID.ToString() + " to the game.");
             if(LoadBalancer.RejoinClientToGame(conn))
-            {
                 return true;
-            }
             return false;
         }
 
@@ -121,7 +118,7 @@ namespace PingPongServer
 
         public void OnMatchmadeGameFound(object sender, MatchmakingManager.MatchData match)
         {
-            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, SessionManager);
+            GameNetwork newGameNetwork = new GameNetwork(MasterUDPSocket, Logger, SessionManager);
             Game newGame = new Game(newGameNetwork, match.MaxPlayerCount, GamesIDGenerator);
 
             foreach (MatchmakingManager.ClientData client in match.Clients)

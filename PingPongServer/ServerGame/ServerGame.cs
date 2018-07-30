@@ -216,7 +216,6 @@ namespace PingPongServer.ServerGame
             BroadcastGameFinishedPackage();
             Logger.GameLog("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
             Thread.Sleep(TeardownDelaySeconds * 1000);
-            Logger.NetworkLog("Tearing Down Network");
             Network.Close();
             GameState = GameStates.Finished;
         }
@@ -283,7 +282,8 @@ namespace PingPongServer.ServerGame
             if (gameOver)
             {
                 Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
-                StopGame();
+                Thread StopGameThread = new Thread(StopGame);
+                StopGameThread.Name = "StopGameThread: " + GameID.ToString();
             }
                 
         }
