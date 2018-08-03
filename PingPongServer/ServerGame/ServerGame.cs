@@ -21,6 +21,7 @@ namespace PingPongServer.ServerGame
         public int Tickrate = 100;
         public int GameID = 0;
         public int NumberOfPlayers;
+        public HashSet<Player> DisconnectedPlayers = new HashSet<Player>();
         private GameNetwork Network;
         private List<Client> Clients = new List<Client>();
         private ServerDataPackage NextFrame;
@@ -249,43 +250,44 @@ namespace PingPongServer.ServerGame
         private void OnClientLost(object sender, EventArgs e)
         {
             Logger.GameLog("Client Lost Event called");
-            bool gameOver = true;
-            List<Player> DisconnectedPlayers = new List<Player>();
 
-            foreach (Client c in Clients)
+            foreach (Client client in Clients)
             {
                 Logger.GameLog("Iterating over clients");
-                if (Network.DiedSessions.Contains(c.SessionID))
+                if (Network.DiedSessions.Contains(client.SessionID))
                 {
-                    Logger.GameLog("Adding Client to disconnected Clients, Session ID:" + c.SessionID);
-                    DisconnectedPlayers.AddRange(c.Players);
+                    Logger.GameLog("Adding Client to disconnected Clients, Session ID:" + client.SessionID);
+                    DisconnectedPlayers.UnionWith(client.Players);
                 }
-                    
             }
-                
+            if (AllPlayersOfOneTeamDisconnected())
+            {
+                Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
+                Thread StopGameThread = new Thread(StopGame);
+                StopGameThread.Name = "StopGameThread: " + GameID.ToString();
+                StopGameThread.Start();
+            }
 
-            foreach(GameStructure.GameTeam team in GameStructure.GameTeams.Values)
+        }
+
+        private bool AllPlayersOfOneTeamDisconnected()
+        {
+            bool gameOver = true;
+            foreach (GameStructure.GameTeam team in GameStructure.GameTeams.Values)
             {
                 Logger.GameLog("Iterating over players");
-                foreach (Player p in team.PlayerList)
+                foreach (Player player in team.PlayerList)
                 {
-                    if (!DisconnectedPlayers.Contains(p))
+                    if (!DisconnectedPlayers.Contains(player))
                     {
                         Logger.GameLog("Player not in disconnected Players");
                         gameOver = false;
                         break;
                     }
-
                 }
             }
 
-            if (gameOver)
-            {
-                Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
-                Thread StopGameThread = new Thread(StopGame);
-                StopGameThread.Name = "StopGameThread: " + GameID.ToString();
-            }
-                
+            return gameOver;
         }
 
         public override string ToString()
@@ -296,9 +298,9 @@ namespace PingPongServer.ServerGame
                 str += "\n\tTeam :" + team.Key;
                 str += team.Value.ToString();
             }
-            foreach(Client c in Clients)
+            foreach(Client client in Clients)
             {
-                str += c.ToString();
+                str += client.ToString();
             }
             return str;
         }
@@ -355,43 +357,33 @@ namespace PingPongServer.ServerGame
 
             return NextFrame;
         }
-        
-        private ClientControls GetLastPlayerControl(int playerID)
-        {
-            List<ClientControlPackage> cc = new List<ClientControlPackage>();
-            foreach (Client c in Clients)
-            {
-                PackageInterface[] ps = GetClientData(c.SessionID);
-                foreach(PackageInterface p in ps)
-                {
-                    if (p == null || p.PackageType != PackageType.ClientControl)
-                        continue;
-                    cc.Add((ClientControlPackage)p);
-                }
-            }
-            return cc[cc.Count - 1].ControlInput;
-        }
 
         private ClientMovement GetLastPlayerMovement(int playerID)
         {
-            List<PlayerMovementPackage> cc = new List<PlayerMovementPackage>();
-            foreach (Client c in Clients)
+            Client clientMatchingPlayerID = null;
+            List<PlayerMovementPackage> allPlayerMovementPackagesSinceLastFrame = new List<PlayerMovementPackage>();
+            foreach (Client clientCandidate in Clients)
             {
-                PackageInterface[] ps = GetClientData(c.SessionID);
-                foreach (PackageInterface p in ps)
+                foreach (Player player in clientCandidate.Players)
                 {
-                    PlayerMovementPackage movementPackage = p as PlayerMovementPackage;
-
-                    if (movementPackage == null || movementPackage.PackageType != PackageType.ClientPlayerMovement)
-                        continue;
-
-                    if(movementPackage.PlayerID == playerID)
-                        cc.Add((PlayerMovementPackage)p);
+                    if(player.ID == playerID)
+                        clientMatchingPlayerID = clientCandidate;
                 }
             }
-            if (cc.Count == 0)
+            PackageInterface[] allClientPackages = GetClientData(clientMatchingPlayerID.SessionID);
+            foreach (PackageInterface receivedPackage in allClientPackages)
+            {
+                if (receivedPackage == null || receivedPackage.PackageType != PackageType.ClientPlayerMovement)
+                    continue;   // Ignore irrelevant packages either it's null because there was something invalid or it's not a ClientPlayerMovement Package but something else instead
+
+                PlayerMovementPackage movementPackage = receivedPackage as PlayerMovementPackage;
+
+                if(movementPackage.PlayerID == playerID)
+                    allPlayerMovementPackagesSinceLastFrame.Add(movementPackage);
+            }
+            if (allPlayerMovementPackagesSinceLastFrame.Count == 0)
                 return ClientMovement.NoInput;
-            return cc[cc.Count - 1].PlayerMovement;
+            return allPlayerMovementPackagesSinceLastFrame[allPlayerMovementPackagesSinceLastFrame.Count - 1].PlayerMovement;
         }              
                         
     }

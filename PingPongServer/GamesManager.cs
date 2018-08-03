@@ -123,7 +123,13 @@ namespace PingPongServer
 
             foreach (MatchmakingManager.ClientData client in match.Clients)
             {
-                newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements());
+                if (!newGame.AddClient(client.m_clientConnection, client.m_request.GetPlayerPlacements()))
+                {
+                    Logger.GamesManagerLog("The client couldn't be added to the game, either the matchmaking algorithm is flawed or the AddClient Method");
+                    Logger.GamesManagerLog("The client consists of the following placement request" + client.m_request.GetPlayerPlacements().ToString());
+                    Logger.GamesManagerLog("The game object looks like this: " + newGame.ToString());
+                    throw new System.Exception("The client couldn't be added to the game, either the matchmaking algorithm is flawed or the AddClient Method");
+                }   
             }
 
             GamesReadyToBeStarted.Add(newGame);

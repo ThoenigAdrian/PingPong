@@ -63,16 +63,6 @@ namespace GameLogicLibrary.GameObjects
             }                            
         }
 
-        public int GetFreeTeam()
-        {
-            foreach (KeyValuePair<int, GameTeam> Team in GameTeams)
-            {
-                if (Team.Value.PlayerList.Count < maxPlayers / TEAM_COUNT)
-                    return Team.Key;
-            }
-            return 0;
-        }
-
         public Player[] GetAllPlayers()
         {
             List<Player> allPlayers = new List<Player>();
