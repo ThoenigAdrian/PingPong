@@ -103,7 +103,7 @@ namespace PingPongServer.GameExecution
                     LeastStressedExecutor = executor;
                 }
             }
-            game.StartGame(this);
+            game.StartGame();
             LeastStressedExecutor.AddGame(game);
         }
 

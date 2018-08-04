@@ -50,7 +50,7 @@ namespace PingPongServer.ServerGame
             GameEngine.OnGameFinished += HandleFinishedGame;
         }
 
-        public void StartGame(object caller)
+        public void StartGame()
         {
             lock(GameStateLock)
             {
@@ -171,6 +171,7 @@ namespace PingPongServer.ServerGame
                 foreach (Player player in packet.m_players)
                     player.Controllable = false;
                 connection.SendTCP(packet);
+                connection.SendTCP(GenerateScorePackage());
                 Network.AddObserver(connection);
                 added = true;
             }
