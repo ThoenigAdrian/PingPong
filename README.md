@@ -5,7 +5,7 @@ This Game is based on the classic Ping Pong Game which was one of the first game
 
 We are hosting a Server on: x.x.x.x to which you can connect to for trying it out (for an indefinte period of time) . 
 
-[PingPongPreview.gif]
+![](PingPongPreview.gif)
 
 
 ## Features 
@@ -17,7 +17,7 @@ Multiple Players can play on the same keyboard, so you can also play with your f
 
 ### Ser
 
-# How to build the Client
+## How to build the Client
 
 The project was developed with Visual Studio 2017 in C# 
 Additionally you need XNA: follow this setup guide for Visual Studio 2017 : http://flatredball.com/visual-studio-2017-xna-setup/
@@ -28,7 +28,7 @@ Additionally you need XNA: follow this setup guide for Visual Studio 2017 : http
 4. (Optional) Change build type to Debug or Release
 5. Click Start in Visual Studio
 
-# How to build the Server
+## How to build the Server
 
 The project was developed with Visual Studio 2017 in C# 
 
@@ -38,7 +38,7 @@ The project was developed with Visual Studio 2017 in C#
 4. (Optional) Change build type to Debug or Release
 5. Click Start in Visual Studio
 
-# Used Libraries
+## Used Libraries
 ### XS Library
 This PingPong project heavily uses the XSLibrary which contains useful code for mutlithreading and networking (as well as other things) 
 Check it out here: https://github.com/CaptainOachkatzl/XSLibrary . 
