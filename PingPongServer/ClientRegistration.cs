@@ -39,7 +39,7 @@ namespace PingPongServer
         Thread m_registrationThread;
         volatile private bool m_abort = false;
 
-        public int RegisteredPlayersCount { get { return ConnectionsReadyForQueingUpToMatchmaking.Count; } }
+        public int RegisteredPlayersCount { get { return ConnectionsReadyForQueingUpToMatchmaking.Count + AcceptedConnections.Count; } }
 
         public ClientRegistration(ServerConfiguration config, GameLogger log, RejoinClientToGame rejoinCallback, UniqueIDGenerator sessionIDGenerator)
         {
