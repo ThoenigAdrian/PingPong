@@ -6,16 +6,34 @@ This Game is based on the classic Ping Pong Game which was one of the first game
 We are hosting a Server on: x.x.x.x to which you can connect to for trying it out (for an indefinte period of time) . 
 
 ![](PingPongPreview.gif)
+![](PingPongEndGameScreen.gif)
 
 
 ## Features 
 ### Rejoining a Game
-### Matchmaking
-Search for games and the server will automatically connect you with other players who als want to play
-### Multi Player Local
-Multiple Players can play on the same keyboard, so you can also play with your friends
+You lost connection during the game ? Maybe due to your unreliable internet connection or because someone plugged your network cable. 
+No Problem just reconnect with your previous session and you will be able to rejoin your game
 
-### Ser
+![](PingPongRejoin.gif)
+
+### Matchmaking
+
+Search for games and the server will automatically connect you with other players who als want to play
+
+
+### Multi Player Local
+
+Multiple Players can play on the same keyboard, so you can also play with your friends on the same Machine.
+You will just be using different keys (UP, DOWN) and the other might use 2 and 8 for example.
+
+
+### Observer
+
+You don't feel like playing ping pong today ? But you still need to feed your Ping Pong Addiction ? 
+Observer mode allows you to secretly watch other people play the game.
+
+![](PingPongObserver.gif)
+
 
 ## How to build the Client
 
