@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stresstester", "Stresstester\Stresstester.csproj", "{0D081106-AAAC-4721-B02D-B67D0430D0B3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AA01E32B-AB68-49A5-AD9E-07E955D3B357} = {AA01E32B-AB68-49A5-AD9E-07E955D3B357}
+		{212421D7-F509-4477-A78D-BA638AB63EB1} = {212421D7-F509-4477-A78D-BA638AB63EB1}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkLibrary", "..\..\NetworkLibrary\NetworkLibrary.csproj", "{AA01E32B-AB68-49A5-AD9E-07E955D3B357}"
@@ -13,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSUtility", "..\..\XSLibrary\XSLibrary\XSUtility\XSUtility.csproj", "{A37C8BF1-08E7-46BB-8F9E-536A82365FED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSNetwork", "..\..\XSLibrary\XSLibrary\XSNetwork\XSNetwork.csproj", "{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameLogicLibrary", "..\..\GameLogicLibrary\GameLogicLibrary.csproj", "{212421D7-F509-4477-A78D-BA638AB63EB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +39,10 @@ Global
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36A1D62E-EA81-4B77-AB0B-6753A7F394ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{212421D7-F509-4477-A78D-BA638AB63EB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

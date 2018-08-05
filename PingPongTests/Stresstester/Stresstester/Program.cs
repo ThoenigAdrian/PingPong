@@ -13,6 +13,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using NetworkLibrary.Utility;
+using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
+using NetworkLibrary.DataPackages.ServerSourcePackages;
+using GameLogicLibrary;
+using GameLogicLibrary.GameObjects;
 
 namespace Stresstester
 {
@@ -27,8 +31,26 @@ namespace Stresstester
         {
             
             Logger.Log("Test");
-            HighResolutionTest();
-            MidResoultionTest();
+            CreateDemoClient();
+            // openMultipleGames(100);
+            /*IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
+            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            connectionSocket.Connect(server);
+            TCPPacketConnection conn = new TCPPacketConnection(connectionSocket);
+            Thread.Sleep(5000);
+            conn.Disconnect();
+            //HighResolutionTest();
+            //MidResoultionTest();*/
+        }
+
+        static void CreateDemoClient()
+        {
+            Thread RandomClientThread = new Thread(randomClient);
+            RandomClientThread.Name = "Random Client";
+            RandomClientThread.Start();
+            Thread ProGamerClientThread = new Thread(proGamerClient);
+            ProGamerClientThread.Name = "Pro Client";
+            ProGamerClientThread.Start();
         }
 
         static void HighResolutionTest()
@@ -114,6 +136,42 @@ namespace Stresstester
             } while (Console.In.ReadLine() != "exit");
         }
 
+        static void open8PlayersGame(TCPPacketConnection conn)
+        {
+            ClientSessionRequest sessionRequest = new ClientSessionRequest();
+            sessionRequest.Reconnect = false;
+            sessionRequest.ReconnectSessionID = 0;
+
+            sendWithAdapter(conn, sessionRequest);
+
+            ClientInitializeGamePackage initGame = new ClientInitializeGamePackage();
+            initGame.GamePlayerCount = 6;
+            initGame.PlayerTeamwish = new int[3];
+            initGame.PlayerTeamwish[0] = 0;
+            initGame.PlayerTeamwish[1] = 1;
+            initGame.PlayerTeamwish[2] = 0;
+            sendWithAdapter(conn, initGame);
+
+        }
+
+        static void open8PlayersGame2(TCPPacketConnection conn)
+        {
+            ClientSessionRequest sessionRequest = new ClientSessionRequest();
+            sessionRequest.Reconnect = false;
+            sessionRequest.ReconnectSessionID = 0;
+
+            sendWithAdapter(conn, sessionRequest);
+
+            ClientInitializeGamePackage initGame = new ClientInitializeGamePackage();
+            initGame.GamePlayerCount = 6;
+            initGame.PlayerTeamwish = new int[3];
+            initGame.PlayerTeamwish[0] = 1;
+            initGame.PlayerTeamwish[1] = 0;
+            initGame.PlayerTeamwish[2] = 1;
+            sendWithAdapter(conn, initGame);
+
+        }
+
         static void openGame(TCPPacketConnection conn)
         {
             ClientSessionRequest sessionRequest = new ClientSessionRequest();
@@ -129,6 +187,137 @@ namespace Stresstester
             initGame.PlayerTeamwish[1] = 1;
             sendWithAdapter(conn, initGame);
            
+        }
+
+        static void randomClient()
+        {
+            IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
+            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            connectionSocket.Connect(server);
+            TCPPacketConnection conn = new TCPPacketConnection(connectionSocket);
+            connections.Add(conn);
+            open8PlayersGame(conn);
+            NetworkConnection networkConn = new NetworkConnection(conn);
+            UDPConnection c = new UDPConnection(conn.Local);
+            c.InitializeReceiving();
+            networkConn.SetUDPConnection(c);
+            List<int> playerIDs = new List<int>();
+            while (true)
+            {
+                PackageInterface p = networkConn.ReadTCP();
+                if (p != null && p.PackageType == PackageType.ServerPlayerIDResponse)
+                {
+                    ServerInitializeGameResponse ps = p as ServerInitializeGameResponse;
+                    foreach(Player pl in ps.m_players)
+                    {
+                        if (pl.Controllable)
+                            playerIDs.Add(pl.ID);
+                    }
+                    break;
+                    
+                }
+                else
+                {
+                    Thread.Sleep(500);
+                }
+                    
+                
+            }
+            
+            while (true)
+            {
+                foreach (int playerID in playerIDs)
+                {
+                    sendRandomMovemet(networkConn, playerID);
+                    Thread.Sleep(RandomGenerator.Next(200));
+                }
+                
+            }
+        }
+
+        static void proGamerClient()
+        {
+            IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
+            Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            connectionSocket.Connect(server);
+            TCPPacketConnection conn = new TCPPacketConnection(connectionSocket);
+            connections.Add(conn);
+            open8PlayersGame(conn);
+            NetworkConnection networkConn = new NetworkConnection(conn);
+            UDPConnection c = new UDPConnection(conn.Local);
+            c.InitializeReceiving();
+            networkConn.SetUDPConnection(c);
+            List<int> playerIDs = new List<int>();
+            while (true)
+            {
+                PackageInterface p = networkConn.ReadTCP();
+                if (p != null && p.PackageType == PackageType.ServerPlayerIDResponse)
+                {
+                    ServerInitializeGameResponse ps = p as ServerInitializeGameResponse;
+                    foreach (Player pl in ps.m_players)
+                    {
+                        if (pl.Controllable)
+                            playerIDs.Add(pl.ID);
+                    }
+                    break;
+
+                }
+                else
+                {
+                    Thread.Sleep(100);
+                }
+
+
+            }
+
+            while (true)
+            {
+                foreach (int playerID in playerIDs)
+                {
+                    sendMovementToMatchBall(networkConn, playerID);
+                }
+                Thread.Sleep(100);
+
+            }
+        }
+
+        static void sendMovementToMatchBall(NetworkConnection conn, int playerID)
+        {
+            ServerDataPackage s = conn.ReadUDP() as ServerDataPackage;
+            PlayerMovementPackage movementPackage = new PlayerMovementPackage();
+            RawPlayer correctPlayer = null;
+            movementPackage.PlayerID = playerID;
+            if (s == null)
+                return;
+            foreach(RawPlayer p in s.Players)
+            {
+                if (p.ID == playerID)
+                {
+                    correctPlayer = p;
+                    break;
+                }
+                    
+            }
+            if (s.Ball.PositionY < correctPlayer.PositionY + GameInitializers.GetPlayerHeight(8)/2)
+            {
+                movementPackage.PlayerMovement = ClientMovement.Up;
+            }
+            else
+            {
+                movementPackage.PlayerMovement = ClientMovement.Down;
+            }
+            conn.SendTCP(movementPackage);
+        }
+
+        static void sendRandomMovemet(NetworkConnection conn, int playerID)
+        {
+            List<ClientMovement> movements = new List<ClientMovement> { ClientMovement.Down, ClientMovement.Up, ClientMovement.StopMoving, ClientMovement.NoInput };
+            ServerDataPackage s = conn.ReadUDP() as ServerDataPackage;
+            PlayerMovementPackage movementPackage = new PlayerMovementPackage();
+            movementPackage.PlayerID = playerID;
+            movementPackage.PlayerMovement = movements[RandomGenerator.Next(4)];
+            conn.SendTCP(movementPackage);
+
         }
 
         static void closeGame(TCPPacketConnection conn)
