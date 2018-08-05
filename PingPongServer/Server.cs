@@ -52,6 +52,7 @@ namespace PingPongServer
 
             GamesManager = new GamesManager(MasterUDPSocket, SessionIDGenerator);
             MatchManager.OnMatchFound += GamesManager.OnMatchmadeGameFound;
+            MatchManager.TotalPlayersOnlineCallback += NumberOfPlayersOnline;
 
             Registration = new ClientRegistration(ServerConfiguration, Logger, GamesManager.RejoinClientToGame, SessionIDGenerator);
             Registration.OnMatchmakingRequest += HandleMatchmakingRequest;
@@ -82,9 +83,7 @@ namespace PingPongServer
                     MatchManager.AddClientToQueue(request.Connection, request.InitData);
                 }
 
-                MatchManager.TotalPlayersOnline = NumberOfPlayersOnline();
                 MatchManager.Update();
-
                 Thread.Sleep(1000); // Sleep so we don't hog CPU Resources 
             }
         }
