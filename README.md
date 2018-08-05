@@ -5,7 +5,7 @@ This Game is based on the classic Ping Pong Game which was one of the first game
 
 We are hosting a Server on: x.x.x.x to which you can connect to for trying it out (for an indefinte period of time) . 
 
-![](PingPongPreview.gif) ![](PingPongEndGameScreen.gif)
+![](PingPongPreview.gif)
 
 
 ## Features 
@@ -33,6 +33,9 @@ Observer mode allows you to secretly watch other people play the game.
 
 ![](PingPongObserver.gif)
 
+### Game Over Screen
+Also a Game Over Animation because why not :) . 
+ ![](PingPongEndGameScreen.gif)
 
 ## How to build the Client
 
