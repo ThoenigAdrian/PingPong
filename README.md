@@ -5,8 +5,7 @@ This Game is based on the classic Ping Pong Game which was one of the first game
 
 We are hosting a Server on: x.x.x.x to which you can connect to for trying it out (for an indefinte period of time) . 
 
-![](PingPongPreview.gif)
-![](PingPongEndGameScreen.gif)
+![](PingPongPreview.gif) ![](PingPongEndGameScreen.gif)
 
 
 ## Features 
