@@ -6,12 +6,12 @@ using PingPongServer.ServerGame.ServerGameObjects;
 
 using GameLogicLibrary;
 using GameLogicLibrary.GameObjects;
-using XSLibrary.ThreadSafety.Containers;
 
 using NetworkLibrary.DataPackages;
 using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
+using XSLibrary.Utility;
 
 namespace PingPongServer.ServerGame
 {
@@ -30,7 +30,8 @@ namespace PingPongServer.ServerGame
         private GameEngine GameEngine;
         private LogWriterConsole Logger = new LogWriterConsole();
         private int SleepTimeMillisecondsBetweenTicks { get { return 1000 / Tickrate; } set { } }
-        private int TeardownDelaySeconds = 60;
+        private const int TeardownDelaySeconds = 60;
+        OneShotTimer CloseTimer = new OneShotTimer(TeardownDelaySeconds * 1000 * 1000, false);
         private object GameStateLock = new object();
         UniqueIDGenerator GamesIDGenerator;
 
@@ -211,15 +212,23 @@ namespace PingPongServer.ServerGame
             {
                 GameState = GameStates.Aborted;
             }
+            CloseTimer.Restart();
+
             Logger.GameLog("This was the final point");
             Logger.GameLog("Final Score: Team Red: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam Blue: " + GameStructure.GameTeams[1].score.ToString());
             Logger.GameLog("Game finished");
             Logger.GameLog("Sending final Game finished to the Clients");
             BroadcastGameFinishedPackage();
             Logger.GameLog("Game Finished Package has been sent waiting " + TeardownDelaySeconds.ToString() + " seconds before tearing down the network");
-            Thread.Sleep(TeardownDelaySeconds * 1000);
-            Network.Close();
-            GameState = GameStates.Finished;
+        }
+
+        public void FinalizeAbortedGame()
+        {
+            if (CloseTimer || DisconnectedPlayers.Count == NumberOfPlayers)
+            {
+                Network.Close();
+                GameState = GameStates.Finished;
+            }
         }
 
         private void BroadcastGameFinishedPackage()
@@ -264,9 +273,7 @@ namespace PingPongServer.ServerGame
             if (AllPlayersOfOneTeamDisconnected())
             {
                 Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
-                Thread StopGameThread = new Thread(StopGame);
-                StopGameThread.Name = "StopGameThread: " + GameID.ToString();
-                StopGameThread.Start();
+                StopGame();
             }
 
         }

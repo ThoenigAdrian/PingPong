@@ -39,8 +39,10 @@ namespace PingPongServer.GameExecution
                 {
                     if (game.GameState == GameStates.Finished)
                         Games.Remove(game);
-                    else if(game.GameState == GameStates.Running)
-                        game.CalculateNextFrame(((FrameDistanceWatch.ElapsedTicks*10000)/Stopwatch.Frequency));
+                    else if (game.GameState == GameStates.Aborted)
+                        game.FinalizeAbortedGame();
+                    else if (game.GameState == GameStates.Running)
+                        game.CalculateNextFrame(((FrameDistanceWatch.ElapsedTicks * 10000) / Stopwatch.Frequency));
                         
                 }
                 FramesExecuted++;
