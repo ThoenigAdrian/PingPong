@@ -115,7 +115,7 @@ namespace PingPongServer.ServerGame
         public bool RejoinClient(NetworkConnection client)
         {
             bool couldRejoin = false;
-            // rejoin is only justified when the client connection died. If it's still connection we want to avoid rejoin since this would get messy
+            // rejoin is only justified if the client connection died. If it's still connected we want to avoid rejoin since this would get messy
             bool rejoinJustified = !Network.ClientStillConnected(client.ClientSession.SessionID);
             Client correctClient = null;
             foreach (Client c in Clients)
@@ -255,7 +255,7 @@ namespace PingPongServer.ServerGame
             foreach (Client client in Clients)
             {
                 Logger.GameLog("Iterating over clients");
-                if (Network.DiedSessions.Contains(client.SessionID))
+                if (Network.DeadSessions.Contains(client.SessionID))
                 {
                     Logger.GameLog("Adding Client to disconnected Clients, Session ID:" + client.SessionID);
                     DisconnectedPlayers.UnionWith(client.Players);
