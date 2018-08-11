@@ -45,7 +45,7 @@ namespace PingPongServer
             ServerConfiguration = new ServerConfiguration();
 
             UDPConnection MasterUDPSocket = new UDPConnection(new IPEndPoint(IPAddress.Any, ServerConfiguration.ServerPort));
-            MasterUDPSocket.OnDisconnect += MasterUDPSocket_OnDisconnect;
+            MasterUDPSocket.OnDisconnect.Event += MasterUDPSocket_OnDisconnect;
             MasterUDPSocket.Logger = Logger;
 
             SessionIDGenerator = new UniqueIDGenerator();
