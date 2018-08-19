@@ -4,15 +4,15 @@ using NetworkLibrary.Utility;
 using System;
 using System.Net;
 using XSLibrary.Network.Connections;
-using XSLibrary.ThreadSafety;
 using XSLibrary.ThreadSafety.Containers;
+using XSLibrary.ThreadSafety.Events;
 
 namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 {
+    using DisconnectEvent = IEvent<NetworkConnection, IPEndPoint>;
+
     public class NetworkConnection : IDisposable
     {
-        class DisconnectEvent : AutoInvokeEvent<NetworkConnection, EndPoint> { }
-        
         public event DisconnectEvent.EventHandle ConnectionDiedEvent
         {
             add { OnDisconnect.Event += value; }
@@ -42,7 +42,6 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
         {
             Adapter = adapter;
 
-            OnDisconnect = new DisconnectEvent();
             TcpPackages = new SafeStack<PackageInterface>();
             m_openResponses = new SafeList<ResponseRequest>();
 
@@ -53,9 +52,10 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
             TcpConnection = tcpConnection;
             RemoteEndPoint = tcpConnection.Remote;
+            OnDisconnect = TcpConnection.OnDisconnect.CreateRelay(this);
 
             TcpConnection.DataReceivedEvent += ReceiveTCP;
-            TcpConnection.OnDisconnect += HandleDisconnect;
+            TcpConnection.OnDisconnect.Event += HandleDisconnect;
             TcpConnection.InitializeReceiving();
         }
 
@@ -79,14 +79,12 @@ namespace NetworkLibrary.NetworkImplementations.ConnectionImplementations
 
         public void CloseConnection()
         {
-            TcpConnection.OnDisconnect -= HandleDisconnect;
+            TcpConnection.OnDisconnect.Event -= HandleDisconnect;
             TcpConnection.DataReceivedEvent -= ReceiveTCP;
             if (UdpConnection != null)
                 UdpConnection.DataReceivedEvent -= ReceiveUDP;
 
             TcpConnection.Disconnect();
-
-            OnDisconnect.Invoke(this, TcpConnection.Remote);
         }
 
         public void SendTCP(PackageInterface package)
