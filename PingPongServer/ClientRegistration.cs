@@ -18,8 +18,6 @@ namespace PingPongServer
         public delegate void ConnectionStateChangedHandler(object sender, NetworkConnection connection);
 
         public delegate void ClientRequestHandler(object sender, NetworkConnection connection, PackageInterface request);
-        public event ClientRequestHandler OnSessionRequest;
-        public event ClientRequestHandler OnGameRequest;
         public event ClientRequestHandler OnMatchmakingRequest;
 
         public delegate void ObserverRequestHandler(object sender, NetworkConnection connection);
@@ -51,9 +49,6 @@ namespace PingPongServer
 
         private void InitRegistration(ServerConfiguration config)
         {
-            OnSessionRequest += HandleSessionRequest;
-            OnGameRequest += HandleGameRequest;
-
             ConnectionAccepter = new TCPAccepter(config.ServerPort, config.MaximumNumberOfIncomingConnections);
             ConnectionAccepter.ClientConnected += OnSocketAccept;
         }
@@ -108,11 +103,11 @@ namespace PingPongServer
                 return;
 
             if (newPacket.PackageType == PackageType.ClientSessionRequest)
-                OnSessionRequest?.Invoke(this, networkConnection, newPacket);
+                HandleSessionRequest(networkConnection, newPacket);
 
         }
 
-        private void HandleSessionRequest(object sender, NetworkConnection connection, PackageInterface request)
+        private void HandleSessionRequest(NetworkConnection connection, PackageInterface request)
         {
             ClientSessionRequest packet = (ClientSessionRequest)request;
 
@@ -171,11 +166,11 @@ namespace PingPongServer
                 return;
 
             if (newPacket.PackageType == PackageType.ClientInitalizeGamePackage)
-                OnGameRequest?.Invoke(this, networkConnection, newPacket);
+                HandleGameRequest(networkConnection, newPacket);
         }
 
 
-        private void HandleGameRequest(object sender, NetworkConnection connection, PackageInterface request)
+        private void HandleGameRequest(NetworkConnection connection, PackageInterface request)
         {
             ClientInitializeGamePackage initPackage = request as ClientInitializeGamePackage;
             switch (initPackage.Request)
