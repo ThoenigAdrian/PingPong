@@ -45,8 +45,10 @@ Additionally you need XNA: follow this setup guide for Visual Studio 2017 : http
 1. git clone git@github.com:ThoenigAdrian/PingPong.git 
 2. git submodule update --init
 3. Open PingPongClient/PingPongClient.sln with Visual Studio 2017
-4. (Optional) Change build type to Debug or Release
-5. Click Start in Visual Studio
+4. In case you get a Error Message about: Project Target Framework Not Installed regarding ManagedOpenSsl (see image below) - make sure to install .NET Framework 2.0 (included with .NET Framework 3.5) you can get it from here
+![](BuildTutorialOpenSSL.png)
+5. (Optional) Change build type to Debug or Release
+6. Click Start in Visual Studio
 
 ## How to build the Server
 
@@ -55,8 +57,10 @@ The project was developed with Visual Studio 2017 in C#
 1. git clone git@github.com:ThoenigAdrian/PingPong.git 
 2. git submodule update --init
 3. Open PingPongServer/PingPongServer.sln with Visual Studio 2017
-4. (Optional) Change build type to Debug or Release
-5. Click Start in Visual Studio
+4. In case you get a Error Message about: Project Target Framework Not Installed regarding ManagedOpenSsl (see image below) - make sure to install .NET Framework 2.0 (included with .NET Framework 3.5) you can get it from here
+![](BuildTutorialOpenSSL.png)
+5. (Optional) Change build type to Debug or Release
+6. Click Start in Visual Studio
 
 ## Used Libraries
 ### XS Library
