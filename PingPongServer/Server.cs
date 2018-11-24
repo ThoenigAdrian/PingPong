@@ -17,7 +17,7 @@ namespace PingPongServer
 
         private ClientRegistration Registration { get; set; }
         private UniqueIDGenerator SessionIDGenerator = new UniqueIDGenerator();
-        private MatchmakingManager MatchManager = new MatchmakingManager();
+        private MatchmakingManager MatchManager;
         private GamesManager GamesManager;
 
         // Logging
@@ -51,6 +51,7 @@ namespace PingPongServer
             SessionIDGenerator = new UniqueIDGenerator();
 
             GamesManager = new GamesManager(MasterUDPSocket, SessionIDGenerator);
+            MatchManager = new MatchmakingManager(SessionIDGenerator);
             MatchManager.OnMatchFound += GamesManager.OnMatchmadeGameFound;
             MatchManager.TotalPlayersOnlineCallback += NumberOfPlayersOnline;
 

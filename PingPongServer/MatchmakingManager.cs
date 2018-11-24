@@ -21,6 +21,7 @@ namespace PingPongServer
         private int MatchmakingRefreshIntervalInSeconds = 5;
         private OneShotTimer UpdateMatchmakingQueue;
         private Matchmaker Matchmaking { get; set; } = new Matchmaker();
+        private UniqueIDGenerator SessionIDGenerator;
         public Func<int> TotalPlayersOnlineCallback { get; internal set; }
 
         const string WAITING_IN_QUEUE = "Waiting for additional players to start the game... \nPlayers online: {0} \nPlayers searching: {1} ";
@@ -38,8 +39,9 @@ namespace PingPongServer
             public Request m_request;
         }
 
-        public MatchmakingManager()
+        public MatchmakingManager(UniqueIDGenerator sessionIDGenerator)
         {
+            SessionIDGenerator = sessionIDGenerator;
             UpdateMatchmakingQueue = new OneShotTimer(MatchmakingRefreshIntervalInSeconds * 1000000, true);
         }
 
@@ -173,6 +175,7 @@ namespace PingPongServer
         {
             client.ConnectionDiedEvent -= RemoveConnection;
             m_waitingClientConnections.Remove(client);
+            SessionIDGenerator.FreeID(client.ClientSession.SessionID);
         }
 
         private void RemoveConnection(NetworkConnection connection, EndPoint remote)
