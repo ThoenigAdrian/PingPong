@@ -14,7 +14,6 @@ namespace PingPongServer.GameExecution
         SafeList<Game> Games = new SafeList<Game>();
         UnleashSignal FrameTimer;
         Stopwatch FrameRateReportWatch = new Stopwatch();
-        Stopwatch FrameDistanceWatch = new Stopwatch();
         public int GamesCount { get { return Games.Count; } set { } }
         public uint ReportFrameRateIntervalInSeconds = 30;
         public uint FramesExecuted = 0;
@@ -30,11 +29,9 @@ namespace PingPongServer.GameExecution
         public void Run()
         {
             FrameRateReportWatch.Start();
-            FrameDistanceWatch.Start();
             while (!StopExecutor)
             {
                 FrameTimer.Lock();
-                FrameDistanceWatch.Stop();
                 foreach(Game game in Games.Entries)
                 {
                     if (game.GameState == GameStates.Finished)
@@ -42,11 +39,10 @@ namespace PingPongServer.GameExecution
                     else if (game.GameState == GameStates.Aborted)
                         game.FinalizeAbortedGame();
                     else if (game.GameState == GameStates.Running)
-                        game.CalculateNextFrame(((FrameDistanceWatch.ElapsedTicks * 10000) / Stopwatch.Frequency));
+                        game.CalculateNextFrame();
                         
                 }
                 FramesExecuted++;
-                FrameDistanceWatch.Restart();
                 ReportFrameRate();
             }
         }
@@ -96,6 +92,7 @@ namespace PingPongServer.GameExecution
                     Games.Remove(game);
                 }
             }
+            Games.TrimExcess(); // helps debugging memory issues
         }
 
         public void Stop()

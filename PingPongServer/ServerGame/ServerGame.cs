@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Collections.Generic;
 
 using PingPongServer.ServerGame.ServerGameObjects;
@@ -12,6 +11,7 @@ using NetworkLibrary.DataPackages.ServerSourcePackages;
 using NetworkLibrary.NetworkImplementations.ConnectionImplementations;
 using NetworkLibrary.Utility;
 using XSLibrary.Utility;
+using System.Diagnostics;
 
 namespace PingPongServer.ServerGame
 {
@@ -34,6 +34,7 @@ namespace PingPongServer.ServerGame
         OneShotTimer CloseTimer = new OneShotTimer(TeardownDelaySeconds * 1000 * 1000, false);
         private object GameStateLock = new object();
         UniqueIDGenerator GamesIDGenerator;
+        Stopwatch FrameDistanceWatch = new Stopwatch();
 
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart, UniqueIDGenerator gamesIDGenerator)
         {
@@ -67,10 +68,12 @@ namespace PingPongServer.ServerGame
 
         }
 
-        public void CalculateNextFrame(long timePassedInTenthOfAMilliseconds)
+        public void CalculateNextFrame()
         {
             ServerDataPackage ServerPackage = new ServerDataPackage();
             GetNetworkDataForNextFrame();
+            long timePassedInTenthOfAMilliseconds = (FrameDistanceWatch.ElapsedTicks * 10000) / Stopwatch.Frequency;
+            FrameDistanceWatch.Restart();
             ServerPackage = NextFramePackage(timePassedInTenthOfAMilliseconds);
             Network.BroadcastFramesToClients(ServerPackage);
         }
