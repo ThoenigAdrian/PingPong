@@ -74,6 +74,10 @@ namespace PingPongServer
                     ReadGameRequests(connection);
 
                 RemoveDeadConnections();
+
+                // helps debugging memory issues
+                AcceptedConnections.TrimExcess();   
+                ConnectionsReadyForQueingUpToMatchmaking.TrimExcess();
                 Thread.Sleep(1000);
             }
         }

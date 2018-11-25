@@ -79,6 +79,8 @@ namespace PingPongServer
                 BroadcastMatchmakingStatus();
                 UpdateMatchmakingQueue.Restart();
             }
+
+            m_waitingClientConnections.TrimExcess();    // Helps debugging Memory Leaks 
         }
 
         private bool IsRequestValid(Request request)
