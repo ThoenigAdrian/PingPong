@@ -18,10 +18,10 @@ namespace PingPongServer.ServerGame
     public class Game
     {
         public GameStates GameState { get; private set; }
-        public int Tickrate = 100;
         public int GameID = 0;
         public int NumberOfPlayers;
-        public HashSet<Player> DisconnectedPlayers = new HashSet<Player>();
+
+        private HashSet<Player> DisconnectedPlayers = new HashSet<Player>();
         private GameNetwork Network;
         private List<Client> Clients = new List<Client>();
         private ServerDataPackage NextFrame;
@@ -29,12 +29,11 @@ namespace PingPongServer.ServerGame
         private GameStructure GameStructure;
         private GameEngine GameEngine;
         private LogWriterConsole Logger = new LogWriterConsole();
-        private int SleepTimeMillisecondsBetweenTicks { get { return 1000 / Tickrate; } set { } }
         private const int TeardownDelaySeconds = 60;
-        OneShotTimer CloseTimer = new OneShotTimer(TeardownDelaySeconds * 1000 * 1000, false);
         private object GameStateLock = new object();
-        UniqueIDGenerator GamesIDGenerator;
-        Stopwatch FrameDistanceWatch = new Stopwatch();
+        private OneShotTimer CloseTimer = new OneShotTimer(TeardownDelaySeconds * 1000 * 1000, false);
+        private UniqueIDGenerator GamesIDGenerator;
+        private Stopwatch FrameDistanceWatch = new Stopwatch();
 
         public Game(GameNetwork Network, int NeededNumberOfPlayersForGameToStart, UniqueIDGenerator gamesIDGenerator)
         {
@@ -197,7 +196,7 @@ namespace PingPongServer.ServerGame
 
         private void OnTeamScored(object sender, EventArgs e)
         {
-            Logger.GameLog("Team scored\t Team 1: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam 2: " + GameStructure.GameTeams[1].score.ToString());
+            // Logger.GameLog("Team scored\t Team 1: " + GameStructure.GameTeams[0].score.ToString() + "\tTeam 2: " + GameStructure.GameTeams[1].score.ToString());
             Network.BroadcastScore(GenerateScorePackage());
         }
 
@@ -227,7 +226,7 @@ namespace PingPongServer.ServerGame
 
         public void FinalizeAbortedGame()
         {
-            if (CloseTimer || DisconnectedPlayers.Count == NumberOfPlayers)
+            if (CloseTimer)
             {
                 Network.Close();
                 GameState = GameStates.Finished;
@@ -273,9 +272,9 @@ namespace PingPongServer.ServerGame
                     DisconnectedPlayers.UnionWith(client.Players);
                 }
             }
-            if (AllPlayersOfOneTeamDisconnected())
+            if(AllPlayersOfOneTeamDisconnected())
             {
-                Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the game");
+                Logger.GameLog("Calling Game finished cleanup because Client Lost was the last client of the team");
                 StopGame();
             }
 
