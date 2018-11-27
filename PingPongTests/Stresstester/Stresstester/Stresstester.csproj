@@ -42,8 +42,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
+    <Compile Include="ConnectionAbortStress.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="InteractiveTester.cs" />
+    <Compile Include="ProGamerClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomClient.cs" />
+    <Compile Include="Testcases\CheckGameFlow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -66,5 +73,6 @@
       <Name>XSUtility</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
