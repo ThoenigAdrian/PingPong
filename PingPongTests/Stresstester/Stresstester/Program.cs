@@ -31,8 +31,9 @@ namespace Stresstester
         {
             
             Logger.Log("Test");
-            CreateDemoClient();
-            // openMultipleGames(100);
+            // CreateDemoClient();
+            openMultipleGames(500);
+            Thread.Sleep(10000);
             /*IPEndPoint server = new IPEndPoint(IPAddress.Parse("127.0.0.1"), NetworkConstants.SERVER_PORT);
             Socket connectionSocket = new Socket(server.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             connectionSocket.Connect(server);
@@ -120,6 +121,7 @@ namespace Stresstester
                     TCPPacketConnection conn = new TCPPacketConnection(connectionSocket);
                     connections.Add(conn);
                     openGame(conn);
+                    //Thread.Sleep(50);
 
             }
             Logger.Log("Started " + numberOfGames.ToString() + "  Games");
